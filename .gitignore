@@ -8,3 +8,6 @@ DeveloperSettings.xcconfig
 
 # macOS
 .DS_Store
+
+# Brainstorm sessions
+.superpowers/
