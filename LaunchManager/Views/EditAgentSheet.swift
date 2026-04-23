@@ -44,34 +44,40 @@ struct EditAgentSheet: View {
     var body: some View {
         Form {
             Section("基本信息") {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 0) {
-                        Text("Label").font(.caption).foregroundStyle(.secondary)
-                        Text(" *").font(.caption).foregroundStyle(.red)
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 0) {
+                            Text("Label").font(.caption).foregroundStyle(.secondary)
+                            Text(" *").font(.caption).foregroundStyle(.red)
+                        }
+                        TextField("如 com.example.mytask", text: $label)
+                            .textFieldStyle(.roundedBorder)
                     }
-                    TextField("如 com.example.mytask", text: $label)
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 0) {
-                        Text("程序路径").font(.caption).foregroundStyle(.secondary)
-                        Text(" *").font(.caption).foregroundStyle(.red)
+                    Divider()
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 0) {
+                            Text("程序路径").font(.caption).foregroundStyle(.secondary)
+                            Text(" *").font(.caption).foregroundStyle(.red)
+                        }
+                        HStack {
+                            TextField("如 /usr/local/bin/mytool", text: $program)
+                                .textFieldStyle(.roundedBorder)
+                            Button("选择…") { pickProgram() }
+                        }
                     }
-                    HStack {
-                        TextField("/usr/local/bin/mytool", text: $program)
-                        Button("选择…") { pickProgram() }
+                    Divider()
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextEditor(text: $argumentsText)
+                            .font(.system(.body, design: .monospaced))
+                            .frame(height: 64)
+                            .background(Color(.textBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color(.separatorColor), lineWidth: 1)
+                            )
+                        Text("每行一个参数").font(.caption).foregroundStyle(.secondary)
                     }
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    TextEditor(text: $argumentsText)
-                        .font(.system(.body, design: .monospaced))
-                        .frame(height: 64)
-                        .background(Color(.textBackgroundColor))
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color(.separatorColor), lineWidth: 1)
-                        )
-                    Text("每行一个参数").font(.caption).foregroundStyle(.secondary)
                 }
             }
 
