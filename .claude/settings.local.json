@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/sean/Library/LaunchAgents/**)",
+      "Read(//Library/LaunchAgents/**)",
+      "Read(//Library/LaunchDaemons/**)",
+      "Bash(plutil -convert xml1 -o - ~/Library/LaunchAgents/com.google.keystone.agent.plist)",
+      "Bash(plutil -convert xml1 -o - ~/Library/LaunchAgents/com.google.keystone.xpcservice.plist)",
+      "Bash(plutil -convert xml1 -o - /Library/LaunchDaemons/com.google.keystone.daemon.plist)",
+      "Bash(xcodebuild build *)",
+      "Bash(xcodebuild test *)",
+      "Bash(xcrun xcresulttool *)",
+      "Bash(python3 -c \" import json,sys d=json.load\\(sys.stdin\\) def find\\(obj,key\\): if isinstance\\(obj,dict\\): if key in obj: print\\(obj[key]\\) for v in obj.values\\(\\): find\\(v,key\\) elif isinstance\\(obj,list\\): for v in obj: find\\(v,key\\) find\\(d,'message'\\) \")",
+      "Bash(grep -v \"^$\")",
+      "Bash(git --version)",
+      "Bash(gh --version)"
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+// Project-wide signing. Optional local overrides (not committed): DeveloperSettings.xcconfig
+#include? "DeveloperSettings.xcconfig"
