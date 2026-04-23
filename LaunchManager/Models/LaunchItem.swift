@@ -20,9 +20,24 @@ struct LaunchItem: Identifiable, Hashable {
     var lastExitCode: Int?
 
     enum Scope: String, CaseIterable, Hashable {
-        case userAgent    = "用户 Agents"
-        case systemAgent  = "系统 Agents"
-        case systemDaemon = "系统 Daemons"
+        case userAgent    = "userAgent"
+        case systemAgent  = "systemAgent"
+        case systemDaemon = "systemDaemon"
+
+        var displayName: String {
+            switch self {
+            case .userAgent, .systemAgent: return "LaunchAgent"
+            case .systemDaemon:            return "LaunchDaemon"
+            }
+        }
+
+        var directoryHint: String {
+            switch self {
+            case .userAgent:    return "用户级 · ~/Library"
+            case .systemAgent:  return "全局 · /Library"
+            case .systemDaemon: return "系统级 · /Library"
+            }
+        }
 
         var directoryURL: URL {
             switch self {

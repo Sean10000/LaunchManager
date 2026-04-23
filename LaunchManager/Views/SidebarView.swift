@@ -7,7 +7,12 @@ struct SidebarView: View {
     var body: some View {
         List(LaunchItem.Scope.allCases, id: \.self, selection: $selectedScope) { scope in
             Label {
-                Text(scope.rawValue)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(scope.displayName)
+                    Text(scope.directoryHint)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             } icon: {
                 Image(systemName: iconName(for: scope))
             }

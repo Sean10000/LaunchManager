@@ -18,6 +18,15 @@ struct LaunchManagerApp: App {
         .windowToolbarStyle(.unified)
         .commands {
             CommandGroup(replacing: .newItem) { }
+            CommandGroup(replacing: .appInfo) {
+                Button("关于 LaunchManager") {
+                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                }
+            }
+        }
+
+        Settings {
+            AboutView()
         }
     }
 }

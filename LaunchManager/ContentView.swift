@@ -12,6 +12,8 @@ struct ContentView: View {
     @State private var selectedScope: LaunchItem.Scope? = .userAgent
     @State private var showingNewAgent = false
     @State private var errorMessage: String?
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @State private var showOnboarding = false
 
     var filteredItems: [LaunchItem] {
         guard let scope = selectedScope else { return store.items }
@@ -35,7 +37,16 @@ struct ContentView: View {
                 errorMessage: $errorMessage
             )
         }
-        .onAppear { store.refresh() }
+        .onAppear {
+            store.refresh()
+            if !hasSeenOnboarding {
+                showOnboarding = true
+                hasSeenOnboarding = true
+            }
+        }
+        .sheet(isPresented: $showOnboarding) {
+            OnboardingView(isPresented: $showOnboarding)
+        }
         .sheet(isPresented: $showingNewAgent) {
             EditAgentSheet(
                 existingItem: nil,
