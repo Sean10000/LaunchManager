@@ -20,6 +20,19 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
 
 ## Installation
 
+### Homebrew (recommended)
+
+```bash
+brew tap Sean10000/tap
+brew install --cask launchmanager
+```
+
+### Direct Download
+
+Download the latest **LaunchManager.dmg** from [Releases](https://github.com/Sean10000/LaunchManager/releases), drag the app to your Applications folder.
+
+> **First launch:** right-click the app → Open (required because this build is not notarized by Apple).
+
 ### Build from Source
 
 ```bash
