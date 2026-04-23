@@ -13,7 +13,27 @@
       "Bash(python3 -c \" import json,sys d=json.load\\(sys.stdin\\) def find\\(obj,key\\): if isinstance\\(obj,dict\\): if key in obj: print\\(obj[key]\\) for v in obj.values\\(\\): find\\(v,key\\) elif isinstance\\(obj,list\\): for v in obj: find\\(v,key\\) find\\(d,'message'\\) \")",
       "Bash(grep -v \"^$\")",
       "Bash(git --version)",
-      "Bash(gh --version)"
+      "Bash(gh --version)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(xcodebuild archive *)",
+      "Read(//Users/sean/.claude/image-cache/15df4cb9-ed0a-4fe4-9e93-e6ab9494dff6/**)",
+      "Bash(identify /Users/sean/.claude/image-cache/15df4cb9-ed0a-4fe4-9e93-e6ab9494dff6/2.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /Users/sean/.claude/image-cache/15df4cb9-ed0a-4fe4-9e93-e6ab9494dff6/2.png)",
+      "Bash(python3 -c \"from PIL import Image; print\\('PIL ok'\\)\")",
+      "Bash(convert --version)",
+      "Bash(convert /Users/sean/.claude/image-cache/15df4cb9-ed0a-4fe4-9e93-e6ab9494dff6/2.png -gravity center -background '#0F1833' -extent 826x826 -resize 1024x1024 /tmp/icon_1024.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/icon_1024.png)",
+      "Bash(echo \"Base icon created: $\\(sips -g pixelWidth -g pixelHeight /tmp/icon_1024.png)",
+      "Bash(gh release *)",
+      "WebSearch",
+      "WebFetch(domain:www.soma-zone.com)",
+      "WebFetch(domain:www.peterborgapps.com)",
+      "Bash(shasum -a 256 /tmp/brew-check/LaunchManager.dmg)",
+      "Bash(gh repo *)",
+      "Bash(git clone *)",
+      "Bash(chmod +x *)"
     ]
   }
 }
