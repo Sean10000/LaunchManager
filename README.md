@@ -88,7 +88,7 @@ MIT — see [LICENSE](LICENSE).
 
 ## Support
 
-If LaunchManager saved you some time, feel free to buy me a coffee ☕
+If LaunchManager saved you some time, feel free to buy me a coffee ☕ Americano is better.
 
 <img src="assets/wechat-reward.jpg" width="200" alt="WeChat Reward QR Code" />
 
