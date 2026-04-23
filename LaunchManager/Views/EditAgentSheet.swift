@@ -44,10 +44,14 @@ struct EditAgentSheet: View {
     var body: some View {
         Form {
             Section("基本信息") {
-                TextField("Label（如 com.example.mytask）", text: $label)
-                HStack {
-                    TextField("程序路径", text: $program)
-                    Button("选择…") { pickProgram() }
+                requiredField("Label") {
+                    TextField("如 com.example.mytask", text: $label)
+                }
+                requiredField("程序路径") {
+                    HStack {
+                        TextField("/usr/local/bin/mytool", text: $program)
+                        Button("选择…") { pickProgram() }
+                    }
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     TextEditor(text: $argumentsText)
@@ -129,6 +133,27 @@ struct EditAgentSheet: View {
             Button("确定") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+    }
+
+    private func requiredField<Content: View>(
+        _ fieldLabel: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 0) {
+                Text(fieldLabel)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(" *")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+            content()
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+                )
         }
     }
 
