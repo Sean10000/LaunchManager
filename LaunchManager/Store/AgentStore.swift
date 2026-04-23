@@ -25,19 +25,19 @@ final class AgentStore: ObservableObject {
     }
 
     func load(_ item: LaunchItem) throws {
-        try launchctlService.load(item.plistURL, privileged: item.scope.requiresPrivilege)
+        try launchctlService.load(item.plistURL, scope: item.scope)
         refresh()
     }
 
     func unload(_ item: LaunchItem) throws {
-        try launchctlService.unload(item.plistURL, privileged: item.scope.requiresPrivilege)
+        try launchctlService.unload(item.plistURL, scope: item.scope)
         refresh()
     }
 
     func start(_ item: LaunchItem) throws {
-        try launchctlService.start(item.label, privileged: item.scope.requiresPrivilege)
-        // launchctl start returns before launchd actually spawns the process;
-        // refresh immediately for responsiveness, then again after launchd has time to update.
+        try launchctlService.start(item.label, scope: item.scope)
+        // kickstart is async from launchd's perspective; refresh immediately then
+        // again after launchd has time to record the running pid.
         refresh()
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 800_000_000)
@@ -46,7 +46,7 @@ final class AgentStore: ObservableObject {
     }
 
     func stop(_ item: LaunchItem) throws {
-        try launchctlService.stop(item.label, privileged: item.scope.requiresPrivilege)
+        try launchctlService.stop(item.label, scope: item.scope)
         refresh()
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 400_000_000)

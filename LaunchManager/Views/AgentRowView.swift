@@ -13,7 +13,9 @@ struct AgentRowView: View {
     var statusColor: Color {
         if item.pid != nil { return .green }
         if let code = item.lastExitCode {
-            return code == 0 ? .blue.opacity(0.7) : .yellow
+            if code == 0  { return .blue.opacity(0.7) }
+            if code > 0   { return .yellow }
+            // negative code = killed by signal (intentional stop) → gray
         }
         return Color(nsColor: .tertiaryLabelColor)
     }
@@ -21,7 +23,9 @@ struct AgentRowView: View {
     var statusTooltip: String {
         if item.pid != nil { return "运行中 (PID \(item.pid!))" }
         if let code = item.lastExitCode {
-            return code == 0 ? "上次执行：正常退出 (0)" : "上次执行：退出码 \(code)"
+            if code == 0  { return "上次执行：正常退出 (0)" }
+            if code < 0   { return "已停止 (信号 \(-code))" }
+            return "上次执行：退出码 \(code)"
         }
         return item.isLoaded ? "已加载，等待触发" : "未加载"
     }

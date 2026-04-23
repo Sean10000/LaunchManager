@@ -10,6 +10,8 @@ struct LaunchctlService {
         self.privilege = privilege
     }
 
+    // MARK: - List
+
     func listAll() throws -> [String: (pid: Int?, exitCode: Int?)] {
         let output = try shell.run("/bin/launchctl", arguments: ["list"])
         return parseListOutput(output)
@@ -31,35 +33,53 @@ struct LaunchctlService {
         return result
     }
 
-    func load(_ url: URL, privileged: Bool) throws {
-        if privileged {
-            try privilege.run("/bin/launchctl load \(url.path)")
+    // MARK: - Load / Unload (bootstrap / bootout)
+
+    func load(_ url: URL, scope: LaunchItem.Scope) throws {
+        let domain = launchdDomain(for: scope)
+        if scope.requiresPrivilege {
+            try privilege.run("/bin/launchctl bootstrap \(domain) \(url.path)")
         } else {
-            _ = try shell.run("/bin/launchctl", arguments: ["load", url.path])
+            _ = try shell.run("/bin/launchctl", arguments: ["bootstrap", domain, url.path])
         }
     }
 
-    func unload(_ url: URL, privileged: Bool) throws {
-        if privileged {
-            try privilege.run("/bin/launchctl unload \(url.path)")
+    func unload(_ url: URL, scope: LaunchItem.Scope) throws {
+        let domain = launchdDomain(for: scope)
+        if scope.requiresPrivilege {
+            try privilege.run("/bin/launchctl bootout \(domain) \(url.path)")
         } else {
-            _ = try shell.run("/bin/launchctl", arguments: ["unload", url.path])
+            _ = try shell.run("/bin/launchctl", arguments: ["bootout", domain, url.path])
         }
     }
 
-    func start(_ label: String, privileged: Bool) throws {
-        if privileged {
-            try privilege.run("/bin/launchctl start \(label)")
+    // MARK: - Start / Stop (kickstart / kill)
+
+    func start(_ label: String, scope: LaunchItem.Scope) throws {
+        let target = "\(launchdDomain(for: scope))/\(label)"
+        if scope.requiresPrivilege {
+            try privilege.run("/bin/launchctl kickstart \(target)")
         } else {
-            _ = try shell.run("/bin/launchctl", arguments: ["start", label])
+            _ = try shell.run("/bin/launchctl", arguments: ["kickstart", target])
         }
     }
 
-    func stop(_ label: String, privileged: Bool) throws {
-        if privileged {
-            try privilege.run("/bin/launchctl stop \(label)")
+    func stop(_ label: String, scope: LaunchItem.Scope) throws {
+        let target = "\(launchdDomain(for: scope))/\(label)"
+        // kill returns non-zero when process isn't running — treat as success
+        if scope.requiresPrivilege {
+            try? privilege.run("/bin/launchctl kill SIGTERM \(target)")
         } else {
-            _ = try shell.run("/bin/launchctl", arguments: ["stop", label])
+            _ = try? shell.run("/bin/launchctl", arguments: ["kill", "SIGTERM", target])
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func launchdDomain(for scope: LaunchItem.Scope) -> String {
+        switch scope {
+        case .systemDaemon:         return "system"
+        case .userAgent, .systemAgent: return "gui/\(getuid())"
         }
     }
 }

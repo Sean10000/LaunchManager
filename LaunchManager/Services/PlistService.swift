@@ -125,9 +125,10 @@ struct PlistService {
                 launchctl: LaunchctlService,
                 privilege: PrivilegeService) throws {
         if item.scope.requiresPrivilege {
-            try privilege.run("/bin/launchctl unload \(item.plistURL.path); rm \(item.plistURL.path)")
+            let domain = item.scope == .systemDaemon ? "system" : "gui/\(getuid())"
+            try privilege.run("/bin/launchctl bootout \(domain) \(item.plistURL.path); rm \(item.plistURL.path)")
         } else {
-            try? launchctl.unload(item.plistURL, privileged: false)
+            try? launchctl.unload(item.plistURL, scope: item.scope)
             try FileManager.default.removeItem(at: item.plistURL)
         }
     }
