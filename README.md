@@ -23,7 +23,7 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
 ### Build from Source
 
 ```bash
-git clone https://github.com/yourusername/LaunchManager.git
+git clone https://github.com/Sean10000/LaunchManager.git
 cd LaunchManager
 open LaunchManager.xcodeproj
 ```
