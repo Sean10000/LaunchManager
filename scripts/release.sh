@@ -82,7 +82,7 @@ cask "launchmanager" do
   version "$VERSION"
   sha256 "$SHA256"
 
-  url "https://github.com/Sean10000/LaunchManager/releases/download/v\#{version}/LaunchManager.dmg"
+  url "https://github.com/Sean10000/LaunchManager/releases/download/v#{version}/LaunchManager.dmg"
   name "LaunchManager"
   desc "macOS app for managing launchd LaunchAgents and LaunchDaemons"
   homepage "https://github.com/Sean10000/LaunchManager"
