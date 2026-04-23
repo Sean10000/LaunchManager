@@ -2,7 +2,7 @@
 
 A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create, edit, and control your system's scheduled tasks from a clean native UI.
 
-![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green)
+![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green) ![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-blueviolet?logo=anthropic)
 
 ## Features
 
@@ -50,3 +50,7 @@ LaunchManager/
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Acknowledgements
+
+Built with [Claude](https://claude.ai) (Anthropic) — AI pair programmer for design, implementation, and code review.
