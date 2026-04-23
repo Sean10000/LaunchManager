@@ -86,6 +86,12 @@ LaunchManager/
 
 MIT — see [LICENSE](LICENSE).
 
+## Support
+
+If LaunchManager saved you some time, feel free to buy me a coffee ☕
+
+<img src="assets/wechat-reward.jpg" width="200" alt="WeChat Reward QR Code" />
+
 ## Acknowledgements
 
 Built with [Claude](https://claude.ai) (Anthropic) — AI pair programmer for design, implementation, and code review.
