@@ -11,19 +11,27 @@ struct ContentView: View {
     @StateObject private var store = AgentStore()
     @State private var selectedScope: LaunchItem.Scope? = .userAgent
     @State private var showingNewAgent = false
+    @State private var searchText = ""
     @State private var errorMessage: String?
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var showOnboarding = false
     @State private var showAbout = false
 
     var filteredItems: [LaunchItem] {
-        guard let scope = selectedScope else { return store.items }
-        return store.items.filter { $0.scope == scope }
+        let scoped = selectedScope.map { scope in store.items.filter { $0.scope == scope } } ?? store.items
+        guard !searchText.isEmpty else { return scoped }
+        return scoped.filter {
+            $0.label.localizedCaseInsensitiveContains(searchText) ||
+            $0.program.localizedCaseInsensitiveContains(searchText)
+        }
     }
 
     var filteredInvalidItems: [InvalidPlist] {
-        guard let scope = selectedScope else { return store.invalidItems }
-        return store.invalidItems.filter { $0.scope == scope }
+        let scoped = selectedScope.map { scope in store.invalidItems.filter { $0.scope == scope } } ?? store.invalidItems
+        guard !searchText.isEmpty else { return scoped }
+        return scoped.filter {
+            $0.url.lastPathComponent.localizedCaseInsensitiveContains(searchText)
+        }
     }
 
     var body: some View {
@@ -38,6 +46,7 @@ struct ContentView: View {
                 errorMessage: $errorMessage
             )
         }
+        .searchable(text: $searchText, prompt: "搜索 Label 或路径")
         .onAppear {
             store.refresh()
             if !hasSeenOnboarding {

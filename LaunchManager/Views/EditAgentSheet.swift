@@ -44,24 +44,34 @@ struct EditAgentSheet: View {
     var body: some View {
         Form {
             Section("基本信息") {
-                requiredField("Label") {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 0) {
+                        Text("Label").font(.caption).foregroundStyle(.secondary)
+                        Text(" *").font(.caption).foregroundStyle(.red)
+                    }
                     TextField("如 com.example.mytask", text: $label)
                 }
-                requiredField("程序路径") {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 0) {
+                        Text("程序路径").font(.caption).foregroundStyle(.secondary)
+                        Text(" *").font(.caption).foregroundStyle(.red)
+                    }
                     HStack {
                         TextField("/usr/local/bin/mytool", text: $program)
                         Button("选择…") { pickProgram() }
                     }
                 }
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     TextEditor(text: $argumentsText)
                         .font(.system(.body, design: .monospaced))
                         .frame(height: 64)
+                        .background(Color(.textBackgroundColor))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.secondary.opacity(0.3))
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color(.separatorColor), lineWidth: 1)
                         )
-                    Text("参数（每行一个）").font(.caption).foregroundStyle(.secondary)
+                    Text("每行一个参数").font(.caption).foregroundStyle(.secondary)
                 }
             }
 
@@ -115,7 +125,7 @@ struct EditAgentSheet: View {
             }
         }
         .formStyle(.grouped)
-        .frame(minWidth: 500)
+        .frame(minWidth: 480, minHeight: 360)
         .navigationTitle(existingItem == nil ? "新建 Agent" : "编辑 Agent")
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -133,27 +143,6 @@ struct EditAgentSheet: View {
             Button("确定") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
-        }
-    }
-
-    private func requiredField<Content: View>(
-        _ fieldLabel: String,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 0) {
-                Text(fieldLabel)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(" *")
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            }
-            content()
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(Color.blue.opacity(0.5), lineWidth: 1)
-                )
         }
     }
 
