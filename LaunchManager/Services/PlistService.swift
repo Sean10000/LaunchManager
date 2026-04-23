@@ -124,10 +124,10 @@ struct PlistService {
     func delete(_ item: LaunchItem,
                 launchctl: LaunchctlService,
                 privilege: PrivilegeService) throws {
-        try? launchctl.unload(item.plistURL, privileged: item.scope.requiresPrivilege)
         if item.scope.requiresPrivilege {
-            try privilege.run("rm \(item.plistURL.path)")
+            try privilege.run("/bin/launchctl unload \(item.plistURL.path); rm \(item.plistURL.path)")
         } else {
+            try? launchctl.unload(item.plistURL, privileged: false)
             try FileManager.default.removeItem(at: item.plistURL)
         }
     }

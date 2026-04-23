@@ -175,4 +175,26 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertEqual(invalid[0].url.lastPathComponent, "com.test.empty.plist")
         XCTAssertEqual(invalid[0].scope, .userAgent)
     }
+
+    func test_delete_nonPrivileged_removesFile() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.delete</string>
+            <key>Program</key><string>/bin/echo</string>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.delete.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let item = svc.parsePlist(at: url, scope: .userAgent)!
+
+        struct NoopShell: ShellRunner {
+            func run(_ path: String, arguments: [String]) throws -> String { "" }
+        }
+        let launchctl = LaunchctlService(shell: NoopShell())
+        try svc.delete(item, launchctl: launchctl, privilege: PrivilegeService())
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+    }
 }
