@@ -11,15 +11,26 @@ struct AgentRowView: View {
     @State private var showingDeleteConfirm = false
 
     var statusColor: Color {
-        if let code = item.lastExitCode, code != 0 { return .yellow }
         if item.pid != nil { return .green }
+        if let code = item.lastExitCode {
+            return code == 0 ? .blue.opacity(0.7) : .yellow
+        }
         return Color(nsColor: .tertiaryLabelColor)
+    }
+
+    var statusTooltip: String {
+        if item.pid != nil { return "运行中 (PID \(item.pid!))" }
+        if let code = item.lastExitCode {
+            return code == 0 ? "上次执行：正常退出 (0)" : "上次执行：退出码 \(code)"
+        }
+        return item.isLoaded ? "已加载，等待触发" : "未加载"
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 Circle().fill(statusColor).frame(width: 8, height: 8)
+                    .help(statusTooltip)
                 Text(item.label)
                     .font(.system(.body, design: .monospaced))
                     .lineLimit(1)

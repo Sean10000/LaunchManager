@@ -36,12 +36,22 @@ final class AgentStore: ObservableObject {
 
     func start(_ item: LaunchItem) throws {
         try launchctlService.start(item.label, privileged: item.scope.requiresPrivilege)
+        // launchctl start returns before launchd actually spawns the process;
+        // refresh immediately for responsiveness, then again after launchd has time to update.
         refresh()
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            self?.refresh()
+        }
     }
 
     func stop(_ item: LaunchItem) throws {
         try launchctlService.stop(item.label, privileged: item.scope.requiresPrivilege)
         refresh()
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            self?.refresh()
+        }
     }
 
     func save(_ item: LaunchItem) throws {
