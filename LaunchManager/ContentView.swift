@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var errorMessage: String?
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var showOnboarding = false
+    @State private var showAbout = false
 
     var filteredItems: [LaunchItem] {
         guard let scope = selectedScope else { return store.items }
@@ -46,6 +47,12 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showOnboarding) {
             OnboardingView(isPresented: $showOnboarding)
+        }
+        .sheet(isPresented: $showAbout) {
+            AboutView()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .showAbout)) { _ in
+            showAbout = true
         }
         .sheet(isPresented: $showingNewAgent) {
             EditAgentSheet(

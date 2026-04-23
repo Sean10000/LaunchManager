@@ -1,11 +1,8 @@
-//
-//  LaunchManagerApp.swift
-//  LaunchManager
-//
-//  Created by Shi-Cheng Ma on 2026/4/22.
-//
-
 import SwiftUI
+
+extension Notification.Name {
+    static let showAbout = Notification.Name("showAbout")
+}
 
 @main
 struct LaunchManagerApp: App {
@@ -20,13 +17,9 @@ struct LaunchManagerApp: App {
             CommandGroup(replacing: .newItem) { }
             CommandGroup(replacing: .appInfo) {
                 Button("关于 LaunchManager") {
-                    NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    NotificationCenter.default.post(name: .showAbout, object: nil)
                 }
             }
-        }
-
-        Settings {
-            AboutView()
         }
     }
 }

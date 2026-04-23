@@ -1,11 +1,19 @@
 import SwiftUI
 
 struct AboutView: View {
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         VStack(spacing: 16) {
-            Image(nsImage: NSApp.applicationIconImage)
-                .resizable()
-                .frame(width: 80, height: 80)
+            if let icon = NSImage(named: NSImage.applicationIconName) {
+                Image(nsImage: icon)
+                    .resizable()
+                    .frame(width: 80, height: 80)
+            } else {
+                Image(systemName: "gearshape.2.fill")
+                    .font(.system(size: 64))
+                    .foregroundStyle(.blue)
+            }
 
             VStack(spacing: 4) {
                 Text("LaunchManager")
@@ -33,6 +41,10 @@ struct AboutView: View {
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
+
+            Button("关闭") { dismiss() }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
         }
         .padding(32)
         .frame(width: 360)
