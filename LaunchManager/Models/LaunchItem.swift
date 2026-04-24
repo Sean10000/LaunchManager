@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 struct LaunchItem: Identifiable, Hashable {
     var id: String { label }
@@ -31,7 +32,7 @@ struct LaunchItem: Identifiable, Hashable {
             }
         }
 
-        var directoryHint: String {
+        var directoryHint: LocalizedStringKey {
             switch self {
             case .userAgent:    return "用户级 · ~/Library"
             case .systemAgent:  return "全局 · /Library"
@@ -55,10 +56,19 @@ struct LaunchItem: Identifiable, Hashable {
     }
 
     enum TriggerType: String, CaseIterable, Hashable {
-        case calendar  = "定时"
-        case interval  = "间隔"
-        case atLoad    = "登录时"
-        case watchPath = "监视路径"
+        case calendar  = "calendar"
+        case interval  = "interval"
+        case atLoad    = "atLoad"
+        case watchPath = "watchPath"
+
+        var localizedName: LocalizedStringKey {
+            switch self {
+            case .calendar:  return "定时"
+            case .interval:  return "间隔"
+            case .atLoad:    return "登录时"
+            case .watchPath: return "监视路径"
+            }
+        }
     }
 
     struct CalendarInterval: Hashable {
