@@ -1,0 +1,294 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "（日志为空）" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "(Log is empty)" } } }
+    },
+    "（无日志）" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "(No logs)" } } }
+    },
+    "上次执行：正常退出 (0)" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Last run: exited normally (0)" } } }
+    },
+    "上次执行：退出码 %lld" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Last run: exit code %lld" } } }
+    },
+    "MIT License · 开源免费" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "MIT License · Free & Open Source" } } }
+    },
+    "卸载" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Unload" } } }
+    },
+    "删除" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete" } } }
+    },
+    "删除 plist 仅移除自动执行配置，不影响应用本身。删除后该任务不再自动运行（如开机自启或定时执行）。系统级操作需要管理员密码授权。" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Deleting a plist only removes the automatic execution schedule — it does not affect the app itself. The task will no longer run automatically. System-level operations require administrator password." } } }
+    },
+    "保存" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Save" } } }
+    },
+    "保持存活（崩溃后自动重启）" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Keep Alive (auto-restart on crash)" } } }
+    },
+    "停止" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop" } } }
+    },
+    "全局 · /Library" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Global · /Library" } } }
+    },
+    "分" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Min" } } }
+    },
+    "刷新" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Refresh" } } }
+    },
+    "加载" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Load" } } }
+    },
+    "加载 vs 运行" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Load vs. Running" } } }
+    },
+    "加载：launchd 登记该任务。运行：任务当前正在执行" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Load: launchd registers the task. Running: the task is currently executing." } } }
+    },
+    "加载时自动运行" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Run at Load" } } }
+    },
+    "取消" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel" } } }
+    },
+    "在编辑 Agent 时填写 StandardOutPath / StandardErrorPath 即可启用。" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Set StandardOutPath or StandardErrorPath when editing the agent." } } }
+    },
+    "基本信息" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Basic Info" } } }
+    },
+    "定时" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Calendar" } } }
+    },
+    "已加载，等待触发" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Loaded, waiting to trigger" } } }
+    },
+    "已停止 (信号 %lld)" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Stopped (signal %lld)" } } }
+    },
+    "开始使用" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Get Started" } } }
+    },
+    "关于 LaunchManager" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "About LaunchManager" } } }
+    },
+    "关于删除操作" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "About Deletion" } } }
+    },
+    "关闭" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Close" } } }
+    },
+    "启动" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Start" } } }
+    },
+    "如 /usr/local/bin/mytool" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "e.g. /usr/local/bin/mytool" } } }
+    },
+    "如 com.example.mytask" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "e.g. com.example.mytask" } } }
+    },
+    "日志 — %@" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Logs — %@" } } }
+    },
+    "日志路径（可选）" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Log Paths (Optional)" } } }
+    },
+    "时" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Hour" } } }
+    },
+    "时间" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Time" } } }
+    },
+    "星期" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Weekday" } } }
+    },
+    "未加载" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Not loaded" } } }
+    },
+    "未配置日志文件路径" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No Log File Configured" } } }
+    },
+    "查看 XML" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "View XML" } } }
+    },
+    "查看日志" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "View Logs" } } }
+    },
+    "标准输出 StandardOutPath" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Standard Output Path" } } }
+    },
+    "标准错误 StandardErrorPath" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Standard Error Path" } } }
+    },
+    "欢迎使用 LaunchManager" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Welcome to LaunchManager" } } }
+    },
+    "版本 %@" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Version %@" } } }
+    },
+    "用户级 · ~/Library" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "User · ~/Library" } } }
+    },
+    "登录时" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "At Login" } } }
+    },
+    "登录或加载时执行一次" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Run once at login or load" } } }
+    },
+    "确定" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "OK" } } }
+    },
+    "确认删除 %@？" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Delete %@?" } } }
+    },
+    "程序" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Program" } } }
+    },
+    "程序路径" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Program Path" } } }
+    },
+    "系统级 · /Library" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "System · /Library" } } }
+    },
+    "管理启动项" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Manage Launch Items" } } }
+    },
+    "类型" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Type" } } }
+    },
+    "编辑 Agent" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Edit Agent" } } }
+    },
+    "自定义调度" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Custom Scheduling" } } }
+    },
+    "触发" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Trigger" } } }
+    },
+    "触发方式" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Trigger" } } }
+    },
+    "路径" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Path" } } }
+    },
+    "运行中 (PID %lld)" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Running (PID %lld)" } } }
+    },
+    "选择…" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose…" } } }
+    },
+    "选项" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Options" } } }
+    },
+    "间隔" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Interval" } } }
+    },
+    "错误" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Error" } } }
+    },
+    "监视路径" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Watch Path" } } }
+    },
+    "监视路径：%@" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Watch path: %@" } } }
+    },
+    "直接在界面打开 plist 配置文件，一键查看原始内容" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Open plist files directly to view raw XML content" } } }
+    },
+    "系统日志" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "System Logs" } } }
+    },
+    "文件日志" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "File Logs" } } }
+    },
+    "浏览 LaunchAgent 和 LaunchDaemon，无需打开终端" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Browse LaunchAgents and LaunchDaemons without a terminal" } } }
+    },
+    "没有 Agent" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No Agents" } } }
+    },
+    "清空日志" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear Logs" } } }
+    },
+    "每 %lld 秒" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Every %lld seconds" } } }
+    },
+    "每天" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Every day" } } }
+    },
+    "每行一个参数" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "One argument per line" } } }
+    },
+    "每隔" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Every" } } }
+    },
+    "此分类下暂无 LaunchAgent / Daemon" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No LaunchAgents or Daemons in this category" } } }
+    },
+    "此文件为空或格式无效，无法作为 launchd 条目加载。" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "This file is empty or has an invalid format and cannot be loaded as a launchd entry." } } }
+    },
+    "此操作将 unload 并永久删除 plist 文件，无法撤销。" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "This will unload and permanently delete the plist file. This cannot be undone." } } }
+    },
+    "此操作将永久删除该 plist 文件，无法撤销。" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "This will permanently delete the plist file. This cannot be undone." } } }
+    },
+    "按时间、间隔或路径变化触发，灵活配置执行计划" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Trigger by time, interval, or path changes" } } }
+    },
+    "新建" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "New" } } }
+    },
+    "新建 Agent" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "New Agent" } } }
+    },
+    "秒执行一次" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "seconds" } } }
+    },
+    "搜索 Label 或路径" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Search by label or path" } } }
+    },
+    "macOS 定时任务与开机启动管理" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Manage macOS scheduled tasks and startup items" } } }
+    },
+    "macOS 定时任务与开机启动管理工具" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "macOS launch item manager for scheduled tasks and startup entries" } } }
+    },
+    "过滤关键字" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Filter" } } }
+    },
+    "周一" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Mon" } } }
+    },
+    "周二" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Tue" } } }
+    },
+    "周三" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Wed" } } }
+    },
+    "周四" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Thu" } } }
+    },
+    "周五" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Fri" } } }
+    },
+    "周六" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Sat" } } }
+    },
+    "周日" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Sun" } } }
+    },
+    "周%lld" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Weekday %lld" } } }
+    }
+  },
+  "version" : "1.0"
+}
