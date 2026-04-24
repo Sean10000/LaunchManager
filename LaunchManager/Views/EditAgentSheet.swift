@@ -84,7 +84,7 @@ struct EditAgentSheet: View {
             Section("触发方式") {
                 Picker("类型", selection: $triggerType) {
                     ForEach(LaunchItem.TriggerType.allCases, id: \.self) {
-                        Text($0.rawValue).tag($0)
+                        Text($0.localizedName).tag($0)
                     }
                 }
                 .pickerStyle(.segmented)
