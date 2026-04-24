@@ -20,8 +20,8 @@ struct AgentRowView: View {
         return Color(nsColor: .tertiaryLabelColor)
     }
 
-    var statusTooltip: String {
-        if item.pid != nil { return "运行中 (PID \(item.pid!))" }
+    var statusTooltip: LocalizedStringKey {
+        if let pid = item.pid { return "运行中 (PID \(pid))" }
         if let code = item.lastExitCode {
             if code == 0  { return "上次执行：正常退出 (0)" }
             if code < 0   { return "已停止 (信号 \(-code))" }
@@ -95,7 +95,7 @@ struct AgentRowView: View {
             LogViewerSheet(item: item)
         }
         .confirmationDialog(
-            "确认删除 \(item.label)？",
+            String(localized: "确认删除 \(item.label)？"),
             isPresented: $showingDeleteConfirm,
             titleVisibility: .visible
         ) {
@@ -121,7 +121,7 @@ struct AgentRowView: View {
         }
     }
 
-    private func detailRow(_ label: String, _ value: String) -> some View {
+    private func detailRow(_ label: LocalizedStringKey, _ value: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text(label)
                 .foregroundStyle(.secondary)
@@ -136,16 +136,19 @@ struct AgentRowView: View {
     private var triggerDescription: String {
         switch item.triggerType {
         case .calendar:
-            guard let ci = item.calendarInterval else { return "定时" }
-            let day = ci.weekday.map { "周\($0)" } ?? "每天"
-            let h   = ci.hour.map { String(format: "%02d", $0) } ?? "每小时"
+            guard let ci = item.calendarInterval else {
+                return String(localized: "定时")
+            }
+            let day = ci.weekday.map { String(localized: "周\($0)") }
+                    ?? String(localized: "每天")
+            let h = ci.hour.map { String(format: "%02d", $0) } ?? "**"
             return "\(day) \(h):\(String(format: "%02d", ci.minute))"
         case .interval:
-            return "每 \(item.startInterval ?? 0) 秒"
+            return String(localized: "每 \(item.startInterval ?? 0) 秒")
         case .atLoad:
-            return "登录时"
+            return String(localized: "登录时")
         case .watchPath:
-            return "监视路径：\(item.watchPaths.first ?? "")"
+            return String(localized: "监视路径：\(item.watchPaths.first ?? "")")
         }
     }
 
