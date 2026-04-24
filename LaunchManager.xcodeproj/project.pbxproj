@@ -192,10 +192,11 @@
 				};
 			};
 			buildConfigurationList = 14F5EF062F99236F00D1FB94 /* Build configuration list for PBXProject "LaunchManager" */;
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"zh-Hans",
 				Base,
 			);
 			mainGroup = 14F5EF022F99236F00D1FB94;
