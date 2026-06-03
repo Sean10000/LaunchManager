@@ -4,18 +4,21 @@ struct LogViewerSheet: View {
     let item: LaunchItem
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedTab      = 0
-    @State private var fileLogContent   = ""
-    @State private var systemLogContent = ""
-    @State private var filterText       = ""
-    @State private var isLoadingSystem  = false
+    @State private var selectedTab = 0
+    @State private var fileLogLines: [String] = []
+    @State private var systemLogLines: [String] = []
+    @State private var filterText = ""
+    @State private var isLoadingSystem = false
+    @State private var systemLogLoaded = false
+    @State private var systemLogTruncated = false
 
-    var filteredSystemLog: String {
-        guard !filterText.isEmpty else { return systemLogContent }
-        return systemLogContent
-            .components(separatedBy: "\n")
-            .filter { $0.localizedCaseInsensitiveContains(filterText) }
-            .joined(separator: "\n")
+    private static let maxFileBytes = 512 * 1024
+    private static let maxSystemLines = 2_000
+    private static let systemLogWindow = "15m"
+
+    private var filteredSystemLines: [String] {
+        guard !filterText.isEmpty else { return systemLogLines }
+        return systemLogLines.filter { $0.localizedCaseInsensitiveContains(filterText) }
     }
 
     var body: some View {
@@ -26,6 +29,9 @@ struct LogViewerSheet: View {
             }
             .pickerStyle(.segmented)
             .padding()
+            .onChange(of: selectedTab) { _, tab in
+                if tab == 1, !systemLogLoaded { loadSystemLog() }
+            }
 
             Divider()
 
@@ -38,10 +44,7 @@ struct LogViewerSheet: View {
                 Button("关闭") { dismiss() }
             }
         }
-        .onAppear {
-            loadFileLog()
-            loadSystemLog()
-        }
+        .onAppear { loadFileLog() }
     }
 
     @ViewBuilder
@@ -54,13 +57,7 @@ struct LogViewerSheet: View {
             )
         } else {
             VStack(spacing: 0) {
-                ScrollView {
-                    Text(fileLogContent.isEmpty ? "（日志为空）" : fileLogContent)
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                }
+                logLinesView(fileLogLines, emptyMessage: "（日志为空）")
                 Divider()
                 HStack {
                     Spacer()
@@ -82,59 +79,111 @@ struct LogViewerSheet: View {
                 }
             }
             .padding(.horizontal).padding(.vertical, 6)
-            Divider()
-            ScrollView {
-                Text(filteredSystemLog.isEmpty ? "（无日志）" : filteredSystemLog)
-                    .font(.system(.caption, design: .monospaced))
-                    .textSelection(.enabled)
+            if systemLogTruncated {
+                Text("仅显示最近 \(Self.maxSystemLines) 行（最近 \(Self.systemLogWindow)）")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+                    .padding(.horizontal)
+            }
+            Divider()
+            logLinesView(filteredSystemLines, emptyMessage: systemLogLoaded ? "（无日志）" : "点击刷新加载系统日志")
+        }
+        .onAppear {
+            if !systemLogLoaded { loadSystemLog() }
+        }
+    }
+
+    @ViewBuilder
+    private func logLinesView(_ lines: [String], emptyMessage: String) -> some View {
+        if lines.isEmpty {
+            ContentUnavailableView(emptyMessage, systemImage: "doc.text")
+        } else {
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 2) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                        Text(line)
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .padding()
             }
         }
     }
 
     private func loadFileLog() {
-        var content = ""
-        if let path = item.standardOutPath,
-           let text = try? String(contentsOfFile: path) {
-            content += "=== stdout (\(path)) ===\n\(text)\n"
+        var lines: [String] = []
+        if let path = item.standardOutPath {
+            lines.append("=== stdout (\(path)) ===")
+            lines.append(contentsOf: tailLines(of: path))
         }
-        if let path = item.standardErrorPath,
-           let text = try? String(contentsOfFile: path) {
-            content += "=== stderr (\(path)) ===\n\(text)\n"
+        if let path = item.standardErrorPath {
+            lines.append("=== stderr (\(path)) ===")
+            lines.append(contentsOf: tailLines(of: path))
         }
-        fileLogContent = content
+        fileLogLines = lines
+    }
+
+    private func tailLines(of path: String) -> [String] {
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: path), options: [.mappedIfSafe]),
+              !data.isEmpty else { return [] }
+        let slice = data.count > Self.maxFileBytes ? data.suffix(Self.maxFileBytes) : data
+        let text = String(decoding: slice, as: UTF8.self)
+        var result = text.components(separatedBy: "\n")
+        if data.count > Self.maxFileBytes {
+            result.insert("…（仅显示文件末尾 \(Self.maxFileBytes / 1024) KB）", at: 0)
+        }
+        return result
     }
 
     private func loadSystemLog() {
         isLoadingSystem = true
-        DispatchQueue.global(qos: .userInitiated).async {
+        let label = item.label
+        Task.detached(priority: .userInitiated) {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/log")
             process.arguments = [
                 "show",
                 "--predicate",
-                "subsystem == \"\(item.label)\" OR process == \"\(item.label)\"",
-                "--last", "1h",
+                "subsystem == \"\(label)\" OR process == \"\(label)\"",
+                "--last", Self.systemLogWindow,
                 "--style", "compact"
             ]
             let pipe = Pipe()
             process.standardOutput = pipe
-            process.standardError  = pipe
-            try? process.run()
-            process.waitUntilExit()
-            let output = String(
-                data: pipe.fileHandleForReading.readDataToEndOfFile(),
-                encoding: .utf8) ?? ""
-            DispatchQueue.main.async {
-                self.systemLogContent = output
-                self.isLoadingSystem  = false
+            process.standardError = FileHandle.nullDevice
+            var lines: [String] = []
+            var truncated = false
+            do {
+                try process.run()
+                for try await line in pipe.fileHandleForReading.bytes.lines {
+                    lines.append(line)
+                    if lines.count > Self.maxSystemLines {
+                        truncated = true
+                        process.terminate()
+                        break
+                    }
+                }
+                process.waitUntilExit()
+            } catch {
+                lines = ["读取系统日志失败：\(error.localizedDescription)"]
+            }
+            if truncated {
+                lines = Array(lines.prefix(Self.maxSystemLines))
+            }
+            await MainActor.run {
+                systemLogLines = lines
+                systemLogTruncated = truncated
+                systemLogLoaded = true
+                isLoadingSystem = false
             }
         }
     }
 
     private func clearFileLog() {
-        if let path = item.standardOutPath  {
+        if let path = item.standardOutPath {
             try? "".write(toFile: path, atomically: true, encoding: .utf8)
         }
         if let path = item.standardErrorPath {

@@ -33,24 +33,28 @@ struct LaunchctlService {
         return result
     }
 
-    // MARK: - Load / Unload (bootstrap / bootout)
+    // MARK: - Bootstrap / Bootout
 
-    func load(_ url: URL, scope: LaunchItem.Scope) throws {
+    func bootstrap(_ url: URL, scope: LaunchItem.Scope) throws {
         let domain = launchdDomain(for: scope)
         if scope.requiresPrivilege {
-            try privilege.run("/bin/launchctl bootstrap \(domain) \(url.path)")
+            try privilege.run("/bin/launchctl bootstrap \(domain) \(shellQuote(url.path))")
         } else {
             _ = try shell.run("/bin/launchctl", arguments: ["bootstrap", domain, url.path])
         }
     }
 
-    func unload(_ url: URL, scope: LaunchItem.Scope) throws {
+    func bootout(_ url: URL, scope: LaunchItem.Scope) throws {
         let domain = launchdDomain(for: scope)
         if scope.requiresPrivilege {
-            try privilege.run("/bin/launchctl bootout \(domain) \(url.path)")
+            try privilege.run("/bin/launchctl bootout \(domain) \(shellQuote(url.path))")
         } else {
             _ = try shell.run("/bin/launchctl", arguments: ["bootout", domain, url.path])
         }
+    }
+
+    private func shellQuote(_ path: String) -> String {
+        "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 
     // MARK: - Start / Stop (kickstart / kill)

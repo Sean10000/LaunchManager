@@ -115,10 +115,16 @@ struct PlistService {
             let tmp = FileManager.default.temporaryDirectory
                 .appendingPathComponent(item.plistURL.lastPathComponent)
             try data.write(to: tmp)
-            try privilege.run("mv \(tmp.path) \(item.plistURL.path)")
+            let dest = shellQuote(item.plistURL.path)
+            let src = shellQuote(tmp.path)
+            try privilege.run("mv \(src) \(dest) && chown root:wheel \(dest) && chmod 644 \(dest)")
         } else {
             try data.write(to: item.plistURL)
         }
+    }
+
+    private func shellQuote(_ path: String) -> String {
+        "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 
     func delete(_ item: LaunchItem,
@@ -128,7 +134,7 @@ struct PlistService {
             let domain = item.scope == .systemDaemon ? "system" : "gui/\(getuid())"
             try privilege.run("/bin/launchctl bootout \(domain) \(item.plistURL.path); rm \(item.plistURL.path)")
         } else {
-            try? launchctl.unload(item.plistURL, scope: item.scope)
+            try? launchctl.bootout(item.plistURL, scope: item.scope)
             try FileManager.default.removeItem(at: item.plistURL)
         }
     }

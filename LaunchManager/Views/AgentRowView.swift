@@ -70,7 +70,7 @@ struct AgentRowView: View {
                     detailRow("路径", item.plistURL.path)
                     HStack(spacing: 8) {
                         if item.isLoaded {
-                            Button("卸载") { perform { try store.unload(item) } }
+                            Button("移除") { perform { try store.bootout(item) } }
                                 .buttonStyle(.bordered).controlSize(.small)
                         }
                         Button("查看日志") { showingLog = true }
@@ -103,7 +103,7 @@ struct AgentRowView: View {
                 perform { try store.delete(item) }
             }
         } message: {
-            Text("此操作将 unload 并永久删除 plist 文件，无法撤销。")
+            Text("此操作将 bootout 并永久删除 plist 文件，无法撤销。")
         }
     }
 
@@ -116,7 +116,7 @@ struct AgentRowView: View {
             Button("启动") { perform { try store.start(item) } }
                 .buttonStyle(.bordered).controlSize(.small)
         } else {
-            Button("加载") { perform { try store.load(item) } }
+            Button("载入") { perform { try store.bootstrap(item) } }
                 .buttonStyle(.bordered).controlSize(.small)
         }
     }

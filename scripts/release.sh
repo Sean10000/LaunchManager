@@ -31,6 +31,8 @@ xcodebuild archive \
   -scheme LaunchManager \
   -configuration Release \
   -archivePath "$ARCHIVE_PATH" \
+  ARCHS="arm64 x86_64" \
+  ONLY_ACTIVE_ARCH=NO \
   CODE_SIGN_IDENTITY="-" \
   CODE_SIGNING_REQUIRED=NO \
   AD_HOC_CODE_SIGNING_ALLOWED=YES \
@@ -53,18 +55,17 @@ echo "  ✓ $SHA256"
 
 # ── 4. GitHub Release ─────────────────────────────────────
 echo "[4/5] Creating GitHub Release $TAG..."
+NOTES_FILE="$SCRIPT_DIR/RELEASE_NOTES_${TAG}.md"
+if [ ! -f "$NOTES_FILE" ]; then
+  NOTES_FILE="$SCRIPT_DIR/RELEASE_NOTES_v${VERSION}.md"
+fi
+if [ ! -f "$NOTES_FILE" ]; then
+  echo "  ✗ Missing release notes: $NOTES_FILE"
+  exit 1
+fi
 gh release create "$TAG" "$DMG_PATH" \
   --title "$TAG" \
-  --notes "## LaunchManager $TAG
-
-### Installation
-\`\`\`bash
-brew tap Sean10000/tap
-brew install --cask launchmanager
-\`\`\`
-Or download **LaunchManager.dmg** below and drag to Applications.
-
-> First launch: right-click → Open (app is not notarized)." \
+  --notes-file "$NOTES_FILE" \
   --repo Sean10000/LaunchManager
 echo "  ✓ Release published"
 

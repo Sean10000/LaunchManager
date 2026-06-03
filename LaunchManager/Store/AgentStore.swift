@@ -24,13 +24,13 @@ final class AgentStore: ObservableObject {
         invalidItems = invalid
     }
 
-    func load(_ item: LaunchItem) throws {
-        try launchctlService.load(item.plistURL, scope: item.scope)
+    func bootstrap(_ item: LaunchItem) throws {
+        try launchctlService.bootstrap(item.plistURL, scope: item.scope)
         refresh()
     }
 
-    func unload(_ item: LaunchItem) throws {
-        try launchctlService.unload(item.plistURL, scope: item.scope)
+    func bootout(_ item: LaunchItem) throws {
+        try launchctlService.bootout(item.plistURL, scope: item.scope)
         refresh()
     }
 
