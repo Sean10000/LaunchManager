@@ -217,6 +217,16 @@
         }
       }
     },
+    "载入" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load"
+          }
+        }
+      }
+    },
     "加载 vs 运行" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -250,6 +260,16 @@
       }
     },
     "卸载" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unload"
+          }
+        }
+      }
+    },
+    "移除" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -627,6 +647,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "This will unload and permanently delete the plist file. This cannot be undone."
+          }
+        }
+      }
+    },
+    "此操作将 bootout 并永久删除 plist 文件，无法撤销。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This will unregister the job and permanently delete the plist file. This cannot be undone."
           }
         }
       }
