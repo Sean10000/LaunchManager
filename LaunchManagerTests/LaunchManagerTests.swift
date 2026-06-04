@@ -8,6 +8,10 @@
 import XCTest
 @testable import LaunchManager
 
+private struct NoopShell: ShellRunner {
+    func run(_ path: String, arguments: [String]) throws -> String { "" }
+}
+
 // MARK: - LaunchctlService Tests
 
 final class LaunchctlServiceTests: XCTestCase {
@@ -189,9 +193,6 @@ final class PlistServiceTests: XCTestCase {
         try plist.write(to: url, atomically: true, encoding: .utf8)
         let item = svc.parsePlist(at: url, scope: .userAgent)!
 
-        struct NoopShell: ShellRunner {
-            func run(_ path: String, arguments: [String]) throws -> String { "" }
-        }
         let launchctl = LaunchctlService(shell: NoopShell())
         try svc.delete(item, launchctl: launchctl, privilege: PrivilegeService())
 

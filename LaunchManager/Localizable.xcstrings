@@ -44,8 +44,48 @@
     "Label" : {
 
     },
+    "Launchd（本应用管理）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launchd (managed in this app)"
+          }
+        }
+      }
+    },
     "LaunchManager" : {
 
+    },
+    "Login Items" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login Items"
+          }
+        }
+      }
+    },
+    "Login Items 与 Launchd 的区别" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login Items vs. Launchd"
+          }
+        }
+      }
+    },
+    "Login Items（系统设置管理）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Login Items (System Settings)"
+          }
+        }
+      }
     },
     "macOS 定时任务与开机启动管理" : {
       "localizations" : {
@@ -93,6 +133,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Last run: exit code %lld"
+          }
+        }
+      }
+    },
+    "仅显示最近 %lld 行（最近 %@）" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "仅显示最近 %1$lld 行（最近 %2$@）"
+          }
+        }
+      }
+    },
+    "位于「系统设置 → 通用 → 登录项」，包括「打开时登录」的应用与「允许在后台」的项目。由 macOS 统一管理，本应用不提供列表或开关。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Found in System Settings → General → Login Items (open at login and background items). Managed by macOS only; this app does not list or toggle them."
           }
         }
       }
@@ -208,16 +268,7 @@
       }
     },
     "加载" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load"
-          }
-        }
-      }
-    },
-    "载入" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -260,16 +311,7 @@
       }
     },
     "卸载" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unload"
-          }
-        }
-      }
-    },
-    "移除" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -429,6 +471,16 @@
         }
       }
     },
+    "对应侧边栏中的 LaunchAgent / LaunchDaemon，plist 位于 ~/Library/LaunchAgents、/Library/LaunchAgents、/Library/LaunchDaemons。可在本应用中载入、移除、启动与停止。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LaunchAgents and LaunchDaemons in the sidebar use plists under ~/Library/LaunchAgents, /Library/LaunchAgents, and /Library/LaunchDaemons. Load, unload, start, and stop them here."
+          }
+        }
+      }
+    },
     "已停止 (信号 %lld)" : {
       "localizations" : {
         "en" : {
@@ -449,12 +501,44 @@
         }
       }
     },
+    "已在 LaunchAgents / Daemons：%@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Also in LaunchAgents / Daemons: %@"
+          }
+        }
+      }
+    },
     "开始使用" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Get Started"
+          }
+        }
+      }
+    },
+    "当前用户下未检测到 BTM 登录项" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No BTM login items found for the current user"
+          }
+        }
+      }
+    },
+    "打开登录项设置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Login Items Settings"
           }
         }
       }
@@ -476,6 +560,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search by label or path"
+          }
+        }
+      }
+    },
+    "搜索名称、Identifier 或路径" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search name, identifier, or path"
+          }
+        }
+      }
+    },
+    "数据来源：sfltool dumpbtm，与「系统设置 → 通用 → 登录项」一致。有 plist 的项可载入/移除；其余请用系统设置。" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data from sfltool dumpbtm (same as System Settings → General → Login Items). Items with a plist can be loaded/unloaded; use System Settings for others."
           }
         }
       }
@@ -506,6 +612,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "New Agent"
+          }
+        }
+      }
+    },
+    "无法读取 Login Items" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot Read Login Items"
           }
         }
       }
@@ -641,22 +758,23 @@
         }
       }
     },
-    "此操作将 unload 并永久删除 plist 文件，无法撤销。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will unload and permanently delete the plist file. This cannot be undone."
-          }
-        }
-      }
-    },
     "此操作将 bootout 并永久删除 plist 文件，无法撤销。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "This will unregister the job and permanently delete the plist file. This cannot be undone."
+          }
+        }
+      }
+    },
+    "此操作将 unload 并永久删除 plist 文件，无法撤销。" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This will unload and permanently delete the plist file. This cannot be undone."
           }
         }
       }
@@ -731,6 +849,17 @@
         }
       }
     },
+    "没有 Login Items" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Login Items"
+          }
+        }
+      }
+    },
     "浏览 LaunchAgent 和 LaunchDaemon，无需打开终端" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -758,6 +887,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Version %@"
+          }
+        }
+      }
+    },
+    "状态" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
           }
         }
       }
@@ -856,6 +996,16 @@
         }
       }
     },
+    "移除" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unload"
+          }
+        }
+      }
+    },
     "程序" : {
       "localizations" : {
         "en" : {
@@ -897,6 +1047,16 @@
         }
       }
     },
+    "系统「登录项」请在本页了解后，前往系统设置管理。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learn how Login Items differ from launchd here, then manage them in System Settings."
+          }
+        }
+      }
+    },
     "系统日志" : {
       "localizations" : {
         "en" : {
@@ -913,6 +1073,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "System · /Library"
+          }
+        }
+      }
+    },
+    "系统设置" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Settings"
           }
         }
       }
@@ -958,12 +1129,42 @@
         }
       }
     },
+    "许多 Login Item 背后对应同一个 launchd plist，若已在 LaunchAgents / LaunchDaemons 中出现，请在本应用相应分类中管理。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Many Login Items share the same launchd plist. If it already appears under LaunchAgents or LaunchDaemons, manage it there."
+          }
+        }
+      }
+    },
+    "说明 · 系统设置" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guide · System Settings"
+          }
+        }
+      }
+    },
     "路径" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Path"
+          }
+        }
+      }
+    },
+    "载入" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load"
           }
         }
       }
@@ -1004,6 +1205,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Options"
+          }
+        }
+      }
+    },
+    "重试" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
           }
         }
       }

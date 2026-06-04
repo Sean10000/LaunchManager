@@ -36,8 +36,6 @@ final class AgentStore: ObservableObject {
 
     func start(_ item: LaunchItem) throws {
         try launchctlService.start(item.label, scope: item.scope)
-        // kickstart is async from launchd's perspective; refresh immediately then
-        // again after launchd has time to record the running pid.
         refresh()
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 800_000_000)

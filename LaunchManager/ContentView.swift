@@ -9,13 +9,22 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var store = AgentStore()
-    @State private var selectedScope: LaunchItem.Scope? = .userAgent
+    @State private var selection: SidebarSelection? = .scope(.userAgent)
     @State private var showingNewAgent = false
     @State private var searchText = ""
     @State private var errorMessage: String?
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var showOnboarding = false
     @State private var showAbout = false
+
+    private var selectedScope: LaunchItem.Scope? {
+        if case .scope(let scope) = selection { return scope }
+        return nil
+    }
+
+    private var isLoginItemsGuide: Bool {
+        selection == .loginItems
+    }
 
     var filteredItems: [LaunchItem] {
         let scoped = selectedScope.map { scope in store.items.filter { $0.scope == scope } } ?? store.items
@@ -36,17 +45,15 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            SidebarView(selectedScope: $selectedScope, store: store)
+            SidebarView(selection: $selection, store: store)
         } detail: {
-            AgentListView(
-                items: filteredItems,
-                invalidItems: filteredInvalidItems,
-                store: store,
-                showingNewAgent: $showingNewAgent,
-                errorMessage: $errorMessage
-            )
+            detailView
         }
-        .searchable(text: $searchText, prompt: "搜索 Label 或路径")
+        .modifier(ConditionalSearchable(
+            isEnabled: !isLoginItemsGuide,
+            text: $searchText,
+            prompt: "搜索 Label 或路径"
+        ))
         .onAppear {
             store.refresh()
             if !hasSeenOnboarding {
@@ -77,6 +84,37 @@ struct ContentView: View {
             Button("确定") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+    }
+
+    @ViewBuilder
+    private var detailView: some View {
+        switch selection {
+        case .loginItems:
+            LoginItemsGuideView()
+        case .scope, .none:
+            AgentListView(
+                items: filteredItems,
+                invalidItems: filteredInvalidItems,
+                store: store,
+                showingNewAgent: $showingNewAgent,
+                errorMessage: $errorMessage
+            )
+        }
+    }
+}
+
+/// Applies `.searchable` only when listing launchd agents (hidden on Login Items guide).
+private struct ConditionalSearchable: ViewModifier {
+    let isEnabled: Bool
+    @Binding var text: String
+    let prompt: LocalizedStringKey
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.searchable(text: $text, prompt: prompt)
+        } else {
+            content
         }
     }
 }
