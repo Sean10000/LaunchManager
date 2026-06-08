@@ -4,6 +4,15 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
 
 ![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green) ![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-blueviolet?logo=anthropic)
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=Sean10000%2FLaunchManager&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&legend=top-left" />
+ </picture>
+</a>
 ## Features
 
 - **Browse** all LaunchAgents and LaunchDaemons across User, System Agent, and System Daemon scopes
