@@ -9,8 +9,18 @@ struct AgentRowView: View {
     @State private var showingEdit = false
     @State private var showingLog  = false
     @State private var showingDeleteConfirm = false
+    @State private var pulseOpacity = false
+
+    private var pending: PendingOperation? {
+        store.pendingOperations[item.label]
+    }
+
+    private var isRowLocked: Bool {
+        pending != nil
+    }
 
     var statusColor: Color {
+        if pending != nil { return .yellow }
         if item.pid != nil { return .green }
         if let code = item.lastExitCode {
             if code == 0  { return .blue.opacity(0.7) }
@@ -33,7 +43,18 @@ struct AgentRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Circle().fill(statusColor).frame(width: 8, height: 8)
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 8, height: 8)
+                    .opacity(isRowLocked ? (pulseOpacity ? 1.0 : 0.35) : 1.0)
+                    .animation(
+                        isRowLocked ? .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .default,
+                        value: pulseOpacity
+                    )
+                    .onAppear { pulseOpacity = true }
+                    .onChange(of: isRowLocked) { _, locked in
+                        pulseOpacity = locked
+                    }
                     .help(statusTooltip)
                 Text(item.label)
                     .font(.system(.body, design: .monospaced))
@@ -45,12 +66,14 @@ struct AgentRowView: View {
                     Image(systemName: "pencil")
                 }
                 .buttonStyle(.borderless)
+                .disabled(isRowLocked)
                 Button(role: .destructive) {
                     showingDeleteConfirm = true
                 } label: {
                     Image(systemName: "trash")
                 }
                 .buttonStyle(.borderless)
+                .disabled(isRowLocked)
                 Button {
                     withAnimation(.easeInOut(duration: 0.15)) { isExpanded.toggle() }
                 } label: {
@@ -58,6 +81,7 @@ struct AgentRowView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.borderless)
+                .disabled(isRowLocked)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -70,11 +94,15 @@ struct AgentRowView: View {
                     detailRow("路径", item.plistURL.path)
                     HStack(spacing: 8) {
                         if item.isLoaded {
-                            Button("移除") { perform { try store.bootout(item) } }
-                                .buttonStyle(.bordered).controlSize(.small)
+                            Button("移除") {
+                                store.bootout(item) { errorMessage = $0 }
+                            }
+                            .buttonStyle(.bordered).controlSize(.small)
+                            .disabled(isRowLocked)
                         }
                         Button("查看日志") { showingLog = true }
                             .buttonStyle(.bordered).controlSize(.small)
+                            .disabled(isRowLocked)
                     }
                     .padding(.top, 4)
                 }
@@ -100,7 +128,8 @@ struct AgentRowView: View {
             titleVisibility: .visible
         ) {
             Button("删除", role: .destructive) {
-                perform { try store.delete(item) }
+                do { try store.delete(item) }
+                catch { errorMessage = error.localizedDescription }
             }
         } message: {
             Text("此操作将 bootout 并永久删除 plist 文件，无法撤销。")
@@ -109,15 +138,31 @@ struct AgentRowView: View {
 
     @ViewBuilder
     private var primaryActionButton: some View {
-        if item.pid != nil {
-            Button("停止") { perform { try store.stop(item) } }
-                .buttonStyle(.borderedProminent).controlSize(.small)
+        if let pending {
+            Button {} label: {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text(pending.localizedLabel)
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+            .disabled(true)
+        } else if item.pid != nil {
+            Button("停止") {
+                store.stop(item) { errorMessage = $0 }
+            }
+            .buttonStyle(.borderedProminent).controlSize(.small)
         } else if item.isLoaded {
-            Button("启动") { perform { try store.start(item) } }
-                .buttonStyle(.bordered).controlSize(.small)
+            Button("启动") {
+                store.start(item) { errorMessage = $0 }
+            }
+            .buttonStyle(.bordered).controlSize(.small)
         } else {
-            Button("载入") { perform { try store.bootstrap(item) } }
-                .buttonStyle(.bordered).controlSize(.small)
+            Button("载入") {
+                store.bootstrap(item) { errorMessage = $0 }
+            }
+            .buttonStyle(.bordered).controlSize(.small)
         }
     }
 
@@ -150,10 +195,5 @@ struct AgentRowView: View {
         case .watchPath:
             return String(localized: "监视路径：\(item.watchPaths.first ?? "")")
         }
-    }
-
-    private func perform(_ action: @escaping () throws -> Void) {
-        do { try action() }
-        catch { errorMessage = error.localizedDescription }
     }
 }

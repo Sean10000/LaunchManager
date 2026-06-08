@@ -199,3 +199,94 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
     }
 }
+
+// MARK: - AgentStore Pending Tests
+
+private final class KickstartCountingShell: ShellRunner, @unchecked Sendable {
+    private(set) var kickstartCount = 0
+    private let lock = NSLock()
+
+    func run(_ path: String, arguments: [String]) throws -> String {
+        if path == "/bin/launchctl" {
+            if arguments.first == "kickstart" {
+                lock.lock()
+                kickstartCount += 1
+                lock.unlock()
+                Thread.sleep(forTimeInterval: 0.15)
+            }
+            if arguments.first == "list" {
+                return "PID\tStatus\tLabel\n"
+            }
+        }
+        return ""
+    }
+}
+
+@MainActor
+final class AgentStorePendingTests: XCTestCase {
+    private func makeItem(label: String = "com.test.pending") -> LaunchItem {
+        LaunchItem(
+            label: label,
+            plistURL: URL(fileURLWithPath: "/tmp/\(label).plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            triggerType: .atLoad,
+            calendarInterval: nil,
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: true,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            isLoaded: true,
+            pid: nil,
+            lastExitCode: 0
+        )
+    }
+
+    func test_start_setsPendingImmediately() {
+        let shell = KickstartCountingShell()
+        let store = AgentStore(launchctlService: LaunchctlService(shell: shell))
+        let item = makeItem()
+
+        store.start(item)
+
+        XCTAssertEqual(store.pendingOperations[item.label], .starting)
+    }
+
+    func test_duplicateStartWhilePending_ignored() async throws {
+        let shell = KickstartCountingShell()
+        let store = AgentStore(launchctlService: LaunchctlService(shell: shell))
+        let item = makeItem()
+
+        store.start(item)
+        store.start(item)
+
+        try await Task.sleep(nanoseconds: 1_100_000_000)
+
+        XCTAssertEqual(shell.kickstartCount, 1)
+        XCTAssertNil(store.pendingOperations[item.label])
+    }
+
+    func test_startFailure_clearsPending() async throws {
+        struct FailingShell: ShellRunner {
+            func run(_ path: String, arguments: [String]) throws -> String {
+                if arguments.first == "kickstart" {
+                    throw ShellError.nonZeroExit(code: 1, output: "kickstart failed")
+                }
+                return "PID\tStatus\tLabel\n"
+            }
+        }
+        let store = AgentStore(launchctlService: LaunchctlService(shell: FailingShell()))
+        let item = makeItem()
+        var capturedError: String?
+
+        store.start(item) { capturedError = $0 }
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+
+        XCTAssertNil(store.pendingOperations[item.label])
+        XCTAssertNotNil(capturedError)
+    }
+}

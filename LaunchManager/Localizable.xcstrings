@@ -187,6 +187,16 @@
         }
       }
     },
+    "停止中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stopping…"
+          }
+        }
+      }
+    },
     "全局 · /Library" : {
       "localizations" : {
         "en" : {
@@ -337,6 +347,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Start"
+          }
+        }
+      }
+    },
+    "启动中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting…"
           }
         }
       }
@@ -1006,6 +1026,16 @@
         }
       }
     },
+    "移除中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unloading…"
+          }
+        }
+      }
+    },
     "程序" : {
       "localizations" : {
         "en" : {
@@ -1165,6 +1195,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Load"
+          }
+        }
+      }
+    },
+    "载入中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading…"
           }
         }
       }
