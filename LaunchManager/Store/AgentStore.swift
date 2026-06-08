@@ -67,9 +67,7 @@ final class AgentStore: ObservableObject {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.stop(item.label, scope: item.scope)
             }
-            await self.refresh()
-            try? await Task.sleep(nanoseconds: 400_000_000)
-            await self.refresh()
+            await self.waitUntilStopped(label: item.label, scope: item.scope)
         }
     }
 
@@ -122,6 +120,27 @@ final class AgentStore: ObservableObject {
             try await MainActor.run { try block() }
         } else {
             try await Task.detached { try block() }.value
+        }
+    }
+
+    private func pid(for label: String) -> Int? {
+        items.first(where: { $0.label == label })?.pid
+    }
+
+    /// Poll launchctl list until the job no longer reports a PID (max ~3s), then SIGKILL if needed.
+    private func waitUntilStopped(label: String, scope: LaunchItem.Scope) async {
+        for _ in 0..<20 {
+            refresh()
+            if pid(for: label) == nil { return }
+            try? await Task.sleep(nanoseconds: 150_000_000)
+        }
+        try? await runLaunchctl(scope: scope) {
+            try self.launchctlService.stop(label, scope: scope, signal: "SIGKILL")
+        }
+        for _ in 0..<10 {
+            refresh()
+            if pid(for: label) == nil { return }
+            try? await Task.sleep(nanoseconds: 150_000_000)
         }
     }
 }

@@ -68,13 +68,13 @@ struct LaunchctlService {
         }
     }
 
-    func stop(_ label: String, scope: LaunchItem.Scope) throws {
+    func stop(_ label: String, scope: LaunchItem.Scope, signal: String = "SIGTERM") throws {
         let target = "\(launchdDomain(for: scope))/\(label)"
         // kill returns non-zero when process isn't running — treat as success
         if scope.requiresPrivilege {
-            try? privilege.run("/bin/launchctl kill SIGTERM \(target)")
+            try? privilege.run("/bin/launchctl kill \(signal) \(target)")
         } else {
-            _ = try? shell.run("/bin/launchctl", arguments: ["kill", "SIGTERM", target])
+            _ = try? shell.run("/bin/launchctl", arguments: ["kill", signal, target])
         }
     }
 
