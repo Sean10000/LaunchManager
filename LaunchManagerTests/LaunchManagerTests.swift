@@ -325,3 +325,54 @@ final class ProcessDiscoveryServiceTests: XCTestCase {
         XCTAssertNil(ProcessDiscoveryService.extractPort(from: "*:bonjour"))
     }
 }
+
+private struct FakeDiscoveryShell: ShellRunner, @unchecked Sendable {
+    let lsofOutput: String
+    var psResponses: [Int32: String] = [:]
+    var cwdResponses: [Int32: String] = [:]
+
+    func run(_ path: String, arguments: [String]) throws -> String {
+        if path == "/usr/sbin/lsof" && arguments.contains("-iTCP") {
+            return lsofOutput
+        }
+        if path == "/bin/ps" {
+            if let pIndex = arguments.firstIndex(of: "-p"), pIndex + 1 < arguments.count,
+               let pid = Int32(arguments[pIndex + 1]) {
+                return psResponses[pid] ?? ""
+            }
+        }
+        if path == "/usr/sbin/lsof", arguments.contains("-d"), arguments.contains("cwd") {
+            if let pIndex = arguments.firstIndex(of: "-p"), pIndex + 1 < arguments.count,
+               let pid = Int32(arguments[pIndex + 1]) {
+                if let cwd = cwdResponses[pid] { return "n\(cwd)\n" }
+            }
+        }
+        return ""
+    }
+}
+
+extension ProcessDiscoveryServiceTests {
+    func test_buildProcesses_enrichesCommandAndCwd() throws {
+        let pid = getpid()
+        let lsof = """
+        COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+        node    \(pid) sean   21u  IPv4 0x0      0t0  TCP *:3000 (LISTEN)
+        """
+        let shell = FakeDiscoveryShell(
+            lsofOutput: lsof,
+            psResponses: [pid: "node /usr/local/bin/next dev"],
+            cwdResponses: [pid: "/Users/sean/blog/frontend"]
+        )
+        let svc = ProcessDiscoveryService(shell: shell)
+        let processes = try svc.scan()
+        XCTAssertEqual(processes.count, 1)
+        XCTAssertEqual(processes[0].command, "node /usr/local/bin/next dev")
+        XCTAssertEqual(processes[0].workingDirectory, "/Users/sean/blog/frontend")
+        XCTAssertEqual(processes[0].executable, "node")
+    }
+
+    func test_healthCheck_aliveProcess() {
+        XCTAssertTrue(ProcessDiscoveryService.isProcessAlive(pid: getpid()))
+        XCTAssertFalse(ProcessDiscoveryService.isProcessAlive(pid: 999_999))
+    }
+}

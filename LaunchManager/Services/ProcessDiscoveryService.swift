@@ -1,5 +1,9 @@
 import Foundation
 
+protocol ProcessScanning: Sendable {
+    func scan() throws -> [ListeningProcess]
+}
+
 struct LsofRow: Equatable {
     let pid: Int32
     let port: Int
@@ -35,5 +39,46 @@ final class ProcessDiscoveryService: Sendable {
             rows.append(LsofRow(pid: pid, port: port, executable: executable))
         }
         return rows
+    }
+}
+
+extension ProcessDiscoveryService: ProcessScanning {
+    static func isProcessAlive(pid: Int32) -> Bool {
+        kill(pid, 0) == 0
+    }
+
+    func scan() throws -> [ListeningProcess] {
+        let lsofOut = try shell.run("/usr/sbin/lsof", arguments: [
+            "-iTCP", "-sTCP:LISTEN", "-nP"
+        ])
+        let rows = parseLsofOutput(lsofOut)
+        var seen = Set<String>()
+        var result: [ListeningProcess] = []
+
+        for row in rows {
+            let key = "\(row.pid)-\(row.port)"
+            guard seen.insert(key).inserted else { continue }
+            guard Self.isProcessAlive(pid: row.pid) else { continue }
+
+            let command = (try? shell.run("/bin/ps", arguments: ["-p", "\(row.pid)", "-o", "command="]))?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? row.executable
+
+            let cwdOut = (try? shell.run("/usr/sbin/lsof", arguments: [
+                "-a", "-p", "\(row.pid)", "-d", "cwd", "-Fn"
+            ])) ?? ""
+            let cwd = cwdOut.split(separator: "\n")
+                .first(where: { $0.hasPrefix("n") })
+                .map { String($0.dropFirst()) }
+
+            result.append(ListeningProcess(
+                pid: row.pid,
+                port: row.port,
+                protocolName: "tcp",
+                command: command,
+                executable: row.executable,
+                workingDirectory: cwd
+            ))
+        }
+        return result.sorted { $0.port < $1.port }
     }
 }
