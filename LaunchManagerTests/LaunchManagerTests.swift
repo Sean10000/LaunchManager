@@ -376,3 +376,33 @@ extension ProcessDiscoveryServiceTests {
         XCTAssertFalse(ProcessDiscoveryService.isProcessAlive(pid: 999_999))
     }
 }
+
+// MARK: - Service Resolver Tests
+
+final class ServiceResolverTests: XCTestCase {
+    func test_commandLineResolver_nextJs() {
+        let hit = CommandLineResolver().resolve(command: "node /path/next dev --port 3000")
+        XCTAssertEqual(hit?.displayName, "Next.js")
+        XCTAssertEqual(hit?.category, .web)
+    }
+
+    func test_commandLineResolver_uvicorn() {
+        let hit = CommandLineResolver().resolve(command: "uvicorn app.main:app --reload")
+        XCTAssertEqual(hit?.displayName, "FastAPI")
+    }
+
+    func test_executableResolver_redis() {
+        let hit = ExecutableResolver().resolve(executable: "redis-server")
+        XCTAssertEqual(hit?.displayName, "Redis")
+        XCTAssertEqual(hit?.category, .cache)
+    }
+
+    func test_projectResolver_packageJson() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try #"{"name":"blog-frontend"}"#.write(to: dir.appendingPathComponent("package.json"), atomically: true, encoding: .utf8)
+        let name = ProjectResolver().resolve(workingDirectory: dir.path)
+        XCTAssertEqual(name, "blog-frontend")
+    }
+}
