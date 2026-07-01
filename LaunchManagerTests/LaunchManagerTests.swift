@@ -290,3 +290,38 @@ final class AgentStorePendingTests: XCTestCase {
         XCTAssertNotNil(capturedError)
     }
 }
+
+// MARK: - ProcessDiscoveryService Tests
+
+final class ProcessDiscoveryServiceTests: XCTestCase {
+    let svc = ProcessDiscoveryService(shell: NoopShell())
+
+    func test_parseLsofOutput_extractsPidPortExecutable() {
+        let output = """
+        COMMAND   PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+        node    12345 sean   21u  IPv4 0xdeadbeef      0t0  TCP *:3000 (LISTEN)
+        Python  67890 sean    3u  IPv4 0xbeefdead      0t0  TCP 127.0.0.1:8000 (LISTEN)
+        """
+        let rows = svc.parseLsofOutput(output)
+        XCTAssertEqual(rows.count, 2)
+        XCTAssertEqual(rows[0].pid, 12345)
+        XCTAssertEqual(rows[0].port, 3000)
+        XCTAssertEqual(rows[0].executable, "node")
+        XCTAssertEqual(rows[1].pid, 67890)
+        XCTAssertEqual(rows[1].port, 8000)
+        XCTAssertEqual(rows[1].executable, "Python")
+    }
+
+    func test_parseLsofOutput_skipsHeaderAndNonListen() {
+        let output = """
+        COMMAND   PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+        """
+        XCTAssertTrue(svc.parseLsofOutput(output).isEmpty)
+    }
+
+    func test_extractPort_parsesIPv6() {
+        XCTAssertEqual(ProcessDiscoveryService.extractPort(from: "[::1]:5432"), 5432)
+        XCTAssertEqual(ProcessDiscoveryService.extractPort(from: "*:6379"), 6379)
+        XCTAssertNil(ProcessDiscoveryService.extractPort(from: "*:bonjour"))
+    }
+}
