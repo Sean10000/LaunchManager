@@ -406,3 +406,42 @@ final class ServiceResolverTests: XCTestCase {
         XCTAssertEqual(name, "blog-frontend")
     }
 }
+
+// MARK: - ServiceClassifier Tests
+
+final class ServiceClassifierTests: XCTestCase {
+    func test_classify_nextJs() {
+        let p = ListeningProcess(
+            pid: getpid(), port: 3000, protocolName: "tcp",
+            command: "node next dev", executable: "node",
+            workingDirectory: nil
+        )
+        let svc = ServiceClassifier().classify(p)
+        XCTAssertEqual(svc.displayName, "Next.js")
+        XCTAssertEqual(svc.url?.port, 3000)
+        XCTAssertEqual(svc.health, .healthy)
+    }
+}
+
+// MARK: - DevServiceFilter Tests
+
+final class DevServiceFilterTests: XCTestCase {
+    func test_devPort_passes() {
+        let s = makeService(port: 5432, executable: "postgres", displayName: "PostgreSQL")
+        XCTAssertTrue(DevServiceFilter().isDevService(s))
+    }
+
+    func test_unknownSystemPort_filtered() {
+        let s = makeService(port: 5353, executable: "mDNSResponder", displayName: "mDNSResponder")
+        XCTAssertFalse(DevServiceFilter().isDevService(s))
+    }
+
+    private func makeService(port: Int, executable: String, displayName: String) -> Service {
+        Service(
+            displayName: displayName, subtitle: nil, category: .other,
+            health: .healthy, port: port, host: "localhost", pid: 1,
+            executable: executable, command: executable,
+            workingDirectory: nil, url: nil
+        )
+    }
+}
