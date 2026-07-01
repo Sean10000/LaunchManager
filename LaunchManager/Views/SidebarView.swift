@@ -29,6 +29,17 @@ struct SidebarView: View {
                     badge: 0
                 )
             }
+
+            Section {
+                SidebarRowButton(
+                    selection: $selection,
+                    tag: .services,
+                    title: Text("Services"),
+                    subtitle: Text("本地开发环境"),
+                    icon: "bolt.fill",
+                    badge: 0
+                )
+            }
         }
         .listStyle(.sidebar)
         .navigationTitle("LaunchManager")

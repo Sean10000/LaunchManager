@@ -9,6 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var store = AgentStore()
+    @StateObject private var serviceStore = ServiceStore()
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selection: SidebarSelection? = .scope(.userAgent)
     @State private var showingNewAgent = false
     @State private var searchText = ""
@@ -56,9 +58,18 @@ struct ContentView: View {
         ))
         .onAppear {
             store.refresh()
+            serviceStore.startPolling(isActive: scenePhase == .active)
             if !hasSeenOnboarding {
                 showOnboarding = true
                 hasSeenOnboarding = true
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            serviceStore.startPolling(isActive: phase == .active)
+        }
+        .onChange(of: selection) { _, newSelection in
+            if newSelection == .services {
+                serviceStore.refresh()
             }
         }
         .sheet(isPresented: $showOnboarding) {
@@ -90,6 +101,8 @@ struct ContentView: View {
     @ViewBuilder
     private var detailView: some View {
         switch selection {
+        case .services:
+            ServicesListView(store: serviceStore, errorMessage: $errorMessage)
         case .loginItems:
             LoginItemsGuideView()
         case .scope, .none:
