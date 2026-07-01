@@ -35,7 +35,7 @@ struct KillConfirmSheet: View {
                 .disabled(store.pendingKillIDs.contains(service.id))
             }
         }
-        .padding()
+        .padding(24)
         .frame(minWidth: 360)
     }
 }

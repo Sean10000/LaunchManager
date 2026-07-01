@@ -87,6 +87,56 @@
         }
       }
     },
+    "Copy URL" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy URL"
+          }
+        }
+      }
+    },
+    "Kill Process…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kill Process…"
+          }
+        }
+      }
+    },
+    "Open in Browser" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in Browser"
+          }
+        }
+      }
+    },
+    "Reveal in Finder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reveal in Finder"
+          }
+        }
+      }
+    },
+    "Services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
+          }
+        }
+      }
+    },
     "macOS 定时任务与开机启动管理" : {
       "localizations" : {
         "en" : {
@@ -147,12 +197,32 @@
         }
       }
     },
+    "显示全部" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All"
+          }
+        }
+      }
+    },
     "位于「系统设置 → 通用 → 登录项」，包括「打开时登录」的应用与「允许在后台」的项目。由 macOS 统一管理，本应用不提供列表或开关。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Found in System Settings → General → Login Items (open at login and background items). Managed by macOS only; this app does not list or toggle them."
+          }
+        }
+      }
+    },
+    "本地开发环境" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local Dev Environment"
           }
         }
       }
@@ -595,6 +665,26 @@
         }
       }
     },
+    "搜索服务名、端口、项目…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search name, port, project…"
+          }
+        }
+      }
+    },
+    "尝试启动 dev server，或开启「显示全部」" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a dev server, or enable \"Show All\""
+          }
+        }
+      }
+    },
     "数据来源：sfltool dumpbtm，与「系统设置 → 通用 → 登录项」一致。有 plist 的项可载入/移除；其余请用系统设置。" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -880,6 +970,16 @@
         }
       }
     },
+    "没有发现开发服务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No dev services found"
+          }
+        }
+      }
+    },
     "浏览 LaunchAgent 和 LaunchDaemon，无需打开终端" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -999,6 +1099,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete %@?"
+          }
+        }
+      }
+    },
+    "确认终止服务？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kill this service?"
+          }
+        }
+      }
+    },
+    "终止进程" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kill Process"
           }
         }
       }

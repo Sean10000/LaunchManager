@@ -40,7 +40,7 @@ struct ServicesListView: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "搜索服务名、端口或项目")
+        .searchable(text: $searchText, prompt: "搜索服务名、端口、项目…")
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Toggle("显示全部", isOn: $store.showAll)
