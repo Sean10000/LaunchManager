@@ -324,6 +324,17 @@ final class ProcessDiscoveryServiceTests: XCTestCase {
         XCTAssertEqual(ProcessDiscoveryService.extractPort(from: "*:6379"), 6379)
         XCTAssertNil(ProcessDiscoveryService.extractPort(from: "*:bonjour"))
     }
+
+    func test_executableName_fromFullPsCommand() {
+        XCTAssertEqual(
+            ProcessDiscoveryService.executableName(from: "/opt/homebrew/bin/cloudflared tunnel run"),
+            "cloudflared"
+        )
+        XCTAssertEqual(
+            ProcessDiscoveryService.executableName(from: "/System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter"),
+            "ControlCenter"
+        )
+    }
 }
 
 private struct FakeDiscoveryShell: ShellRunner, @unchecked Sendable {
@@ -383,18 +394,68 @@ final class ServiceResolverTests: XCTestCase {
     func test_commandLineResolver_nextJs() {
         let hit = CommandLineResolver().resolve(command: "node /path/next dev --port 3000")
         XCTAssertEqual(hit?.displayName, "Next.js")
-        XCTAssertEqual(hit?.category, .web)
+        XCTAssertEqual(hit?.identityKind, .realService)
     }
 
-    func test_commandLineResolver_uvicorn() {
+    func test_commandLineResolver_uvicorn_notMatched() {
         let hit = CommandLineResolver().resolve(command: "uvicorn app.main:app --reload")
-        XCTAssertEqual(hit?.displayName, "FastAPI")
+        XCTAssertNil(hit)
     }
 
     func test_executableResolver_redis() {
         let hit = ExecutableResolver().resolve(executable: "redis-server")
         XCTAssertEqual(hit?.displayName, "Redis")
         XCTAssertEqual(hit?.category, .cache)
+    }
+
+    func test_executableResolver_postgres() {
+        let hit = ExecutableResolver().resolve(executable: "postgres")
+        XCTAssertEqual(hit?.displayName, "PostgreSQL")
+    }
+
+    func test_executableResolver_node_notMatched() {
+        XCTAssertNil(ExecutableResolver().resolve(executable: "node"))
+    }
+
+    func test_hostMechanism_dockerProxy() {
+        let process = ListeningProcess(
+            pid: 1, port: 6379, protocolName: "tcp",
+            command: "docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 6379",
+            executable: "docker-proxy", workingDirectory: nil
+        )
+        let hit = HostMechanismResolver().resolve(process: process)
+        XCTAssertEqual(hit?.displayName, "Docker 端口转发")
+        XCTAssertEqual(hit?.identityKind, .hostMechanism)
+    }
+
+    func test_hostMechanism_sshForward() {
+        let process = ListeningProcess(
+            pid: 1, port: 5432, protocolName: "tcp",
+            command: "ssh -L 5432:127.0.0.1:5432 user@remote",
+            executable: "ssh", workingDirectory: nil
+        )
+        let hit = HostMechanismResolver().resolve(process: process)
+        XCTAssertEqual(hit?.displayName, "SSH 端口转发")
+    }
+
+    func test_hostMechanism_colima() {
+        let process = ListeningProcess(
+            pid: 1, port: 8080, protocolName: "tcp",
+            command: "/Users/sean/.colima/default/docker.sock",
+            executable: "colima", workingDirectory: nil
+        )
+        let hit = HostMechanismResolver().resolve(process: process)
+        XCTAssertEqual(hit?.displayName, "Colima")
+    }
+
+    func test_hostMechanism_launchd() {
+        let process = ListeningProcess(
+            pid: 1, port: 8080, protocolName: "tcp",
+            command: "/sbin/launchd",
+            executable: "launchd", workingDirectory: nil
+        )
+        let hit = HostMechanismResolver().resolve(process: process)
+        XCTAssertEqual(hit?.displayName, "系统服务 (launchd)")
     }
 
     func test_projectResolver_packageJson() throws {
@@ -405,21 +466,203 @@ final class ServiceResolverTests: XCTestCase {
         let name = ProjectResolver().resolve(workingDirectory: dir.path)
         XCTAssertEqual(name, "blog-frontend")
     }
+
+    func test_projectContext_findsRootFromCommandPath() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try #"{"name":"my-app"}"#.write(to: dir.appendingPathComponent("package.json"), atomically: true, encoding: .utf8)
+        let bin = dir.appendingPathComponent("node_modules/.bin/next")
+        try FileManager.default.createDirectory(at: bin.deletingLastPathComponent(), withIntermediateDirectories: true)
+
+        let process = ListeningProcess(
+            pid: 1, port: 3000, protocolName: "tcp",
+            command: "\(bin.path) dev",
+            executable: "node",
+            workingDirectory: FileManager.default.homeDirectoryForCurrentUser.path
+        )
+        let context = ProjectContextResolver().resolve(process: process)
+        XCTAssertEqual(context.projectDirectory, dir.path)
+        XCTAssertEqual(context.projectName, "my-app")
+    }
 }
 
 // MARK: - ServiceClassifier Tests
 
 final class ServiceClassifierTests: XCTestCase {
+    private func isolatedNameStore() -> ServiceNameStore {
+        let suite = "ServiceNameStoreTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        return ServiceNameStore(defaults: defaults)
+    }
+
     func test_classify_nextJs() {
         let p = ListeningProcess(
             pid: getpid(), port: 3000, protocolName: "tcp",
             command: "node next dev", executable: "node",
             workingDirectory: nil
         )
-        let svc = ServiceClassifier().classify(p)
+        let svc = ServiceClassifier().classify(
+            p, dockerIndex: DockerContainerIndex(containers: []), nameStore: isolatedNameStore()
+        )
         XCTAssertEqual(svc.displayName, "Next.js")
+        XCTAssertEqual(svc.runtimeGroup, .instance)
+        XCTAssertEqual(svc.identityKind, .realService)
         XCTAssertEqual(svc.url?.port, 3000)
         XCTAssertEqual(svc.health, .healthy)
+    }
+
+    func test_classify_dockerProxy_blocksKillWithoutContainer() {
+        let p = ListeningProcess(
+            pid: 1, port: 6379, protocolName: "tcp",
+            command: "docker-proxy -proto tcp -host-port 6379",
+            executable: "docker-proxy", workingDirectory: nil
+        )
+        let svc = ServiceClassifier().classify(
+            p, dockerIndex: DockerContainerIndex(containers: []), nameStore: isolatedNameStore()
+        )
+        XCTAssertEqual(svc.autoDisplayName, "Docker 端口转发")
+        XCTAssertEqual(svc.identityKind, .hostMechanism)
+        XCTAssertEqual(svc.runtimeGroup, .docker)
+        XCTAssertFalse(svc.killAllowed)
+        if case .blocked = svc.stopMethod { } else {
+            XCTFail("expected blocked stop method")
+        }
+    }
+
+    func test_classify_dockerProxy_resolvesRedisContainer() {
+        let container = DockerContainerInfo(
+            id: "abc123def456",
+            name: "myproject-redis-1",
+            image: "redis:7-alpine",
+            composeProject: "myproject",
+            composeService: "redis",
+            publishedHostPorts: [6379]
+        )
+        let index = DockerContainerIndex(containers: [container])
+        let p = ListeningProcess(
+            pid: 1, port: 6379, protocolName: "tcp",
+            command: "docker-proxy -proto tcp -host-port 6379",
+            executable: "docker-proxy", workingDirectory: nil
+        )
+        let svc = ServiceClassifier().classify(
+            p, dockerIndex: index, nameStore: isolatedNameStore()
+        )
+        XCTAssertEqual(svc.displayName, "Redis")
+        XCTAssertEqual(svc.runtimeGroup, .docker)
+        XCTAssertEqual(svc.subtitle, "myproject · redis:7-alpine")
+        XCTAssertTrue(svc.usesDockerStop)
+        XCTAssertEqual(svc.dockerInfo?.composeService, "redis")
+        if case .dockerContainer(let ref, _) = svc.stopMethod {
+            XCTAssertEqual(ref, "myproject-redis-1")
+        } else {
+            XCTFail("expected docker stop")
+        }
+    }
+
+    func test_classify_redis_direct() {
+        let p = ListeningProcess(
+            pid: 1, port: 6379, protocolName: "tcp",
+            command: "redis-server", executable: "redis-server", workingDirectory: nil
+        )
+        let svc = ServiceClassifier().classify(
+            p, dockerIndex: DockerContainerIndex(containers: []), nameStore: isolatedNameStore()
+        )
+        XCTAssertEqual(svc.displayName, "Redis")
+        XCTAssertEqual(svc.identityKind, .realService)
+    }
+
+    func test_classify_unidentified_usesExecutable() {
+        let p = ListeningProcess(
+            pid: 1, port: 8080, protocolName: "tcp",
+            command: "cloudflared tunnel run", executable: "cloudflared", workingDirectory: nil
+        )
+        let svc = ServiceClassifier().classify(
+            p, dockerIndex: DockerContainerIndex(containers: []), nameStore: isolatedNameStore()
+        )
+        XCTAssertEqual(svc.displayName, "cloudflared")
+        XCTAssertEqual(svc.identityKind, .unidentified)
+    }
+
+    func test_classify_customNameOverrides() {
+        let store = isolatedNameStore()
+        let key = ServiceNameStore.identityKey(port: 8080, executable: "cloudflared")
+        store.setCustomName("我的隧道", for: key)
+        let p = ListeningProcess(
+            pid: 1, port: 8080, protocolName: "tcp",
+            command: "cloudflared tunnel run", executable: "cloudflared", workingDirectory: nil
+        )
+        let svc = ServiceClassifier().classify(p, dockerIndex: DockerContainerIndex(containers: []), nameStore: store)
+        XCTAssertEqual(svc.displayName, "我的隧道")
+        XCTAssertEqual(svc.autoDisplayName, "cloudflared")
+    }
+}
+
+// MARK: - Docker Tests
+
+final class DockerContainerIndexTests: XCTestCase {
+    func test_resolveExecutable_usesKnownPathsOnly() {
+        guard let path = DockerCLI.resolveExecutable() else { return }
+        XCTAssertTrue(DockerCLI.allCandidatePaths().contains(path))
+    }
+
+    func test_augmentedPATH_includesCommonInstallDirs() {
+        let path = DockerCLI.augmentedPATH(existing: "/usr/bin:/bin")
+        XCTAssertTrue(path.contains("/opt/homebrew/bin"))
+        XCTAssertTrue(path.contains("/usr/local/bin"))
+    }
+
+    func test_optionalInit_succeedsWhenDockerAvailable() throws {
+        if DockerCLI.resolveExecutable() == nil && DockerCLI(optional: DefaultShellRunner()) == nil {
+            throw XCTSkip("docker not available")
+        }
+        XCTAssertNotNil(DockerCLI(optional: DefaultShellRunner()))
+    }
+
+    func test_parseHostPorts() {
+        let ports = DockerContainerIndex.parseHostPorts(
+            from: "0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp, 127.0.0.1:3000->3000/tcp"
+        )
+        XCTAssertEqual(Set(ports), Set([6379, 3000]))
+    }
+
+    func test_parseListingLine() {
+        let line = "abc123\tmy-redis\tredis:7\t0.0.0.0:6379->6379/tcp\tredis\tmyproject"
+        let container = DockerContainerIndex.parseLine(line)
+        XCTAssertEqual(container?.name, "my-redis")
+        XCTAssertEqual(container?.composeService, "redis")
+        XCTAssertEqual(container?.publishedHostPorts, [6379])
+    }
+
+    func test_containerLookupByPort() {
+        let container = DockerContainerInfo(
+            id: "id1", name: "web-1", image: "nginx:latest",
+            composeProject: "app", composeService: "web",
+            publishedHostPorts: [8080]
+        )
+        let index = DockerContainerIndex(containers: [container])
+        XCTAssertEqual(index.container(forHostPort: 8080)?.name, "web-1")
+        XCTAssertNil(index.container(forHostPort: 9090))
+    }
+}
+
+final class DockerManagedDetectorTests: XCTestCase {
+    func test_dockerProxy() {
+        let p = ListeningProcess(
+            pid: 1, port: 1, protocolName: "tcp",
+            command: "docker-proxy", executable: "docker-proxy", workingDirectory: nil
+        )
+        XCTAssertTrue(DockerManagedDetector.isDockerManaged(p))
+    }
+
+    func test_colimaPath() {
+        let p = ListeningProcess(
+            pid: 1, port: 1, protocolName: "tcp",
+            command: "/Users/sean/.colima/docker.sock",
+            executable: "colima", workingDirectory: "/Users/sean/.colima/default"
+        )
+        XCTAssertTrue(DockerManagedDetector.isDockerManaged(p))
     }
 }
 
@@ -436,12 +679,24 @@ final class DevServiceFilterTests: XCTestCase {
         XCTAssertFalse(DevServiceFilter().isDevService(s))
     }
 
+    func test_controlCenterOn5000_filtered() {
+        let s = makeService(port: 5000, executable: "ControlCenter", displayName: "AirPlay Receiver")
+        XCTAssertFalse(DevServiceFilter().isDevService(s))
+    }
+
     private func makeService(port: Int, executable: String, displayName: String) -> Service {
-        Service(
-            displayName: displayName, subtitle: nil, category: .other,
+        let key = ServiceNameStore.identityKey(port: port, executable: executable)
+        return Service(
+            identityKey: key,
+            autoDisplayName: displayName,
+            displayName: displayName,
+            identityKind: .realService,
+            runtimeGroup: .instance,
+            subtitle: nil, category: .other,
             health: .healthy, port: port, host: "localhost", pid: 1,
             executable: executable, command: executable,
-            workingDirectory: nil, url: nil
+            workingDirectory: nil, processDirectory: nil, url: nil,
+            dockerInfo: nil, stopMethod: .process(pid: 1)
         )
     }
 }

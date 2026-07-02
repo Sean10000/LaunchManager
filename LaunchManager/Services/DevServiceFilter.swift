@@ -4,7 +4,7 @@ struct DevServiceFilter {
     private let devPorts: Set<Int> = {
         var ports = Set<Int>()
         ports.formUnion(3000...3010)
-        ports.formUnion([4000, 4173, 5000, 5001, 5173, 5432, 6379, 8080, 8443, 9000, 11434, 27017])
+        ports.formUnion([4000, 4173, 5001, 5173, 5432, 6379, 8080, 8443, 9000, 11434, 27017])
         ports.formUnion(8000...8008)
         return ports
     }()
@@ -15,24 +15,33 @@ struct DevServiceFilter {
     ]
 
     private let devFrameworkNames: Set<String> = [
-        "Next.js", "Vite", "Nuxt", "FastAPI", "Flask", "Django", "Rust", "Go",
+        "Next.js", "Vite", "Nuxt", "FastAPI", "Flask", "Django", "NestJS", "Rust", "Go",
+        "Webpack Dev", "Python HTTP",
+    ]
+
+    private let excludedExecutables: Set<String> = [
+        "controlcenter", "rapportd", "ardagent", "mdnsresponder", "limactl", "cloudflared",
+    ]
+
+    private let excludedDisplayNames: Set<String> = [
+        "SSH 转发", "AirPlay Receiver", "AirDrop / Handoff", "Cloudflare Tunnel", "Lima VM",
     ]
 
     func isDevService(_ service: Service) -> Bool {
-        if devPorts.contains(service.port) {
-            return true
-        }
-
         let exeName = (service.executable as NSString).lastPathComponent.lowercased()
-        if devExecutables.contains(exeName) {
-            return true
-        }
-        if service.executable.lowercased().contains("com.docker") {
+
+        if excludedExecutables.contains(exeName) { return false }
+        if excludedDisplayNames.contains(service.displayName) { return false }
+
+        if devFrameworkNames.contains(service.displayName) { return true }
+
+        if devExecutables.contains(exeName) || service.executable.lowercased().contains("com.docker") {
             return true
         }
 
-        if devFrameworkNames.contains(service.displayName) {
-            return true
+        // Port alone is not enough — avoids macOS Control Center on :5000/:7000
+        if devPorts.contains(service.port) {
+            return devExecutables.contains(exeName) || devFrameworkNames.contains(service.displayName)
         }
 
         return false

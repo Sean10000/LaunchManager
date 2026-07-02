@@ -10,6 +10,9 @@
     ":" : {
 
     },
+    "·" : {
+
+    },
     "（无日志）" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -32,14 +35,45 @@
         }
       }
     },
+    "%lld" : {
+
+    },
     "⚠️ 无法解析" : {
 
     },
     "🚀" : {
 
     },
+    "Compose" : {
+
+    },
+    "Copy" : {
+
+    },
+    "Copy URL" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy URL"
+          }
+        }
+      }
+    },
     "GitHub: Sean10000/LaunchManager" : {
 
+    },
+    "Kill Process…" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kill Process…"
+          }
+        }
+      }
     },
     "Label" : {
 
@@ -87,56 +121,6 @@
         }
       }
     },
-    "Copy URL" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy URL"
-          }
-        }
-      }
-    },
-    "Kill Process…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kill Process…"
-          }
-        }
-      }
-    },
-    "Open in Browser" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open in Browser"
-          }
-        }
-      }
-    },
-    "Reveal in Finder" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reveal in Finder"
-          }
-        }
-      }
-    },
-    "Services" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Services"
-          }
-        }
-      }
-    },
     "macOS 定时任务与开机启动管理" : {
       "localizations" : {
         "en" : {
@@ -163,6 +147,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "MIT License · Free & Open Source"
+          }
+        }
+      }
+    },
+    "Open" : {
+
+    },
+    "Open in Browser" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open in Browser"
+          }
+        }
+      }
+    },
+    "PID" : {
+
+    },
+    "PID %d" : {
+
+    },
+    "Reveal in Finder" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reveal in Finder"
+          }
+        }
+      }
+    },
+    "Services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Services"
           }
         }
       }
@@ -197,32 +222,12 @@
         }
       }
     },
-    "显示全部" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show All"
-          }
-        }
-      }
-    },
     "位于「系统设置 → 通用 → 登录项」，包括「打开时登录」的应用与「允许在后台」的项目。由 macOS 统一管理，本应用不提供列表或开关。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Found in System Settings → General → Login Items (open at login and background items). Managed by macOS only; this app does not list or toggle them."
-          }
-        }
-      }
-    },
-    "本地开发环境" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Local Dev Environment"
           }
         }
       }
@@ -411,6 +416,9 @@
         }
       }
     },
+    "可执行" : {
+
+    },
     "启动" : {
       "localizations" : {
         "en" : {
@@ -531,6 +539,9 @@
         }
       }
     },
+    "复制地址" : {
+
+    },
     "如 /usr/local/bin/mytool" : {
       "localizations" : {
         "en" : {
@@ -561,12 +572,29 @@
         }
       }
     },
+    "容器" : {
+
+    },
+    "容器 ID" : {
+
+    },
     "对应侧边栏中的 LaunchAgent / LaunchDaemon，plist 位于 ~/Library/LaunchAgents、/Library/LaunchAgents、/Library/LaunchDaemons。可在本应用中载入、移除、启动与停止。" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "LaunchAgents and LaunchDaemons in the sidebar use plists under ~/Library/LaunchAgents, /Library/LaunchAgents, and /Library/LaunchDaemons. Load, unload, start, and stop them here."
+          }
+        }
+      }
+    },
+    "尝试启动 dev server，或开启「显示全部」" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a dev server, or enable \"Show All\""
           }
         }
       }
@@ -602,6 +630,19 @@
         }
       }
     },
+    "已复制" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied"
+          }
+        }
+      }
+    },
+    "已自定义名称（自动识别: %@）" : {
+
+    },
     "开始使用" : {
       "localizations" : {
         "en" : {
@@ -611,6 +652,9 @@
           }
         }
       }
+    },
+    "当前没有监听中的 TCP 服务" : {
+
     },
     "当前用户下未检测到 BTM 登录项" : {
       "extractionState" : "stale",
@@ -622,6 +666,9 @@
           }
         }
       }
+    },
+    "恢复自动" : {
+
     },
     "打开登录项设置" : {
       "localizations" : {
@@ -671,16 +718,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search name, port, project…"
-          }
-        }
-      }
-    },
-    "尝试启动 dev server，或开启「显示全部」" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a dev server, or enable \"Show All\""
           }
         }
       }
@@ -787,6 +824,20 @@
         }
       }
     },
+    "显示全部" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All"
+          }
+        }
+      }
+    },
+    "显示名称" : {
+
+    },
     "未加载" : {
       "localizations" : {
         "en" : {
@@ -803,6 +854,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Log File Configured"
+          }
+        }
+      }
+    },
+    "本地开发环境" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local Dev Environment"
           }
         }
       }
@@ -971,6 +1032,7 @@
       }
     },
     "没有发现开发服务" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -979,6 +1041,9 @@
           }
         }
       }
+    },
+    "没有发现服务" : {
+
     },
     "浏览 LaunchAgent 和 LaunchDaemon，无需打开终端" : {
       "extractionState" : "stale",
@@ -1104,21 +1169,12 @@
       }
     },
     "确认终止服务？" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kill this service?"
-          }
-        }
-      }
-    },
-    "终止进程" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kill Process"
           }
         }
       }
@@ -1238,6 +1294,17 @@
         }
       }
     },
+    "终止进程" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kill Process"
+          }
+        }
+      }
+    },
     "编辑 Agent" : {
       "localizations" : {
         "en" : {
@@ -1349,6 +1416,9 @@
         }
       }
     },
+    "进程目录" : {
+
+    },
     "选择…" : {
       "localizations" : {
         "en" : {
@@ -1390,6 +1460,9 @@
         }
       }
     },
+    "镜像" : {
+
+    },
     "间隔" : {
       "localizations" : {
         "en" : {
@@ -1399,6 +1472,9 @@
           }
         }
       }
+    },
+    "项目目录" : {
+
     }
   },
   "version" : "1.0"

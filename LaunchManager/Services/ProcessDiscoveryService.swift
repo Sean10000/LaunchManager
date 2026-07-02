@@ -24,6 +24,25 @@ final class ProcessDiscoveryService: Sendable {
         return Int(portStr)
     }
 
+    /// lsof COMMAND column is truncated (~8 chars); derive full name from ps output.
+    static func executableName(from command: String) -> String? {
+        var trimmed = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if trimmed.first == "\"" {
+            trimmed.removeFirst()
+            if let end = trimmed.firstIndex(of: "\"") {
+                let path = String(trimmed[..<end])
+                let name = (path as NSString).lastPathComponent
+                return name.isEmpty ? nil : name
+            }
+        }
+
+        let first = trimmed.split(separator: " ", maxSplits: 1).first.map(String.init) ?? trimmed
+        let name = (first as NSString).lastPathComponent
+        return name.isEmpty ? nil : name
+    }
+
     func parseLsofOutput(_ output: String) -> [LsofRow] {
         var rows: [LsofRow] = []
         for line in output.split(separator: "\n", omittingEmptySubsequences: true) {
@@ -63,6 +82,11 @@ extension ProcessDiscoveryService: ProcessScanning {
             let command = (try? shell.run("/bin/ps", arguments: ["-p", "\(row.pid)", "-o", "command="]))?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? row.executable
 
+            let executable = Self.executableName(from: command)
+                ?? (try? shell.run("/bin/ps", arguments: ["-p", "\(row.pid)", "-o", "comm="]))?
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                ?? row.executable
+
             let cwdOut = (try? shell.run("/usr/sbin/lsof", arguments: [
                 "-a", "-p", "\(row.pid)", "-d", "cwd", "-Fn"
             ])) ?? ""
@@ -75,7 +99,7 @@ extension ProcessDiscoveryService: ProcessScanning {
                 port: row.port,
                 protocolName: "tcp",
                 command: command,
-                executable: row.executable,
+                executable: executable,
                 workingDirectory: cwd
             ))
         }

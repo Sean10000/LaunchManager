@@ -28,6 +28,10 @@ struct ContentView: View {
         selection == .loginItems
     }
 
+    private var isServicesView: Bool {
+        selection == .services
+    }
+
     var filteredItems: [LaunchItem] {
         let scoped = selectedScope.map { scope in store.items.filter { $0.scope == scope } } ?? store.items
         guard !searchText.isEmpty else { return scoped }
@@ -52,7 +56,7 @@ struct ContentView: View {
             detailView
         }
         .modifier(ConditionalSearchable(
-            isEnabled: !isLoginItemsGuide,
+            isEnabled: !isLoginItemsGuide && !isServicesView,
             text: $searchText,
             prompt: "搜索 Label 或路径"
         ))
@@ -69,7 +73,7 @@ struct ContentView: View {
         }
         .onChange(of: selection) { _, newSelection in
             if newSelection == .services {
-                serviceStore.refresh()
+                serviceStore.refreshNow()
             }
         }
         .sheet(isPresented: $showOnboarding) {
