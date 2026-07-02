@@ -16,6 +16,7 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
 ## Features
 
 - **Browse** all LaunchAgents and LaunchDaemons across User, System Agent, and System Daemon scopes
+- **Services** — discover local TCP listeners (Next.js, Redis, Docker containers, etc.), group by Docker vs local instance, stop processes or containers safely
 - **Create & edit** plist jobs with a form UI — no manual XML editing required
 - **Control** jobs: load, unload, start, stop
 - **View logs** — both file-based stdout/stderr logs and system log (via `log show`)
@@ -54,10 +55,11 @@ Build and run with Xcode (`⌘R`).
 
 ## Usage
 
-1. Select a scope from the sidebar: **User Agents**, **System Agents**, or **System Daemons**
+1. Select a scope from the sidebar: **User Agents**, **System Agents**, **System Daemons**, or **Services**
 2. Click **+** to create a new job, or click the pencil icon to edit an existing one
 3. Use the row buttons to **load / start / stop** a job
 4. Expand a row (chevron) to see details and view logs
+5. On **Services**, refresh the list, rename entries, open URLs, or stop local processes / Docker containers
 
 ## Comparison with Paid Alternatives
 
@@ -85,10 +87,10 @@ Build and run with Xcode (`⌘R`).
 
 ```
 LaunchManager/
-├── Models/          # LaunchItem, InvalidPlist data models
-├── Services/        # PlistService, LaunchctlService, PrivilegeService, ShellRunner
-├── Store/           # AgentStore (ObservableObject)
-└── Views/           # SwiftUI views
+├── Models/          # LaunchItem, InvalidPlist, Service, ListeningProcess
+├── Services/        # PlistService, LaunchctlService, ProcessDiscovery, Docker/, resolvers
+├── Store/           # AgentStore, ServiceStore, ServiceNameStore
+└── Views/           # SwiftUI views (AgentList, ServicesList, …)
 ```
 
 ## License
