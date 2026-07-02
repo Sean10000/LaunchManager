@@ -16,7 +16,7 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
 ## Features
 
 - **Browse** all LaunchAgents and LaunchDaemons across User, System Agent, and System Daemon scopes
-- **Services** — discover local TCP listeners (Next.js, Redis, Docker containers, etc.), group by Docker vs local instance, stop processes or containers safely
+- **Services** — discover **host TCP listeners only** (Next.js, Redis, Docker containers published on Mac, etc.), group by Docker vs local instance, stop processes or containers safely
 - **Create & edit** plist jobs with a form UI — no manual XML editing required
 - **Control** jobs: load, unload, start, stop
 - **View logs** — both file-based stdout/stderr logs and system log (via `log show`)
@@ -60,6 +60,33 @@ Build and run with Xcode (`⌘R`).
 3. Use the row buttons to **load / start / stop** a job
 4. Expand a row (chevron) to see details and view logs
 5. On **Services**, refresh the list, rename entries, open URLs, or stop local processes / Docker containers
+
+## Services
+
+The **Services** sidebar scans **TCP ports listening on your Mac** (`lsof -iTCP -sTCP:LISTEN`). It is a local dev-environment view, not a network-wide service discovery tool.
+
+### What it shows
+
+- TCP services **listening on the host** (Next.js, Redis, PostgreSQL, etc.)
+- **Docker / Colima** containers whose ports are **published on the Mac** (resolved via `docker ps`)
+
+### What it does not show
+
+- **Outbound connections only** (`ESTABLISHED` where your Mac is the client)
+- Services running **inside a VM, NAS, or another machine** on the LAN (unless their port is forwarded so the Mac is listening locally)
+- **UDP** listeners (v1 is TCP only)
+
+### Quick check
+
+```bash
+# Will appear in Services only if the Mac is LISTENing on this port
+lsof -iTCP:5666 -sTCP:LISTEN -nP
+
+# Matches any socket involving port 5666 (including remote VM / outbound client)
+lsof -i :5666
+```
+
+**Example:** A NAS on a VMware VM at `192.168.95.x:5666` — your Mac may only have an outbound `ESTABLISHED` connection to that address. The NAS is not listening on the Mac, so it is **excluded by design**.
 
 ## Comparison with Paid Alternatives
 

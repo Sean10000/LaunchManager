@@ -6,6 +6,13 @@
 - **Docker integration:** resolve container name, image, and Compose labels via `docker ps`; stop containers with `docker stop` instead of killing docker-proxy.
 - **Grouped list:** Docker and local instance sections in the Services view.
 
+### Scope
+
+- **Host-local TCP `LISTEN` only** — processes bound on your Mac
+- **Docker published ports on Mac** — via `docker ps` port mapping
+- **Does not include** remote VM/NAS/LAN services or outbound-only (`ESTABLISHED`) connections
+- **TCP only** in v1.6 (no UDP)
+
 ### Improved
 - Full process names from `ps command=` (avoids lsof ~8 character truncation).
 - Docker CLI lookup via known install paths with `/usr/bin/env docker` PATH fallback (no zsh dependency).
