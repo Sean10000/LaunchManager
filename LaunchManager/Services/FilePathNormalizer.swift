@@ -1,7 +1,17 @@
 import Foundation
 
 enum FilePathNormalizer {
-    /// Normalizes filesystem paths from shell tools (lsof, ps) for correct Unicode display.
+    /// Normalizes filesystem paths and shell-sourced strings for correct Unicode display.
+    static func display(_ text: String) -> String {
+        let normalized = normalize(text)
+        guard normalized.hasPrefix("/") else { return normalized }
+        // Avoid URL round-trip for non-ASCII paths; kernel and plist paths are already UTF-8.
+        if normalized.contains(where: { !$0.isASCII }) {
+            return normalized
+        }
+        return URL(fileURLWithPath: normalized).path
+    }
+
     static func normalize(_ path: String) -> String {
         let decoded = decodeLsofOctalEscapes(path)
         if let repaired = repairUTF8Mojibake(decoded) {
@@ -41,12 +51,44 @@ enum FilePathNormalizer {
         return String(data: Data(bytes), encoding: .utf8) ?? path
     }
 
-    /// Repairs UTF-8 paths that were misinterpreted as ISO Latin-1 (e.g. 启动器.app → mojibake).
+    /// Repairs UTF-8 text that was misinterpreted as a legacy byte encoding.
     static func repairUTF8Mojibake(_ string: String) -> String? {
-        guard string.contains(where: { $0.isASCII == false }) else { return nil }
-        guard let latin1 = string.data(using: .isoLatin1),
-              let repaired = String(data: latin1, encoding: .utf8),
-              repaired != string else { return nil }
-        return repaired
+        guard string.contains(where: { !$0.isASCII }) else { return nil }
+        // Already valid CJK — do not run legacy re-encoding (it corrupts good Unicode).
+        if containsCJK(string) { return nil }
+        guard containsMojibakeMarkers(string) else { return nil }
+
+        let candidateEncodings: [String.Encoding] = [
+            .isoLatin1,
+            .windowsCP1252,
+            macOSRoman,
+        ]
+
+        for encoding in candidateEncodings {
+            guard let bytes = string.data(using: encoding, allowLossyConversion: true),
+                  let repaired = String(data: bytes, encoding: .utf8),
+                  repaired != string
+            else { continue }
+            if containsCJK(repaired) || !containsMojibakeMarkers(repaired) {
+                return repaired
+            }
+        }
+        return nil
+    }
+
+    private static let macOSRoman = String.Encoding(
+        rawValue: CFStringConvertEncodingToNSStringEncoding(
+            CFStringBuiltInEncodings.macRoman.rawValue
+        )
+    )
+
+    private static func containsCJK(_ string: String) -> Bool {
+        string.unicodeScalars.contains { (0x4E00...0x9FFF).contains($0.value) }
+    }
+
+    private static func containsMojibakeMarkers(_ string: String) -> Bool {
+        string.unicodeScalars.contains { scalar in
+            (0x00C0...0x00FF).contains(scalar.value) && !scalar.isASCII
+        }
     }
 }

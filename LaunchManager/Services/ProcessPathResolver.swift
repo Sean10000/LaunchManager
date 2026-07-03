@@ -3,10 +3,12 @@ import Foundation
 
 enum ProcessPathResolver {
     static func executablePath(for pid: pid_t) -> String? {
-        var buffer = [CChar](repeating: 0, count: Int(MAXPATHLEN))
+        var buffer = [UInt8](repeating: 0, count: Int(MAXPATHLEN))
         let length = proc_pidpath(pid, &buffer, UInt32(buffer.count))
         guard length > 0 else { return nil }
-        return FilePathNormalizer.normalize(String(cString: buffer))
+        let end = buffer.prefix(while: { $0 != 0 })
+        guard let path = String(bytes: end, encoding: .utf8) else { return nil }
+        return FilePathNormalizer.display(path)
     }
 
     static func currentWorkingDirectory(for pid: pid_t) -> String? {
@@ -17,9 +19,9 @@ enum ProcessPathResolver {
         }
         return withUnsafeBytes(of: info.pvi_cdir.vip_path) { raw -> String? in
             guard let base = raw.baseAddress else { return nil }
-            let cString = base.assumingMemoryBound(to: CChar.self)
-            guard let path = String(validatingUTF8: cString) else { return nil }
-            return FilePathNormalizer.normalize(path)
+            let bytes = UnsafeRawBufferPointer(start: base, count: raw.count).prefix(while: { $0 != 0 })
+            guard let path = String(bytes: bytes, encoding: .utf8) else { return nil }
+            return FilePathNormalizer.display(path)
         }
     }
 }

@@ -314,6 +314,20 @@ final class FilePathNormalizerTests: XCTestCase {
             "/Users/sean/project"
         )
     }
+
+    func test_normalize_preservesChinesePath() {
+        XCTAssertEqual(
+            FilePathNormalizer.normalize("/Applications/启动器.app"),
+            "/Applications/启动器.app"
+        )
+    }
+
+    func test_display_preservesChinesePath() {
+        XCTAssertEqual(
+            FilePathNormalizer.display("/Applications/启动器.app"),
+            "/Applications/启动器.app"
+        )
+    }
 }
 
 // MARK: - ProcessDiscoveryService Tests
@@ -368,6 +382,11 @@ private struct FakeDiscoveryShell: ShellRunner, @unchecked Sendable {
     var cwdResponses: [Int32: String] = [:]
 
     func run(_ path: String, arguments: [String]) throws -> String {
+        if path == "/usr/bin/env", arguments.count >= 3 {
+            let realPath = arguments[2]
+            let realArgs = Array(arguments.dropFirst(3))
+            return try run(realPath, arguments: realArgs)
+        }
         if path == "/usr/sbin/lsof" && arguments.contains("-iTCP") {
             return lsofOutput
         }
@@ -389,29 +408,50 @@ private struct FakeDiscoveryShell: ShellRunner, @unchecked Sendable {
 
 extension ProcessDiscoveryServiceTests {
     func test_buildProcesses_enrichesCommandAndCwd() throws {
-        let pid = getpid()
+        let fakePid: Int32 = 42_424
         let lsof = """
         COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
-        node    \(pid) sean   21u  IPv4 0x0      0t0  TCP *:3000 (LISTEN)
+        node    \(fakePid) sean   21u  IPv4 0x0      0t0  TCP *:3000 (LISTEN)
         """
         let shell = FakeDiscoveryShell(
             lsofOutput: lsof,
-            psResponses: [pid: "node /usr/local/bin/next dev"],
-            cwdResponses: [pid: "/Users/sean/blog/frontend"]
+            psResponses: [fakePid: "node /usr/local/bin/next dev"],
+            cwdResponses: [fakePid: "/Users/sean/blog/frontend"]
         )
-        let svc = ProcessDiscoveryService(shell: shell)
+        let svc = ProcessDiscoveryService(
+            shell: shell,
+            isAlive: { $0 == fakePid }
+        )
         let processes = try svc.scan()
         XCTAssertEqual(processes.count, 1)
         XCTAssertEqual(processes[0].command, "node /usr/local/bin/next dev")
-        let expectedCwd = ProcessPathResolver.currentWorkingDirectory(for: pid)
-            ?? "/Users/sean/blog/frontend"
-        XCTAssertEqual(processes[0].workingDirectory, expectedCwd)
         XCTAssertEqual(processes[0].executable, "node")
+        XCTAssertEqual(processes[0].workingDirectory, "/Users/sean/blog/frontend")
+    }
+
+    func test_resolveCommand_usesPsFallbackForUnknownPid() {
+        let shell = FakeDiscoveryShell(
+            lsofOutput: "",
+            psResponses: [99_999: "/Applications/启动器.app/Contents/MacOS/启动器 --serve"]
+        )
+        let svc = ProcessDiscoveryService(shell: shell)
+        let command = svc.resolveCommand(pid: 99_999, shell: shell, fallbackExecutable: "启动器")
+        XCTAssertEqual(command, "/Applications/启动器.app/Contents/MacOS/启动器 --serve")
     }
 
     func test_healthCheck_aliveProcess() {
         XCTAssertTrue(ProcessDiscoveryService.isProcessAlive(pid: getpid()))
         XCTAssertFalse(ProcessDiscoveryService.isProcessAlive(pid: 999_999))
+    }
+
+    func test_parseLsofOutput_allowsFewerColumnsWhenNameHasSpaces() {
+        let output = """
+        COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+        Google    123 sean   51u  IPv4 0x0      0t0  TCP 127.0.0.1:9222 (LISTEN)
+        """
+        let rows = svc.parseLsofOutput(output)
+        XCTAssertEqual(rows.count, 1)
+        XCTAssertEqual(rows[0].port, 9222)
     }
 }
 

@@ -89,9 +89,9 @@ struct AgentRowView: View {
             if isExpanded {
                 Divider()
                 VStack(alignment: .leading, spacing: 4) {
-                    detailRow("程序", ([item.program] + item.programArguments).joined(separator: " "))
+                    detailRow("程序", FilePathNormalizer.display(([item.program] + item.programArguments).joined(separator: " ")))
                     detailRow("触发", triggerDescription)
-                    detailRow("路径", item.plistURL.path)
+                    detailRow("路径", FilePathNormalizer.display(item.plistURL.path))
                     HStack(spacing: 8) {
                         if item.isLoaded {
                             Button("移除") {

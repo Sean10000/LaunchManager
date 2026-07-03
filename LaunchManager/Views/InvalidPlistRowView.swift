@@ -47,7 +47,7 @@ struct InvalidPlistRowView: View {
                         Text("路径")
                             .foregroundStyle(.secondary)
                             .frame(width: 36, alignment: .leading)
-                        Text(item.url.path)
+                        Text(FilePathNormalizer.display(item.url.path))
                             .font(.system(.caption, design: .monospaced))
                             .textSelection(.enabled)
                     }

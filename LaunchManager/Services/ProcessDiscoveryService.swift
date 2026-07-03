@@ -13,9 +13,14 @@ struct LsofRow: Equatable {
 
 final class ProcessDiscoveryService: Sendable {
     private let shell: ShellRunner
+    private let isAlive: @Sendable (Int32) -> Bool
 
-    init(shell: ShellRunner = DefaultShellRunner()) {
+    init(
+        shell: ShellRunner = DefaultShellRunner(),
+        isAlive: @escaping @Sendable (Int32) -> Bool = ProcessDiscoveryService.isProcessAlive
+    ) {
         self.shell = shell
+        self.isAlive = isAlive
     }
 
     static func extractPort(from nameField: String) -> Int? {
@@ -64,7 +69,9 @@ final class ProcessDiscoveryService: Sendable {
 
 extension ProcessDiscoveryService: ProcessScanning {
     static func isProcessAlive(pid: Int32) -> Bool {
-        kill(pid, 0) == 0
+        if kill(pid, 0) == 0 { return true }
+        // EPERM means the process exists but we cannot signal it (e.g. owned by root).
+        return errno == EPERM
     }
 
     func scan() throws -> [ListeningProcess] {
@@ -78,17 +85,16 @@ extension ProcessDiscoveryService: ProcessScanning {
         for row in rows {
             let key = "\(row.pid)-\(row.port)"
             guard seen.insert(key).inserted else { continue }
-            guard Self.isProcessAlive(pid: row.pid) else { continue }
+            guard isAlive(row.pid) else { continue }
 
-            let rawCommand = (try? shell.run("/bin/ps", arguments: ["-p", "\(row.pid)", "-o", "command="]))?
-                .trimmingCharacters(in: .whitespacesAndNewlines) ?? row.executable
-            let command = FilePathNormalizer.normalize(rawCommand)
+            let command = resolveCommand(pid: row.pid, shell: shell, fallbackExecutable: row.executable)
 
-            let executable = Self.executableName(from: command)
-                ?? ProcessPathResolver.executablePath(for: row.pid).map {
-                    ($0 as NSString).lastPathComponent
+            let executable: String = {
+                if let path = ProcessPathResolver.executablePath(for: row.pid) {
+                    return (path as NSString).lastPathComponent
                 }
-                ?? row.executable
+                return Self.executableName(from: command) ?? row.executable
+            }()
 
             let cwd = ProcessPathResolver.currentWorkingDirectory(for: row.pid)
                 ?? cwdFromLsof(shell: shell, pid: row.pid)
@@ -112,6 +118,15 @@ extension ProcessDiscoveryService: ProcessScanning {
         guard let raw = cwdOut.split(separator: "\n")
             .first(where: { $0.hasPrefix("n") })
             .map({ String($0.dropFirst()) }) else { return nil }
-        return FilePathNormalizer.normalize(raw)
+        return FilePathNormalizer.display(raw)
+    }
+
+    func resolveCommand(pid: Int32, shell: ShellRunner, fallbackExecutable: String) -> String {
+        if let kernel = ProcessCommandLineResolver.commandLine(for: pid) {
+            return FilePathNormalizer.display(kernel)
+        }
+        let raw = (try? shell.run("/bin/ps", arguments: ["-p", "\(pid)", "-o", "command="]))?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? fallbackExecutable
+        return FilePathNormalizer.display(raw)
     }
 }

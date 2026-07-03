@@ -64,15 +64,15 @@ struct ServiceRowView: View {
                         }
                         detailRow("容器 ID", docker.shortID)
                     }
-                    detailRow("程序", service.command)
+                    detailRow("程序", FilePathNormalizer.display(service.command))
                     detailRow("PID", "\(service.pid)")
-                    detailRow("可执行", service.executable)
+                    detailRow("可执行", FilePathNormalizer.display(service.executable))
                     if let projectDir = service.workingDirectory {
-                        detailRow("项目目录", projectDir)
+                        detailRow("项目目录", FilePathNormalizer.display(projectDir))
                     }
                     if let processDir = service.processDirectory,
                        processDir != service.workingDirectory {
-                        detailRow("进程目录", processDir)
+                        detailRow("进程目录", FilePathNormalizer.display(processDir))
                     }
 
                     HStack(spacing: 8) {
@@ -229,7 +229,7 @@ struct ServiceRowView: View {
             lines.append(String(localized: "PID \(service.pid)"))
         }
         if let dir = service.workingDirectory {
-            lines.append(dir)
+            lines.append(FilePathNormalizer.display(dir))
         }
         return lines.joined(separator: "\n")
     }

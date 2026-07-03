@@ -5,8 +5,17 @@ final class ServiceStore: ObservableObject {
     @Published private(set) var services: [Service] = []
     @Published private(set) var pendingKillIDs: Set<String> = []
     @Published var lastScanError: String?
+    @Published var showAll: Bool {
+        didSet {
+            UserDefaults.standard.set(showAll, forKey: Self.showAllDefaultsKey)
+            Task { await performScan() }
+        }
+    }
+
+    private static let showAllDefaultsKey = "servicesShowAll"
 
     private let discovery: ProcessScanning
+    private let filter = DevServiceFilter()
     private let terminator = ServiceTerminationService()
     private let nameStore: ServiceNameStore
     private var timerTask: Task<Void, Never>?
@@ -15,6 +24,12 @@ final class ServiceStore: ObservableObject {
     init(discovery: ProcessScanning = ProcessDiscoveryService(), nameStore: ServiceNameStore = .shared) {
         self.discovery = discovery
         self.nameStore = nameStore
+        if UserDefaults.standard.object(forKey: Self.showAllDefaultsKey) == nil {
+            // First launch: show every TCP listener so the list is never mysteriously empty.
+            self.showAll = true
+        } else {
+            self.showAll = UserDefaults.standard.bool(forKey: Self.showAllDefaultsKey)
+        }
     }
 
     func startPolling(isActive: Bool) {
@@ -81,6 +96,7 @@ final class ServiceStore: ObservableObject {
         let nameStore = nameStore
 
         do {
+            let showAll = showAll
             let classified = try await Task.detached {
                 let processes = try discovery.scan()
                 let dockerIndex = DockerContainerIndex.load()
@@ -90,7 +106,7 @@ final class ServiceStore: ObservableObject {
                     nameStore: nameStore
                 )
             }.value
-            services = classified
+            services = filter.filter(classified, showAll: showAll)
             lastScanError = nil
         } catch {
             lastScanError = error.localizedDescription

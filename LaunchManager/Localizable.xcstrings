@@ -747,7 +747,6 @@
       }
     },
     "尝试启动 dev server，或开启「显示全部」" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -865,6 +864,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Execution failed: %@"
+          }
+        }
+      }
+    },
+    "扫描失败" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan Failed"
           }
         }
       }
@@ -1071,7 +1080,6 @@
       }
     },
     "显示全部" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1304,7 +1312,6 @@
       }
     },
     "没有发现开发服务" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

@@ -28,9 +28,9 @@ struct ServicesListView: View {
         Group {
             if filteredServices.isEmpty {
                 ContentUnavailableView(
-                    "没有发现服务",
-                    systemImage: "bolt.slash",
-                    description: Text("当前没有监听中的 TCP 服务")
+                    emptyStateTitle,
+                    systemImage: store.lastScanError == nil ? "bolt.slash" : "exclamationmark.triangle",
+                    description: Text(emptyStateDescription)
                 )
             } else {
                 ScrollView {
@@ -53,11 +53,28 @@ struct ServicesListView: View {
                 }
             }
             ToolbarItem {
+                Toggle("显示全部", isOn: $store.showAll)
+            }
+            ToolbarItem {
                 Button { store.refreshNow() } label: {
                     Label("刷新", systemImage: "arrow.clockwise")
                 }
             }
         }
+    }
+
+    private var emptyStateTitle: LocalizedStringKey {
+        if store.lastScanError != nil { return "扫描失败" }
+        if !store.showAll { return "没有发现开发服务" }
+        return "没有发现服务"
+    }
+
+    private var emptyStateDescription: String {
+        if let error = store.lastScanError { return error }
+        if !store.showAll {
+            return String(localized: "尝试启动 dev server，或开启「显示全部」")
+        }
+        return String(localized: "当前没有监听中的 TCP 服务")
     }
 
     private func serviceGroupSection(group: ServiceRuntimeGroup, services: [Service]) -> some View {
