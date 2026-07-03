@@ -23,15 +23,11 @@ struct DevServiceFilter {
         "controlcenter", "rapportd", "ardagent", "mdnsresponder", "limactl", "cloudflared",
     ]
 
-    private let excludedDisplayNames: Set<String> = [
-        "SSH 转发", "AirPlay Receiver", "AirDrop / Handoff", "Cloudflare Tunnel", "Lima VM",
-    ]
-
     func isDevService(_ service: Service) -> Bool {
         let exeName = (service.executable as NSString).lastPathComponent.lowercased()
 
         if excludedExecutables.contains(exeName) { return false }
-        if excludedDisplayNames.contains(service.displayName) { return false }
+        if service.identityKind == .hostMechanism { return false }
 
         if devFrameworkNames.contains(service.displayName) { return true }
 

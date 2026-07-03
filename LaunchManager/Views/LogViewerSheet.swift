@@ -38,7 +38,7 @@ struct LogViewerSheet: View {
             if selectedTab == 0 { fileLogTab } else { systemLogTab }
         }
         .frame(minWidth: 620, minHeight: 420)
-        .navigationTitle("日志 — \(item.label)")
+        .navigationTitle(String(localized: "日志 — \(item.label)"))
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("关闭") { dismiss() }
@@ -80,14 +80,14 @@ struct LogViewerSheet: View {
             }
             .padding(.horizontal).padding(.vertical, 6)
             if systemLogTruncated {
-                Text("仅显示最近 \(Self.maxSystemLines) 行（最近 \(Self.systemLogWindow)）")
+                Text(String(localized: "仅显示最近 \(Self.maxSystemLines) 行（最近 \(Self.systemLogWindow)）"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
             }
             Divider()
-            logLinesView(filteredSystemLines, emptyMessage: systemLogLoaded ? "（无日志）" : "点击刷新加载系统日志")
+            logLinesView(filteredSystemLines, emptyMessage: systemLogLoaded ? String(localized: "（无日志）") : String(localized: "点击刷新加载系统日志"))
         }
         .onAppear {
             if !systemLogLoaded { loadSystemLog() }
@@ -133,7 +133,7 @@ struct LogViewerSheet: View {
         let text = String(decoding: slice, as: UTF8.self)
         var result = text.components(separatedBy: "\n")
         if data.count > Self.maxFileBytes {
-            result.insert("…（仅显示文件末尾 \(Self.maxFileBytes / 1024) KB）", at: 0)
+            result.insert(String(localized: "…（仅显示文件末尾 \(Self.maxFileBytes / 1024) KB）"), at: 0)
         }
         return result
     }
@@ -168,7 +168,7 @@ struct LogViewerSheet: View {
                 }
                 process.waitUntilExit()
             } catch {
-                lines = ["读取系统日志失败：\(error.localizedDescription)"]
+                lines = [String(localized: "读取系统日志失败：\(error.localizedDescription)")]
             }
             if truncated {
                 lines = Array(lines.prefix(Self.maxSystemLines))

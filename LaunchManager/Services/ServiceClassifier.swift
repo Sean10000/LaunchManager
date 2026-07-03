@@ -103,7 +103,7 @@ struct ServiceClassifier {
     ) -> Service {
         let identityKey = ServiceNameStore.identityKey(port: process.port, executable: process.executable)
         let mechanismHit = hostMechanism.resolve(process: process)
-        let autoDisplayName = mechanismHit?.displayName ?? "Docker 端口转发"
+        let autoDisplayName = mechanismHit?.displayName ?? String(localized: "Docker 端口转发")
         let customName = nameStore.customName(for: identityKey)
         let health: ServiceHealth = ProcessDiscoveryService.isProcessAlive(pid: process.pid)
             ? .healthy : .down
@@ -126,7 +126,7 @@ struct ServiceClassifier {
             processDirectory: context.processDirectory,
             url: nil,
             dockerInfo: nil,
-            stopMethod: .blocked(reason: "无法定位 Docker 容器，不能直接终止 docker-proxy（会破坏 Docker 网络）。请使用 docker stop 或在 Docker Desktop 中停止。")
+            stopMethod: .blocked(reason: String(localized: "无法定位 Docker 容器，不能直接终止 docker-proxy（会破坏 Docker 网络）。请使用 docker stop 或在 Docker Desktop 中停止。"))
         )
     }
 

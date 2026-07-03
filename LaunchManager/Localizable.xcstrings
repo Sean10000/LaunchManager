@@ -10,11 +10,20 @@
     ":" : {
 
     },
+    "…（仅显示文件末尾 %lld KB）" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "…(showing last %lld KB of file)"
+          }
+        }
+      }
+    },
     "·" : {
 
     },
     "（无日志）" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -39,16 +48,38 @@
 
     },
     "⚠️ 无法解析" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚠️ Cannot Parse"
+          }
+        }
+      }
     },
     "🚀" : {
 
     },
     "Compose" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compose"
+          }
+        }
+      }
     },
     "Copy" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
+          }
+        }
+      }
     },
     "Copy URL" : {
       "extractionState" : "stale",
@@ -57,6 +88,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copy URL"
+          }
+        }
+      }
+    },
+    "Docker 端口转发" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Docker Port Forward"
           }
         }
       }
@@ -90,6 +131,16 @@
     },
     "LaunchManager" : {
 
+    },
+    "LaunchManager 帮助" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LaunchManager Help"
+          }
+        }
+      }
     },
     "Login Items" : {
       "localizations" : {
@@ -152,7 +203,14 @@
       }
     },
     "Open" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open"
+          }
+        }
+      }
     },
     "Open in Browser" : {
       "extractionState" : "stale",
@@ -166,10 +224,28 @@
       }
     },
     "PID" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PID"
+          }
+        }
+      }
     },
     "PID %d" : {
 
+    },
+    "PID %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PID %lld"
+          }
+        }
+      }
     },
     "Reveal in Finder" : {
       "extractionState" : "stale",
@@ -188,6 +264,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Services"
+          }
+        }
+      }
+    },
+    "SSH 端口转发" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH Port Forward"
           }
         }
       }
@@ -214,6 +300,12 @@
     },
     "仅显示最近 %lld 行（最近 %@）" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Showing last %1$lld lines (%2$@)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
@@ -268,6 +360,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stopping…"
+          }
+        }
+      }
+    },
+    "停止容器" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Container"
+          }
+        }
+      }
+    },
+    "停止容器…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Container…"
           }
         }
       }
@@ -364,7 +476,6 @@
       }
     },
     "加载 vs 运行" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -375,7 +486,6 @@
       }
     },
     "加载：launchd 登记该任务。运行：任务当前正在执行" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -417,7 +527,14 @@
       }
     },
     "可执行" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Executable"
+          }
+        }
+      }
     },
     "启动" : {
       "localizations" : {
@@ -540,7 +657,14 @@
       }
     },
     "复制地址" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy Address"
+          }
+        }
+      }
     },
     "如 /usr/local/bin/mytool" : {
       "localizations" : {
@@ -573,10 +697,44 @@
       }
     },
     "容器" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Container"
+          }
+        }
+      }
     },
     "容器 ID" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Container ID"
+          }
+        }
+      }
+    },
+    "容器: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Container: %@"
+          }
+        }
+      }
+    },
+    "宿主机制" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Host Mechanism"
+          }
+        }
+      }
     },
     "对应侧边栏中的 LaunchAgent / LaunchDaemon，plist 位于 ~/Library/LaunchAgents、/Library/LaunchAgents、/Library/LaunchDaemons。可在本应用中载入、移除、启动与停止。" : {
       "localizations" : {
@@ -641,7 +799,14 @@
       }
     },
     "已自定义名称（自动识别: %@）" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom name (auto-detected: %@)"
+          }
+        }
+      }
     },
     "开始使用" : {
       "localizations" : {
@@ -654,7 +819,14 @@
       }
     },
     "当前没有监听中的 TCP 服务" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No TCP services are currently listening"
+          }
+        }
+      }
     },
     "当前用户下未检测到 BTM 登录项" : {
       "extractionState" : "stale",
@@ -668,7 +840,14 @@
       }
     },
     "恢复自动" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to Auto"
+          }
+        }
+      }
     },
     "打开登录项设置" : {
       "localizations" : {
@@ -680,8 +859,17 @@
         }
       }
     },
+    "执行失败：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Execution failed: %@"
+          }
+        }
+      }
+    },
     "按时间、间隔或路径变化触发，灵活配置执行计划" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -718,6 +906,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search name, port, project…"
+          }
+        }
+      }
+    },
+    "操作已取消" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Operation cancelled"
           }
         }
       }
@@ -759,6 +957,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "New Agent"
+          }
+        }
+      }
+    },
+    "无法停止 Docker 容器：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to stop Docker container: %@"
+          }
+        }
+      }
+    },
+    "无法向 PID %d 发送信号" : {
+
+    },
+    "无法向 PID %lld 发送信号" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot send signal to PID %lld"
+          }
+        }
+      }
+    },
+    "无法定位 Docker 容器，不能直接终止 docker-proxy（会破坏 Docker 网络）。请使用 docker stop 或在 Docker Desktop 中停止。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot locate the Docker container. Do not kill docker-proxy directly (it will break Docker networking). Use docker stop or stop it in Docker Desktop."
+          }
+        }
+      }
+    },
+    "无法终止 PID %d：权限不足" : {
+
+    },
+    "无法终止 PID %lld：权限不足" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot terminate PID %lld: permission denied"
           }
         }
       }
@@ -836,7 +1082,14 @@
       }
     },
     "显示名称" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Display Name"
+          }
+        }
+      }
     },
     "未加载" : {
       "localizations" : {
@@ -848,12 +1101,32 @@
         }
       }
     },
+    "未找到 docker 可执行文件" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Docker executable not found"
+          }
+        }
+      }
+    },
     "未配置日志文件路径" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Log File Configured"
+          }
+        }
+      }
+    },
+    "本地实例" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local Instances"
           }
         }
       }
@@ -869,7 +1142,6 @@
       }
     },
     "查看 XML" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1043,10 +1315,16 @@
       }
     },
     "没有发现服务" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Services Found"
+          }
+        }
+      }
     },
     "浏览 LaunchAgent 和 LaunchDaemon，无需打开终端" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1062,6 +1340,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Clear Logs"
+          }
+        }
+      }
+    },
+    "点击刷新加载系统日志" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click refresh to load system logs"
           }
         }
       }
@@ -1138,7 +1426,6 @@
       }
     },
     "直接在界面打开 plist 配置文件，一键查看原始内容" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1158,6 +1445,16 @@
         }
       }
     },
+    "确认停止容器？" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop this container?"
+          }
+        }
+      }
+    },
     "确认删除 %@？" : {
       "localizations" : {
         "en" : {
@@ -1169,7 +1466,6 @@
       }
     },
     "确认终止服务？" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1180,7 +1476,14 @@
       }
     },
     "秒" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sec"
+          }
+        }
+      }
     },
     "秒执行一次" : {
       "localizations" : {
@@ -1233,7 +1536,6 @@
       }
     },
     "管理启动项" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1273,6 +1575,16 @@
         }
       }
     },
+    "系统服务 (launchd)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Service (launchd)"
+          }
+        }
+      }
+    },
     "系统级 · /Library" : {
       "localizations" : {
         "en" : {
@@ -1295,12 +1607,21 @@
       }
     },
     "终止进程" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kill Process"
+          }
+        }
+      }
+    },
+    "终止进程…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kill Process…"
           }
         }
       }
@@ -1316,7 +1637,6 @@
       }
     },
     "自定义调度" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1362,6 +1682,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Guide · System Settings"
+          }
+        }
+      }
+    },
+    "读取系统日志失败：%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to read system logs: %@"
           }
         }
       }
@@ -1417,7 +1747,14 @@
       }
     },
     "进程目录" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Process Directory"
+          }
+        }
+      }
     },
     "选择…" : {
       "localizations" : {
@@ -1461,7 +1798,24 @@
       }
     },
     "镜像" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image"
+          }
+        }
+      }
+    },
+    "镜像: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Image: %@"
+          }
+        }
+      }
     },
     "间隔" : {
       "localizations" : {
@@ -1474,7 +1828,14 @@
       }
     },
     "项目目录" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Project Directory"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

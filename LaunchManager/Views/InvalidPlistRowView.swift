@@ -68,7 +68,7 @@ struct InvalidPlistRowView: View {
                 .shadow(color: .black.opacity(0.06), radius: 2, y: 1)
         )
         .confirmationDialog(
-            "确认删除 \(item.url.lastPathComponent)？",
+            String(localized: "确认删除 \(item.url.lastPathComponent)？"),
             isPresented: $showingDeleteConfirm,
             titleVisibility: .visible
         ) {

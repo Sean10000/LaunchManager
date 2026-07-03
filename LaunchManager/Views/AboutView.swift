@@ -19,7 +19,7 @@ struct AboutView: View {
                 Text("LaunchManager")
                     .font(.title2)
                     .fontWeight(.bold)
-                Text("版本 \(appVersion)")
+                Text(String(localized: "版本 \(appVersion)"))
                     .foregroundStyle(.secondary)
                     .font(.subheadline)
             }

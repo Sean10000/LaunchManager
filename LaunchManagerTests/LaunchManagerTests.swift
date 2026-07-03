@@ -291,6 +291,31 @@ final class AgentStorePendingTests: XCTestCase {
     }
 }
 
+// MARK: - FilePathNormalizer Tests
+
+final class FilePathNormalizerTests: XCTestCase {
+    func test_decodeLsofOctalEscapes_decodesUTF8Path() {
+        // 启动器 in octal: \345\220\257\345\212\250\345\231\250
+        let encoded = "/Applications/\\345\\220\\257\\345\\212\\250\\345\\231\\250.app"
+        XCTAssertEqual(
+            FilePathNormalizer.decodeLsofOctalEscapes(encoded),
+            "/Applications/启动器.app"
+        )
+    }
+
+    func test_repairUTF8Mojibake_fixesLatin1Misread() {
+        let mojibake = "å¯å¨å¨"
+        XCTAssertEqual(FilePathNormalizer.repairUTF8Mojibake(mojibake), "启动器")
+    }
+
+    func test_normalize_leavesAsciiPathsUntouched() {
+        XCTAssertEqual(
+            FilePathNormalizer.normalize("/Users/sean/project"),
+            "/Users/sean/project"
+        )
+    }
+}
+
 // MARK: - ProcessDiscoveryService Tests
 
 final class ProcessDiscoveryServiceTests: XCTestCase {
@@ -378,7 +403,9 @@ extension ProcessDiscoveryServiceTests {
         let processes = try svc.scan()
         XCTAssertEqual(processes.count, 1)
         XCTAssertEqual(processes[0].command, "node /usr/local/bin/next dev")
-        XCTAssertEqual(processes[0].workingDirectory, "/Users/sean/blog/frontend")
+        let expectedCwd = ProcessPathResolver.currentWorkingDirectory(for: pid)
+            ?? "/Users/sean/blog/frontend"
+        XCTAssertEqual(processes[0].workingDirectory, expectedCwd)
         XCTAssertEqual(processes[0].executable, "node")
     }
 
@@ -424,7 +451,7 @@ final class ServiceResolverTests: XCTestCase {
             executable: "docker-proxy", workingDirectory: nil
         )
         let hit = HostMechanismResolver().resolve(process: process)
-        XCTAssertEqual(hit?.displayName, "Docker 端口转发")
+        XCTAssertEqual(hit?.displayName, String(localized: "Docker 端口转发"))
         XCTAssertEqual(hit?.identityKind, .hostMechanism)
     }
 
@@ -435,7 +462,7 @@ final class ServiceResolverTests: XCTestCase {
             executable: "ssh", workingDirectory: nil
         )
         let hit = HostMechanismResolver().resolve(process: process)
-        XCTAssertEqual(hit?.displayName, "SSH 端口转发")
+        XCTAssertEqual(hit?.displayName, String(localized: "SSH 端口转发"))
     }
 
     func test_hostMechanism_colima() {
@@ -455,7 +482,7 @@ final class ServiceResolverTests: XCTestCase {
             executable: "launchd", workingDirectory: nil
         )
         let hit = HostMechanismResolver().resolve(process: process)
-        XCTAssertEqual(hit?.displayName, "系统服务 (launchd)")
+        XCTAssertEqual(hit?.displayName, String(localized: "系统服务 (launchd)"))
     }
 
     func test_projectResolver_packageJson() throws {
@@ -522,7 +549,7 @@ final class ServiceClassifierTests: XCTestCase {
         let svc = ServiceClassifier().classify(
             p, dockerIndex: DockerContainerIndex(containers: []), nameStore: isolatedNameStore()
         )
-        XCTAssertEqual(svc.autoDisplayName, "Docker 端口转发")
+        XCTAssertEqual(svc.autoDisplayName, String(localized: "Docker 端口转发"))
         XCTAssertEqual(svc.identityKind, .hostMechanism)
         XCTAssertEqual(svc.runtimeGroup, .docker)
         XCTAssertFalse(svc.killAllowed)

@@ -6,8 +6,10 @@ enum ProcessKillError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .notKillable(let pid): return "无法终止 PID \(pid)：权限不足"
-        case .signalFailed(let pid, _): return "无法向 PID \(pid) 发送信号"
+        case .notKillable(let pid):
+            return String(localized: "无法终止 PID \(pid)：权限不足")
+        case .signalFailed(let pid, _):
+            return String(localized: "无法向 PID \(pid) 发送信号")
         }
     }
 }

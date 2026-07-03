@@ -18,6 +18,10 @@ struct DefaultShellRunner: ShellRunner {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: path)
         process.arguments = arguments
+        var env = ProcessInfo.processInfo.environment
+        env["LC_ALL"] = "en_US.UTF-8"
+        env["LANG"] = "en_US.UTF-8"
+        process.environment = env
         let outPipe = Pipe()
         let errPipe = Pipe()
         process.standardOutput = outPipe

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 extension Notification.Name {
@@ -18,6 +19,13 @@ struct LaunchManagerApp: App {
             CommandGroup(replacing: .appInfo) {
                 Button("关于 LaunchManager") {
                     NotificationCenter.default.post(name: .showAbout, object: nil)
+                }
+            }
+            CommandGroup(replacing: .help) {
+                Button("LaunchManager 帮助") {
+                    if let url = URL(string: "https://www.launchmanager.dev/help") {
+                        NSWorkspace.shared.open(url)
+                    }
                 }
             }
         }

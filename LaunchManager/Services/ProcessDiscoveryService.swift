@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 protocol ProcessScanning: Sendable {
@@ -79,20 +80,18 @@ extension ProcessDiscoveryService: ProcessScanning {
             guard seen.insert(key).inserted else { continue }
             guard Self.isProcessAlive(pid: row.pid) else { continue }
 
-            let command = (try? shell.run("/bin/ps", arguments: ["-p", "\(row.pid)", "-o", "command="]))?
+            let rawCommand = (try? shell.run("/bin/ps", arguments: ["-p", "\(row.pid)", "-o", "command="]))?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? row.executable
+            let command = FilePathNormalizer.normalize(rawCommand)
 
             let executable = Self.executableName(from: command)
-                ?? (try? shell.run("/bin/ps", arguments: ["-p", "\(row.pid)", "-o", "comm="]))?
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                ?? ProcessPathResolver.executablePath(for: row.pid).map {
+                    ($0 as NSString).lastPathComponent
+                }
                 ?? row.executable
 
-            let cwdOut = (try? shell.run("/usr/sbin/lsof", arguments: [
-                "-a", "-p", "\(row.pid)", "-d", "cwd", "-Fn"
-            ])) ?? ""
-            let cwd = cwdOut.split(separator: "\n")
-                .first(where: { $0.hasPrefix("n") })
-                .map { String($0.dropFirst()) }
+            let cwd = ProcessPathResolver.currentWorkingDirectory(for: row.pid)
+                ?? cwdFromLsof(shell: shell, pid: row.pid)
 
             result.append(ListeningProcess(
                 pid: row.pid,
@@ -104,5 +103,15 @@ extension ProcessDiscoveryService: ProcessScanning {
             ))
         }
         return result.sorted { $0.port < $1.port }
+    }
+
+    private func cwdFromLsof(shell: ShellRunner, pid: Int32) -> String? {
+        let cwdOut = (try? shell.run("/usr/sbin/lsof", arguments: [
+            "-a", "-p", "\(pid)", "-d", "cwd", "-Fn"
+        ])) ?? ""
+        guard let raw = cwdOut.split(separator: "\n")
+            .first(where: { $0.hasPrefix("n") })
+            .map({ String($0.dropFirst()) }) else { return nil }
+        return FilePathNormalizer.normalize(raw)
     }
 }

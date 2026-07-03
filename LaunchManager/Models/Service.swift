@@ -11,7 +11,7 @@ enum ServiceRuntimeGroup: String, CaseIterable, Equatable, Sendable {
     var title: String {
         switch self {
         case .docker: return "Docker"
-        case .instance: return "本地实例"
+        case .instance: return String(localized: "本地实例")
         }
     }
 

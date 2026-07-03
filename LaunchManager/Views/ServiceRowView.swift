@@ -54,7 +54,7 @@ struct ServiceRowView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     renameSection
                     if service.identityKind == .hostMechanism {
-                        detailRow("类型", "宿主机制")
+                        detailRow("类型", String(localized: "宿主机制"))
                     }
                     if let docker = service.dockerInfo {
                         detailRow("容器", docker.containerLabel)
@@ -161,7 +161,7 @@ struct ServiceRowView: View {
                 }
             }
             if store.hasCustomName(for: service) {
-                Text("已自定义名称（自动识别: \(service.autoDisplayName)）")
+                Text(String(localized: "已自定义名称（自动识别: \(service.autoDisplayName)）"))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -208,25 +208,25 @@ struct ServiceRowView: View {
         }
     }
 
-    private var killButtonTitle: String {
+    private var killButtonTitle: LocalizedStringKey {
         service.usesDockerStop ? "停止容器…" : "终止进程…"
     }
 
-    private var killDialogTitle: String {
+    private var killDialogTitle: LocalizedStringKey {
         service.usesDockerStop ? "确认停止容器？" : "确认终止服务？"
     }
 
-    private var killConfirmActionTitle: String {
+    private var killConfirmActionTitle: LocalizedStringKey {
         service.usesDockerStop ? "停止容器" : "终止进程"
     }
 
     private var killConfirmMessage: String {
         var lines = [service.displayName, service.addressLabel]
         if let docker = service.dockerInfo {
-            lines.append("容器: \(docker.containerLabel)")
-            lines.append("镜像: \(docker.image)")
+            lines.append(String(localized: "容器: \(docker.containerLabel)"))
+            lines.append(String(localized: "镜像: \(docker.image)"))
         } else {
-            lines.append("PID \(service.pid)")
+            lines.append(String(localized: "PID \(service.pid)"))
         }
         if let dir = service.workingDirectory {
             lines.append(dir)
@@ -243,7 +243,7 @@ struct ServiceRowView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
         } else {
-            Button(copyConfirmed ? "已复制" : "Copy") {
+            Button(copyConfirmed ? "已复制" : "复制地址") {
                 copyAddress()
             }
             .buttonStyle(.bordered)
