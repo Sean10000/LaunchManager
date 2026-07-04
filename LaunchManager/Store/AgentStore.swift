@@ -90,6 +90,43 @@ final class AgentStore: ObservableObject {
         refresh()
     }
 
+    func saveRawXml(_ xml: String, to url: URL, scope: LaunchItem.Scope) throws {
+        try plistService.saveRawXml(xml, to: url, scope: scope, privilege: privilegeService)
+        refresh()
+    }
+
+    func cloneItem(_ item: LaunchItem, newLabel: String, scope: LaunchItem.Scope) throws {
+        let dest = plistService.directoryURL(for: scope).appendingPathComponent("\(newLabel).plist")
+        if FileManager.default.fileExists(atPath: dest.path) {
+            throw PlistValidationError.invalidFormat(String(localized: "Label 已存在"))
+        }
+        _ = try plistService.clonePlist(
+            from: item.plistURL,
+            newLabel: newLabel,
+            targetScope: scope,
+            privilege: privilegeService
+        )
+        refresh()
+    }
+
+    func importPlist(from sourceURL: URL, scope: LaunchItem.Scope, overwrite: Bool) throws -> LaunchItem {
+        let xml = try plistService.readXml(from: sourceURL)
+        guard case .success(let dict) = plistService.validateXml(xml),
+              let label = dict["Label"] as? String else {
+            throw PlistValidationError.missingLabel
+        }
+        let dest = plistService.directoryURL(for: scope).appendingPathComponent("\(label).plist")
+        if FileManager.default.fileExists(atPath: dest.path) && !overwrite {
+            throw PlistValidationError.invalidFormat(String(localized: "文件已存在"))
+        }
+        try plistService.saveRawXml(xml, to: dest, scope: scope, privilege: privilegeService)
+        refresh()
+        guard let item = items.first(where: { $0.label == label && $0.scope == scope }) else {
+            throw PlistValidationError.invalidFormat("Import succeeded but item not found")
+        }
+        return item
+    }
+
     // MARK: - Private
 
     private func runPending(
