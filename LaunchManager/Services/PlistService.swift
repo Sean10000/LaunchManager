@@ -75,6 +75,7 @@ struct PlistService {
             keepAlive: dict["KeepAlive"] as? Bool ?? false,
             standardOutPath: dict["StandardOutPath"] as? String,
             standardErrorPath: dict["StandardErrorPath"] as? String,
+            workingDirectory: dict["WorkingDirectory"] as? String,
             isLoaded: false, pid: nil, lastExitCode: nil
         )
     }
@@ -105,6 +106,7 @@ struct PlistService {
         if item.keepAlive  { dict["KeepAlive"]  = true }
         if let o = item.standardOutPath   { dict["StandardOutPath"]   = o }
         if let e = item.standardErrorPath { dict["StandardErrorPath"] = e }
+        if let wd = item.workingDirectory { dict["WorkingDirectory"] = wd }
         return dict
     }
 

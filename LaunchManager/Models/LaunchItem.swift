@@ -16,6 +16,7 @@ struct LaunchItem: Identifiable, Hashable {
     var keepAlive: Bool
     var standardOutPath: String?
     var standardErrorPath: String?
+    var workingDirectory: String?
     var isLoaded: Bool
     var pid: Int?
     var lastExitCode: Int?
