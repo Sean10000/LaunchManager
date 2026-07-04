@@ -7,6 +7,7 @@ struct AgentRowView: View {
 
     @State private var isExpanded = false
     @State private var showingEdit = false
+    @State private var showingClone = false
     @State private var showingLog  = false
     @State private var showingDeleteConfirm = false
     @State private var pulseOpacity = false
@@ -100,6 +101,9 @@ struct AgentRowView: View {
                             .buttonStyle(.bordered).controlSize(.small)
                             .disabled(isRowLocked)
                         }
+                        Button("复制…") { showingClone = true }
+                            .buttonStyle(.bordered).controlSize(.small)
+                            .disabled(isRowLocked)
                         Button("查看日志") { showingLog = true }
                             .buttonStyle(.bordered).controlSize(.small)
                             .disabled(isRowLocked)
@@ -118,6 +122,9 @@ struct AgentRowView: View {
         )
         .sheet(isPresented: $showingEdit) {
             EditAgentSheet(existingItem: item, defaultScope: item.scope, store: store)
+        }
+        .sheet(isPresented: $showingClone) {
+            CloneAgentSheet(item: item, store: store, errorMessage: $errorMessage)
         }
         .sheet(isPresented: $showingLog) {
             LogViewerSheet(item: item)

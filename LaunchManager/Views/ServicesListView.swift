@@ -3,8 +3,10 @@ import SwiftUI
 struct ServicesListView: View {
     @ObservedObject var store: ServiceStore
     @Binding var errorMessage: String?
+    var onCreateLaunchAgent: (LaunchAgentDraft) -> Void
 
     @State private var searchText = ""
+    @State private var collapsedGroups: Set<ServiceRuntimeGroup> = []
 
     private var filteredServices: [Service] {
         guard !searchText.isEmpty else { return store.services }
@@ -78,27 +80,49 @@ struct ServicesListView: View {
     }
 
     private func serviceGroupSection(group: ServiceRuntimeGroup, services: [Service]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Image(systemName: group.systemImage)
-                    .foregroundStyle(.secondary)
-                Text(group.title)
-                    .font(.headline)
-                Text("\(services.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Capsule().fill(Color(nsColor: .controlBackgroundColor)))
-            }
-            .padding(.horizontal, 4)
+        let isCollapsed = collapsedGroups.contains(group)
 
-            ForEach(services) { service in
-                ServiceRowView(
-                    service: service,
-                    store: store,
-                    errorMessage: $errorMessage
-                )
+        return VStack(alignment: .leading, spacing: 6) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    if isCollapsed {
+                        collapsedGroups.remove(group)
+                    } else {
+                        collapsedGroups.insert(group)
+                    }
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: group.systemImage)
+                        .foregroundStyle(.secondary)
+                    Text(group.title)
+                        .font(.headline)
+                    Text("\(services.count)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color(nsColor: .controlBackgroundColor)))
+                    Spacer()
+                    Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                        .foregroundStyle(.secondary)
+                        .font(.caption.weight(.semibold))
+                }
+                .padding(.horizontal, 4)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isCollapsed ? "展开 \(group.title)" : "收起 \(group.title)")
+
+            if !isCollapsed {
+                ForEach(services) { service in
+                    ServiceRowView(
+                        service: service,
+                        store: store,
+                        errorMessage: $errorMessage,
+                        onCreateLaunchAgent: onCreateLaunchAgent
+                    )
+                }
             }
         }
     }
