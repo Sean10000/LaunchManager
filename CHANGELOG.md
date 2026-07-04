@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
+## [1.6.3] - 2026-07-04
+
+
 ### Changed
 - **Release automation** — version in `Version.xcconfig`, CHANGELOG-driven releases, GitHub Actions builds DMG and updates Homebrew tap.
 
