@@ -288,6 +288,24 @@ final class PlistServiceTests: XCTestCase {
         let dict = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
         XCTAssertNotNil(dict["EnvironmentVariables"])
     }
+
+    func test_clonePlist_changesLabel() throws {
+        let source = tmpDir.appendingPathComponent("com.test.source.plist")
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.source</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>RunAtLoad</key><true/>
+        </dict></plist>
+        """
+        try xml.write(to: source, atomically: true, encoding: .utf8)
+        let dest = try svc.clonePlist(from: source, newLabel: "com.test.copy", targetScope: .userAgent, targetDirectory: tmpDir)
+        XCTAssertEqual(dest.lastPathComponent, "com.test.copy.plist")
+        let item = svc.parsePlist(at: dest, scope: .userAgent)
+        XCTAssertEqual(item?.label, "com.test.copy")
+    }
 }
 
 // MARK: - AgentStore Pending Tests

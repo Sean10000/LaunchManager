@@ -189,6 +189,26 @@ struct PlistService {
         }
     }
 
+    func clonePlist(from sourceURL: URL, newLabel: String, targetScope: LaunchItem.Scope, targetDirectory: URL? = nil, privilege: PrivilegeService = PrivilegeService()) throws -> URL {
+        let xml = try readXml(from: sourceURL)
+        var dict: [String: Any]
+        switch validateXml(xml) {
+        case .failure(let err):
+            throw err
+        case .success(let d):
+            dict = d
+        }
+        dict["Label"] = newLabel
+        let dir = targetDirectory ?? targetScope.directoryURL
+        let dest = dir.appendingPathComponent("\(newLabel).plist")
+        let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+        guard let destString = String(data: data, encoding: .utf8) else {
+            throw PlistValidationError.invalidFormat("Cannot encode XML")
+        }
+        try saveRawXml(destString, to: dest, scope: targetScope, privilege: privilege)
+        return dest
+    }
+
     private func shellQuote(_ path: String) -> String {
         "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
