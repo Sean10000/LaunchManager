@@ -196,9 +196,15 @@ struct ServiceClassifier {
         } else if let projectName {
             parts.append(projectName)
         }
-        if !container.image.isEmpty {
-            parts.append(container.image)
+        if let composeService = container.composeService, !composeService.isEmpty {
+            parts.append(composeService)
+        } else if !container.image.isEmpty {
+            parts.append(shortImageReference(container.image))
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    private func shortImageReference(_ image: String) -> String {
+        image.split(separator: "/").last.map(String.init) ?? image
     }
 }

@@ -23,6 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Agent search** — search runs across all three scopes in one view.
 
 ### Improved
+- **Services row layout** — port/address stays visible when display name or Docker image subtitle is long; Docker subtitle uses compose service or short image name.
+- **New Agent templates link** — footer button on the new-agent sheet opens [launchmanager.dev/templates](https://www.launchmanager.dev/templates).
 - **Services groups** — Docker and local instance sections can be collapsed/expanded via the group header (helpful when many services are listed).
 - **DMG install UX** — release DMGs include an **Applications** folder shortcut beside the app for drag-to-install (via `create-dmg`); README Direct Download instructions updated.
 - **Release tooling** — shared `package-dmg.sh` for local builds and CI; `build-dmg.sh` outputs to `build/LaunchManager.dmg`.

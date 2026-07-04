@@ -39,10 +39,8 @@ jobs:
       - name: Package DMG
         run: |
           APP_PATH=$(find /tmp/LaunchManager.xcarchive -name "LaunchManager.app" -maxdepth 5 | head -1)
-          STAGING=/tmp/LaunchManager-dmg
-          rm -rf "$STAGING" && mkdir "$STAGING"
-          cp -R "$APP_PATH" "$STAGING/"
-          hdiutil create -volname "LaunchManager" -srcfolder "$STAGING" -ov -format UDZO /tmp/LaunchManager.dmg
+          chmod +x scripts/create-dmg scripts/package-dmg.sh
+          ./scripts/package-dmg.sh "$APP_PATH" /tmp/LaunchManager.dmg
 
       - name: Compute SHA256
         id: sha

@@ -4,19 +4,21 @@ struct SidebarView: View {
     @Binding var selection: SidebarSelection?
     @ObservedObject var store: AgentStore
 
+    private var agentCount: Int {
+        store.items.count + store.invalidItems.count
+    }
+
     var body: some View {
         List {
             Section {
-                ForEach(LaunchItem.Scope.allCases, id: \.self) { scope in
-                    SidebarRowButton(
-                        selection: $selection,
-                        tag: .scope(scope),
-                        title: Text(scope.displayName),
-                        subtitle: Text(scope.directoryHint),
-                        icon: iconName(for: scope),
-                        badge: store.items.filter { $0.scope == scope }.count
-                    )
-                }
+                SidebarRowButton(
+                    selection: $selection,
+                    tag: .agents,
+                    title: Text("Launch Agents"),
+                    subtitle: Text("用户 · 全局 · 系统"),
+                    icon: "list.bullet.rectangle",
+                    badge: agentCount
+                )
             }
 
             Section {
@@ -43,14 +45,6 @@ struct SidebarView: View {
         }
         .listStyle(.sidebar)
         .navigationTitle("LaunchManager")
-    }
-
-    private func iconName(for scope: LaunchItem.Scope) -> String {
-        switch scope {
-        case .userAgent:    return "person.circle"
-        case .systemAgent:  return "gearshape.circle"
-        case .systemDaemon: return "server.rack"
-        }
     }
 }
 

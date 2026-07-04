@@ -195,7 +195,8 @@ struct ServiceRowView: View {
         HStack(spacing: 4) {
             Text(service.displayName)
                 .lineLimit(1)
-                .fixedSize(horizontal: true, vertical: false)
+                .truncationMode(.tail)
+                .layoutPriority(0)
 
             if let subtitle = service.subtitle {
                 Text("·")
@@ -204,17 +205,17 @@ struct ServiceRowView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
+                    .layoutPriority(-1)
             }
 
-            Text("·")
-                .foregroundStyle(.secondary)
+            Spacer(minLength: 8)
 
             Text(service.addressLabel)
                 .foregroundStyle(.secondary)
                 .font(.system(.body, design: .monospaced))
                 .lineLimit(1)
-                .truncationMode(.middle)
-                .layoutPriority(-1)
+                .fixedSize(horizontal: true, vertical: false)
+                .layoutPriority(1)
         }
     }
 

@@ -1,7 +1,7 @@
 import Foundation
 
 enum SidebarSelection: Hashable {
-    case scope(LaunchItem.Scope)
+    case agents
     case loginItems
     case services
 }

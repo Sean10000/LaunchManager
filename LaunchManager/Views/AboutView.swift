@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct AboutView: View {
+    @ObservedObject var updateChecker: UpdateChecker
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -32,6 +33,19 @@ struct AboutView: View {
             Divider()
 
             VStack(spacing: 8) {
+                Button {
+                    updateChecker.checkNow()
+                } label: {
+                    if updateChecker.isChecking {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Text("检查更新…")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(updateChecker.isChecking)
+
                 Link(destination: URL(string: "https://github.com/Sean10000/LaunchManager")!) {
                     Label("GitHub: Sean10000/LaunchManager", systemImage: "link")
                         .font(.subheadline)
@@ -51,6 +65,6 @@ struct AboutView: View {
     }
 
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        AppVersion.current.displayString
     }
 }
