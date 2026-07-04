@@ -240,6 +240,54 @@ final class PlistServiceTests: XCTestCase {
 
         XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
     }
+
+    func test_validateXml_valid() {
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.xml</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>EnvironmentVariables</key>
+            <dict><key>FOO</key><string>bar</string></dict>
+        </dict></plist>
+        """
+        let result = svc.validateXml(xml)
+        guard case .success(let dict) = result else {
+            return XCTFail("expected success")
+        }
+        XCTAssertEqual(dict["Label"] as? String, "com.test.xml")
+        XCTAssertNotNil(dict["EnvironmentVariables"])
+    }
+
+    func test_validateXml_missingLabel() {
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict><key>Program</key><string>/bin/echo</string></dict></plist>
+        """
+        guard case .failure(PlistValidationError.missingLabel) = svc.validateXml(xml) else {
+            return XCTFail("expected missingLabel")
+        }
+    }
+
+    func test_saveRawXml_preservesExtraKeys() throws {
+        let xml = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.extra</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>EnvironmentVariables</key>
+            <dict><key>PORT</key><string>3000</string></dict>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.extra.plist")
+        try svc.saveRawXml(xml, to: url, scope: .userAgent, privilege: PrivilegeService())
+        let data = try Data(contentsOf: url)
+        let dict = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
+        XCTAssertNotNil(dict["EnvironmentVariables"])
+    }
 }
 
 // MARK: - AgentStore Pending Tests
