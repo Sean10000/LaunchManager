@@ -424,6 +424,58 @@ final class CommandLineParserTests: XCTestCase {
     }
 }
 
+// MARK: - LaunchAgentDraft Tests
+
+final class LaunchAgentDraftTests: XCTestCase {
+    func test_launchAgentDraft_fromService() {
+        let service = makeService(
+            port: 3000,
+            executable: "node",
+            displayName: "Next Dev",
+            command: "node next dev",
+            workingDirectory: "/proj"
+        )
+        let draft = LaunchAgentDraft.from(service: service)
+        XCTAssertEqual(draft?.program, "node")
+        XCTAssertEqual(draft?.programArguments, ["next", "dev"])
+        XCTAssertEqual(draft?.workingDirectory, "/proj")
+        XCTAssertEqual(draft?.label, "dev.3000.next-dev")
+        XCTAssertTrue(draft?.runAtLoad == true)
+        XCTAssertFalse(draft?.keepAlive == true)
+        XCTAssertEqual(draft?.triggerType, .atLoad)
+    }
+
+    private func makeService(
+        port: Int,
+        executable: String,
+        displayName: String,
+        command: String,
+        workingDirectory: String?
+    ) -> Service {
+        let key = ServiceNameStore.identityKey(port: port, executable: executable)
+        return Service(
+            identityKey: key,
+            autoDisplayName: displayName,
+            displayName: displayName,
+            identityKind: .realService,
+            runtimeGroup: .instance,
+            subtitle: nil,
+            category: .other,
+            health: .healthy,
+            port: port,
+            host: "localhost",
+            pid: 1,
+            executable: executable,
+            command: command,
+            workingDirectory: workingDirectory,
+            processDirectory: nil,
+            url: nil,
+            dockerInfo: nil,
+            stopMethod: .process(pid: 1)
+        )
+    }
+}
+
 // MARK: - FilePathNormalizer Tests
 
 final class FilePathNormalizerTests: XCTestCase {
