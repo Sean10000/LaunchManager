@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
+## [1.6.4] - 2026-07-04
+
+
 ### Added
 - **Plist XML editor** — Form | XML tabs in agent editor; paste XML to create new jobs; extra plist keys preserved in XML mode.
 - **Import plist** — import external `.plist` into user/global Agent or LaunchDaemon directories.
