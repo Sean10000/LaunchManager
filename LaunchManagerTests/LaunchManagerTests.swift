@@ -400,6 +400,30 @@ final class AgentStorePendingTests: XCTestCase {
     }
 }
 
+// MARK: - CommandLineParser Tests
+
+final class CommandLineParserTests: XCTestCase {
+    func test_simpleCommand() {
+        XCTAssertEqual(CommandLineParser.parse("node server.js"), ["node", "server.js"])
+    }
+
+    func test_quotedPath() {
+        XCTAssertEqual(
+            CommandLineParser.parse(#"/usr/bin/node "/Users/sean/my app/server.js""#),
+            ["/usr/bin/node", "/Users/sean/my app/server.js"]
+        )
+    }
+
+    func test_npmRunDev() {
+        let args = CommandLineParser.parse("npm run dev")
+        XCTAssertEqual(args, ["npm", "run", "dev"])
+    }
+
+    func test_empty_returnsEmpty() {
+        XCTAssertTrue(CommandLineParser.parse("").isEmpty)
+    }
+}
+
 // MARK: - FilePathNormalizer Tests
 
 final class FilePathNormalizerTests: XCTestCase {
