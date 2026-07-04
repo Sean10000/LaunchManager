@@ -41,6 +41,38 @@ struct LaunchItem: Identifiable, Hashable {
             }
         }
 
+        var sectionTitle: LocalizedStringKey {
+            switch self {
+            case .userAgent:    return "用户 Agents"
+            case .systemAgent:  return "全局 Agents"
+            case .systemDaemon: return "LaunchDaemons"
+            }
+        }
+
+        var sectionSubtitle: LocalizedStringKey {
+            switch self {
+            case .userAgent:    return "~/Library/LaunchAgents"
+            case .systemAgent:  return "/Library/LaunchAgents"
+            case .systemDaemon: return "/Library/LaunchDaemons"
+            }
+        }
+
+        var systemImage: String {
+            switch self {
+            case .userAgent:    return "person.circle"
+            case .systemAgent:  return "gearshape.circle"
+            case .systemDaemon: return "server.rack"
+            }
+        }
+
+        var newAgentMenuTitle: LocalizedStringKey {
+            switch self {
+            case .userAgent:    return "新建用户 Agent"
+            case .systemAgent:  return "新建全局 Agent"
+            case .systemDaemon: return "新建 LaunchDaemon"
+            }
+        }
+
         var directoryURL: URL {
             switch self {
             case .userAgent:

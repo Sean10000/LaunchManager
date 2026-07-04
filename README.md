@@ -39,7 +39,7 @@ brew install --cask launchmanager
 
 ### Direct Download
 
-Download the latest **LaunchManager.dmg** from [Releases](https://github.com/Sean10000/LaunchManager/releases), drag the app to your Applications folder.
+Download the latest **LaunchManager.dmg** from [Releases](https://github.com/Sean10000/LaunchManager/releases). Open the DMG and drag **LaunchManager** to the **Applications** folder shown in the window.
 
 > **First launch:** right-click the app → Open (required because this build is not notarized by Apple).
 

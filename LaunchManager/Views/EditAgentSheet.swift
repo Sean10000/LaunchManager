@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct EditAgentSheet: View {
@@ -89,6 +90,10 @@ struct EditAgentSheet: View {
                 formContent
             } else {
                 xmlContent
+            }
+
+            if existingItem == nil {
+                templatesFooter
             }
         }
         .frame(minWidth: 480, minHeight: 360)
@@ -252,6 +257,21 @@ struct EditAgentSheet: View {
             return formDisabledReason == nil && !label.isEmpty && !program.isEmpty
         case .xml:
             return xmlError == nil && !xmlText.isEmpty
+        }
+    }
+
+    private var templatesFooter: some View {
+        VStack(spacing: 0) {
+            Divider()
+            Button {
+                if let url = URL(string: "https://www.launchmanager.dev/templates") {
+                    NSWorkspace.shared.open(url)
+                }
+            } label: {
+                Label("浏览 Launch Agent 模板…", systemImage: "safari")
+            }
+            .buttonStyle(.link)
+            .padding(.vertical, 10)
         }
     }
 

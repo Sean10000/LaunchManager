@@ -906,7 +906,7 @@ final class ServiceClassifierTests: XCTestCase {
         )
         XCTAssertEqual(svc.displayName, "Redis")
         XCTAssertEqual(svc.runtimeGroup, .docker)
-        XCTAssertEqual(svc.subtitle, "myproject · redis:7-alpine")
+        XCTAssertEqual(svc.subtitle, "myproject · redis")
         XCTAssertTrue(svc.usesDockerStop)
         XCTAssertEqual(svc.dockerInfo?.composeService, "redis")
         if case .dockerContainer(let ref, _) = svc.stopMethod {

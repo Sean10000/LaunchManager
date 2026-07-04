@@ -7,11 +7,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ARCHIVE_PATH="$PROJECT_DIR/build/LaunchManager.xcarchive"
 DMG_PATH="$PROJECT_DIR/build/LaunchManager.dmg"
-DMG_STAGING="/tmp/LaunchManager-dmg-staging-$$"
 
 mkdir -p "$PROJECT_DIR/build"
-rm -rf "$ARCHIVE_PATH" "$DMG_PATH" "$DMG_STAGING"
-trap 'rm -rf "$DMG_STAGING"' EXIT
+rm -rf "$ARCHIVE_PATH" "$DMG_PATH"
 
 echo "▶ Building LaunchManager (universal Release)..."
 cd "$PROJECT_DIR"
@@ -35,9 +33,7 @@ fi
 
 echo "▶ Packaging DMG..."
 APP_PATH=$(find "$ARCHIVE_PATH" -name "LaunchManager.app" -maxdepth 5 | head -1)
-mkdir "$DMG_STAGING"
-cp -R "$APP_PATH" "$DMG_STAGING/"
-hdiutil create -volname "LaunchManager" -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG_PATH" > /dev/null
+"$SCRIPT_DIR/package-dmg.sh" "$APP_PATH" "$DMG_PATH"
 
 SHA256=$(shasum -a 256 "$DMG_PATH" | awk '{print $1}')
 echo ""
