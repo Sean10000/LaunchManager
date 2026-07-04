@@ -1,5 +1,21 @@
 import Foundation
 
+enum PlistValidationError: Error, Equatable {
+    case invalidFormat(String)
+    case missingLabel
+}
+
+extension PlistValidationError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .invalidFormat(let message):
+            return message
+        case .missingLabel:
+            return String(localized: "Plist must contain a Label key")
+        }
+    }
+}
+
 struct PlistService {
 
     func scanAll() -> (items: [LaunchItem], invalid: [InvalidPlist]) {
@@ -122,6 +138,54 @@ struct PlistService {
             try privilege.run("mv \(src) \(dest) && chown root:wheel \(dest) && chmod 644 \(dest)")
         } else {
             try data.write(to: item.plistURL)
+        }
+    }
+
+    func validateXml(_ string: String) -> Result<[String: Any], PlistValidationError> {
+        guard let data = string.data(using: .utf8) else {
+            return .failure(.invalidFormat("Invalid UTF-8"))
+        }
+        do {
+            guard let dict = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] else {
+                return .failure(.invalidFormat("Root must be a dictionary"))
+            }
+            guard dict["Label"] is String else {
+                return .failure(.missingLabel)
+            }
+            return .success(dict)
+        } catch {
+            return .failure(.invalidFormat(error.localizedDescription))
+        }
+    }
+
+    func readXml(from url: URL) throws -> String {
+        let data = try Data(contentsOf: url)
+        let xmlData = try PropertyListSerialization.data(
+            fromPropertyList: try PropertyListSerialization.propertyList(from: data, options: [], format: nil),
+            format: .xml,
+            options: 0)
+        guard let string = String(data: xmlData, encoding: .utf8) else {
+            throw PlistValidationError.invalidFormat("Cannot encode XML")
+        }
+        return string
+    }
+
+    func saveRawXml(_ string: String, to url: URL, scope: LaunchItem.Scope, privilege: PrivilegeService) throws {
+        switch validateXml(string) {
+        case .failure(let err):
+            throw err
+        case .success(let dict):
+            let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+            if scope.requiresPrivilege {
+                let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(url.lastPathComponent)
+                try data.write(to: tmp)
+                let dest = shellQuote(url.path)
+                let src = shellQuote(tmp.path)
+                try privilege.run("mv \(src) \(dest) && chown root:wheel \(dest) && chmod 644 \(dest)")
+            } else {
+                try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try data.write(to: url)
+            }
         }
     }
 
