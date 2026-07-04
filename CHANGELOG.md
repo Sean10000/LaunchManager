@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
+### Added
+- **Plist XML editor** — Form | XML tabs in agent editor; paste XML to create new jobs; extra plist keys preserved in XML mode.
+- **Import plist** — import external `.plist` into user/global Agent or LaunchDaemon directories.
+- **Clone job** — duplicate an existing Launch Agent/Daemon with a new Label.
+- **Services → Launch Agent** — prefill a new user Agent from a running local service (command, working directory).
+- **WorkingDirectory** — optional field in agent form.
+- **Startup update check** — once per day, compares the running app to GitHub Releases; shows a sheet with DMG download link, Homebrew upgrade commands (copy), and options to skip a version or remind later.
+- **Check for Updates** — manual check from the About window.
+
+### Changed
+- **Launch Agents sidebar** — User Agents, System Agents, and LaunchDaemons merged into a single **Launch Agents** entry; the detail view groups items by scope with collapsible sections (same pattern as Services).
+- **New Agent** — toolbar **New** is now a menu to pick user / global Agent or LaunchDaemon scope before opening the editor.
+- **Agent search** — search runs across all three scopes in one view.
+
+### Improved
+- **Services groups** — Docker and local instance sections can be collapsed/expanded via the group header (helpful when many services are listed).
+- **DMG install UX** — release DMGs include an **Applications** folder shortcut beside the app for drag-to-install (via `create-dmg`); README Direct Download instructions updated.
+- **Release tooling** — shared `package-dmg.sh` for local builds and CI; `build-dmg.sh` outputs to `build/LaunchManager.dmg`.
+
 ## [1.6.3] - 2026-07-04
 
 

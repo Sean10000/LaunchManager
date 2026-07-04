@@ -5,6 +5,7 @@ struct ServiceRowView: View {
     let service: Service
     @ObservedObject var store: ServiceStore
     @Binding var errorMessage: String?
+    var onCreateLaunchAgent: (LaunchAgentDraft) -> Void
 
     @State private var isExpanded = false
     @State private var showingKillConfirm = false
@@ -76,6 +77,15 @@ struct ServiceRowView: View {
                     }
 
                     HStack(spacing: 8) {
+                        if service.runtimeGroup == .instance && service.killAllowed,
+                           let draft = LaunchAgentDraft.from(service: service) {
+                            Button("创建 Launch Agent…") {
+                                onCreateLaunchAgent(draft)
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+
                         Button(copyConfirmed ? "已复制" : "复制地址") {
                             copyAddress()
                         }

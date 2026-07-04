@@ -5,24 +5,25 @@
 //  Created by Shi-Cheng Ma on 2026/4/22.
 //
 
+import AppKit
 import SwiftUI
 
 struct ContentView: View {
     @StateObject private var store = AgentStore()
     @StateObject private var serviceStore = ServiceStore()
+    @StateObject private var updateChecker = UpdateChecker()
     @Environment(\.scenePhase) private var scenePhase
-    @State private var selection: SidebarSelection? = .scope(.userAgent)
+    @State private var selection: SidebarSelection? = .agents
     @State private var showingNewAgent = false
+    @State private var showingNewFromXml = false
+    @State private var newAgentScope: LaunchItem.Scope = .userAgent
+    @State private var serviceLaunchDraft: LaunchAgentDraft?
     @State private var searchText = ""
     @State private var errorMessage: String?
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var showOnboarding = false
     @State private var showAbout = false
-
-    private var selectedScope: LaunchItem.Scope? {
-        if case .scope(let scope) = selection { return scope }
-        return nil
-    }
+    @State private var pendingUpdateCheck = false
 
     private var isLoginItemsGuide: Bool {
         selection == .loginItems
@@ -32,21 +33,8 @@ struct ContentView: View {
         selection == .services
     }
 
-    var filteredItems: [LaunchItem] {
-        let scoped = selectedScope.map { scope in store.items.filter { $0.scope == scope } } ?? store.items
-        guard !searchText.isEmpty else { return scoped }
-        return scoped.filter {
-            $0.label.localizedCaseInsensitiveContains(searchText) ||
-            $0.program.localizedCaseInsensitiveContains(searchText)
-        }
-    }
-
-    var filteredInvalidItems: [InvalidPlist] {
-        let scoped = selectedScope.map { scope in store.invalidItems.filter { $0.scope == scope } } ?? store.invalidItems
-        guard !searchText.isEmpty else { return scoped }
-        return scoped.filter {
-            $0.url.lastPathComponent.localizedCaseInsensitiveContains(searchText)
-        }
+    private var isAgentsView: Bool {
+        selection == .agents || selection == nil
     }
 
     var body: some View {
@@ -56,7 +44,7 @@ struct ContentView: View {
             detailView
         }
         .modifier(ConditionalSearchable(
-            isEnabled: !isLoginItemsGuide && !isServicesView,
+            isEnabled: isAgentsView && !isLoginItemsGuide && !isServicesView,
             text: $searchText,
             prompt: "搜索 Label 或路径"
         ))
@@ -66,6 +54,15 @@ struct ContentView: View {
             if !hasSeenOnboarding {
                 showOnboarding = true
                 hasSeenOnboarding = true
+                pendingUpdateCheck = true
+            } else {
+                updateChecker.checkIfNeeded()
+            }
+        }
+        .onChange(of: showOnboarding) { _, isShowing in
+            if pendingUpdateCheck && !isShowing {
+                pendingUpdateCheck = false
+                updateChecker.checkIfNeeded()
             }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -80,7 +77,15 @@ struct ContentView: View {
             OnboardingView(isPresented: $showOnboarding)
         }
         .sheet(isPresented: $showAbout) {
-            AboutView()
+            AboutView(updateChecker: updateChecker)
+        }
+        .sheet(item: $updateChecker.pendingRelease) { release in
+            UpdateAvailableSheet(
+                release: release,
+                currentVersion: updateChecker.currentVersion,
+                onSkip: { updateChecker.skipVersion(release.version) },
+                onDismiss: { updateChecker.dismissForLater() }
+            )
         }
         .onReceive(NotificationCenter.default.publisher(for: .showAbout)) { _ in
             showAbout = true
@@ -88,8 +93,24 @@ struct ContentView: View {
         .sheet(isPresented: $showingNewAgent) {
             EditAgentSheet(
                 existingItem: nil,
-                defaultScope: selectedScope ?? .userAgent,
+                defaultScope: newAgentScope,
                 store: store
+            )
+        }
+        .sheet(isPresented: $showingNewFromXml) {
+            EditAgentSheet(
+                existingItem: nil,
+                defaultScope: newAgentScope,
+                store: store,
+                initialXml: newAgentInitialXml
+            )
+        }
+        .sheet(item: $serviceLaunchDraft) { draft in
+            EditAgentSheet(
+                existingItem: nil,
+                defaultScope: .userAgent,
+                store: store,
+                draft: draft
             )
         }
         .alert("错误", isPresented: Binding(
@@ -102,19 +123,41 @@ struct ContentView: View {
         }
     }
 
+    private var newAgentInitialXml: String {
+        if let clip = NSPasteboard.general.string(forType: .string),
+           clip.contains("<plist") {
+            return clip
+        }
+        return """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.example.myagent</string>
+            <key>ProgramArguments</key>
+            <array><string>/path/to/program</string></array>
+            <key>RunAtLoad</key><true/>
+        </dict></plist>
+        """
+    }
+
     @ViewBuilder
     private var detailView: some View {
         switch selection {
         case .services:
-            ServicesListView(store: serviceStore, errorMessage: $errorMessage)
+            ServicesListView(
+                store: serviceStore,
+                errorMessage: $errorMessage,
+                onCreateLaunchAgent: { draft in serviceLaunchDraft = draft }
+            )
         case .loginItems:
             LoginItemsGuideView()
-        case .scope, .none:
+        case .agents, .none:
             AgentListView(
-                items: filteredItems,
-                invalidItems: filteredInvalidItems,
                 store: store,
+                searchText: searchText,
+                newAgentScope: $newAgentScope,
                 showingNewAgent: $showingNewAgent,
+                showingNewFromXml: $showingNewFromXml,
                 errorMessage: $errorMessage
             )
         }
