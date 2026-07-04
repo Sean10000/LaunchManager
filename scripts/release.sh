@@ -1,109 +1,162 @@
 #!/bin/bash
-set -e
+# Bump version, finalize CHANGELOG, commit, tag, and push to trigger CI release.
+#
+# Usage:
+#   ./scripts/release.sh patch              # 1.6.2 → 1.6.3
+#   ./scripts/release.sh minor              # 1.6.2 → 1.7.0
+#   ./scripts/release.sh major              # 1.6.2 → 2.0.0
+#   ./scripts/release.sh 1.7.0              # explicit version
+#   ./scripts/release.sh patch --dry-run    # preview only, no git changes
+#
+# Prerequisites:
+#   - Update CHANGELOG.md [Unreleased] section before running
+#   - GitHub Actions builds DMG + updates Homebrew tap on tag push
+set -euo pipefail
 
-# Usage: ./scripts/release.sh 1.1.0
-VERSION="$1"
-
-# ── 参数检查 ──────────────────────────────────────────────
-if [ -z "$VERSION" ]; then
-  echo "Usage: ./scripts/release.sh <version>"
-  echo "Example: ./scripts/release.sh 1.1.0"
-  exit 1
-fi
-
-TAG="v$VERSION"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-ARCHIVE_PATH="/tmp/LaunchManager.xcarchive"
-DMG_PATH="/tmp/LaunchManager.dmg"
-DMG_STAGING="/tmp/LaunchManager-dmg"
-TAP_DIR="/tmp/homebrew-tap"
-CASK_FILE="$TAP_DIR/Casks/launchmanager.rb"
+VERSION_FILE="$PROJECT_DIR/Version.xcconfig"
+CHANGELOG="$PROJECT_DIR/CHANGELOG.md"
 
-echo "▶ Releasing LaunchManager $TAG"
+BUMP=""
+DRY_RUN=false
+
+usage() {
+  echo "Usage: ./scripts/release.sh <patch|minor|major|X.Y.Z> [--dry-run]"
+  exit 1
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    patch|minor|major)
+      BUMP="$1"
+      ;;
+    --dry-run)
+      DRY_RUN=true
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      if [ -z "$BUMP" ] && [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        BUMP="$1"
+      else
+        echo "Unknown argument: $1"
+        usage
+      fi
+      ;;
+  esac
+  shift
+done
+
+[ -n "$BUMP" ] || usage
+
+read_version() {
+  grep '^MARKETING_VERSION' "$VERSION_FILE" | sed 's/.*= *//'
+}
+
+read_build() {
+  grep '^CURRENT_PROJECT_VERSION' "$VERSION_FILE" | sed 's/.*= *//'
+}
+
+current_version=$(read_version)
+IFS='.' read -r MAJOR MINOR PATCH <<< "$current_version"
+
+case "$BUMP" in
+  patch)
+    PATCH=$((PATCH + 1))
+    NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+    ;;
+  minor)
+    MINOR=$((MINOR + 1))
+    PATCH=0
+    NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+    ;;
+  major)
+    MAJOR=$((MAJOR + 1))
+    MINOR=0
+    PATCH=0
+    NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+    ;;
+  *)
+    NEW_VERSION="$BUMP"
+    ;;
+esac
+
+NEW_BUILD=$(( $(read_build) + 1 ))
+TAG="v$NEW_VERSION"
+TODAY=$(date +%Y-%m-%d)
+
+echo "▶ Release $TAG (build $NEW_BUILD)"
+echo "  Current: v$current_version (build $(read_build))"
 echo ""
 
-# ── 1. Build Archive ──────────────────────────────────────
-echo "[1/5] Building archive..."
-cd "$PROJECT_DIR"
-xcodebuild archive \
-  -project LaunchManager.xcodeproj \
-  -scheme LaunchManager \
-  -configuration Release \
-  -archivePath "$ARCHIVE_PATH" \
-  ARCHS="arm64 x86_64" \
-  ONLY_ACTIVE_ARCH=NO \
-  CODE_SIGN_IDENTITY="-" \
-  CODE_SIGNING_REQUIRED=NO \
-  AD_HOC_CODE_SIGNING_ALLOWED=YES \
-  DEVELOPMENT_TEAM="" \
-  2>&1 | grep -E "error:|ARCHIVE|BUILD"
-echo "  ✓ Archive built"
+# ── Validate CHANGELOG [Unreleased] has content ─────────────
+unreleased_has_content() {
+  awk '
+    /^## \[Unreleased\]/ { in_unreleased=1; next }
+    in_unreleased && /^## \[/ { exit }
+    in_unreleased && /^### / { found=1; exit }
+    in_unreleased && /^- / { found=1; exit }
+    END { exit !found }
+  ' "$CHANGELOG"
+}
 
-# ── 2. Package DMG ────────────────────────────────────────
-echo "[2/5] Packaging DMG..."
-APP_PATH=$(find "$ARCHIVE_PATH" -name "LaunchManager.app" -maxdepth 5 | head -1)
-rm -rf "$DMG_STAGING" && mkdir "$DMG_STAGING"
-cp -r "$APP_PATH" "$DMG_STAGING/"
-hdiutil create -volname "LaunchManager" -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG_PATH" > /dev/null
-echo "  ✓ DMG created ($(du -sh "$DMG_PATH" | cut -f1))"
-
-# ── 3. SHA256 ─────────────────────────────────────────────
-echo "[3/5] Computing SHA256..."
-SHA256=$(shasum -a 256 "$DMG_PATH" | awk '{print $1}')
-echo "  ✓ $SHA256"
-
-# ── 4. GitHub Release ─────────────────────────────────────
-echo "[4/5] Creating GitHub Release $TAG..."
-NOTES_FILE="$SCRIPT_DIR/RELEASE_NOTES_${TAG}.md"
-if [ ! -f "$NOTES_FILE" ]; then
-  NOTES_FILE="$SCRIPT_DIR/RELEASE_NOTES_v${VERSION}.md"
-fi
-if [ ! -f "$NOTES_FILE" ]; then
-  echo "  ✗ Missing release notes: $NOTES_FILE"
+if ! unreleased_has_content; then
+  echo "✗ CHANGELOG.md [Unreleased] is empty."
+  echo "  Add bullets under ## [Unreleased] before releasing."
   exit 1
 fi
-gh release create "$TAG" "$DMG_PATH" \
-  --title "$TAG" \
-  --notes-file "$NOTES_FILE" \
-  --repo Sean10000/LaunchManager
-echo "  ✓ Release published"
 
-# ── 5. Update Homebrew Tap ────────────────────────────────
-echo "[5/5] Updating homebrew-tap..."
-if [ -d "$TAP_DIR/.git" ]; then
-  git -C "$TAP_DIR" pull --quiet
-else
-  rm -rf "$TAP_DIR"
-  git clone --quiet https://github.com/Sean10000/homebrew-tap.git "$TAP_DIR"
+cd "$PROJECT_DIR"
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "✗ Working tree has uncommitted changes. Commit or stash first."
+  exit 1
 fi
 
-cat > "$CASK_FILE" <<CASK
-cask "launchmanager" do
-  version "$VERSION"
-  sha256 "$SHA256"
+if [ "$DRY_RUN" = true ]; then
+  echo "[dry-run] Would release $TAG (build $NEW_BUILD)"
+  echo "[dry-run] Would finalize CHANGELOG and push tag to trigger CI"
+  exit 0
+fi
 
-  url "https://github.com/Sean10000/LaunchManager/releases/download/v#{version}/LaunchManager.dmg"
-  name "LaunchManager"
-  desc "macOS app for managing launchd LaunchAgents and LaunchDaemons"
-  homepage "https://github.com/Sean10000/LaunchManager"
+# ── Bump Version.xcconfig ───────────────────────────────────
+sed -i '' "s/^MARKETING_VERSION = .*/MARKETING_VERSION = $NEW_VERSION/" "$VERSION_FILE"
+sed -i '' "s/^CURRENT_PROJECT_VERSION = .*/CURRENT_PROJECT_VERSION = $NEW_BUILD/" "$VERSION_FILE"
+echo "✓ Version.xcconfig → $NEW_VERSION ($NEW_BUILD)"
 
-  app "LaunchManager.app"
+# ── Finalize CHANGELOG ──────────────────────────────────────
+# Replace [Unreleased] header with dated version section; insert fresh [Unreleased].
+TMP_CHANGELOG=$(mktemp)
+awk -v ver="$NEW_VERSION" -v date="$TODAY" '
+  /^## \[Unreleased\]/ {
+    print "## [Unreleased]"
+    print ""
+    print "<!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->"
+    print ""
+    print "## [" ver "] - " date
+    in_unreleased=1
+    next
+  }
+  in_unreleased && /^## \[/ { in_unreleased=0 }
+  in_unreleased && /^<!--/ { next }
+  !in_unreleased { print }
+  in_unreleased { print }
+' "$CHANGELOG" > "$TMP_CHANGELOG"
+mv "$TMP_CHANGELOG" "$CHANGELOG"
+echo "✓ CHANGELOG.md finalized for $TAG"
 
-  zap trash: [
-    "~/Library/Preferences/com.Sean10000.LaunchManager.plist",
-    "~/Library/Application Support/LaunchManager",
-  ]
-end
-CASK
+# ── Git commit + tag + push ─────────────────────────────────
+git add "$VERSION_FILE" "$CHANGELOG"
+git commit -m "chore(release): $TAG"
+git tag "$TAG"
+echo "✓ Committed and tagged $TAG"
 
-git -C "$TAP_DIR" add Casks/launchmanager.rb
-git -C "$TAP_DIR" commit -m "chore: bump LaunchManager to $TAG"
-git -C "$TAP_DIR" push
-echo "  ✓ Homebrew tap updated"
+echo "▶ Pushing to origin (triggers GitHub Actions release)..."
+git push origin HEAD
+git push origin "$TAG"
 
-# ── Done ──────────────────────────────────────────────────
 echo ""
-echo "🎉 LaunchManager $TAG released!"
-echo "   GitHub : https://github.com/Sean10000/LaunchManager/releases/tag/$TAG"
-echo "   Install : brew tap Sean10000/tap && brew install --cask launchmanager"
+echo "🎉 $TAG pushed — CI will build DMG and update Homebrew tap."
+echo "   Actions: https://github.com/Sean10000/LaunchManager/actions"
+echo "   Release: https://github.com/Sean10000/LaunchManager/releases/tag/$TAG"

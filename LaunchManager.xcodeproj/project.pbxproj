@@ -28,6 +28,7 @@
 		14F5EF1C2F99237000D1FB94 /* LaunchManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LaunchManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		14F5EF262F99237000D1FB94 /* LaunchManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LaunchManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = SharedSigning.xcconfig; sourceTree = "<group>"; };
+		14F5EF3A2F99237000D1FB94 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -77,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */,
+				14F5EF3A2F99237000D1FB94 /* Version.xcconfig */,
 				14F5EF0D2F99236F00D1FB94 /* LaunchManager */,
 				14F5EF1F2F99237000D1FB94 /* LaunchManagerTests */,
 				14F5EF292F99237000D1FB94 /* LaunchManagerUITests */,
@@ -397,13 +399,13 @@
 		};
 		14F5EF312F99237000D1FB94 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LaunchManager/LaunchManager.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"LaunchManager/Preview Content\"";
 				DEVELOPMENT_TEAM = CL4SXN6CJ2;
 				ENABLE_PREVIEWS = YES;
@@ -413,7 +415,6 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = top.seanhub.LaunchManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -423,13 +424,13 @@
 		};
 		14F5EF322F99237000D1FB94 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = LaunchManager/LaunchManager.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_ASSET_PATHS = "\"LaunchManager/Preview Content\"";
 				DEVELOPMENT_TEAM = CL4SXN6CJ2;
 				ENABLE_PREVIEWS = YES;
@@ -439,7 +440,6 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = top.seanhub.LaunchManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -449,14 +449,13 @@
 		};
 		14F5EF342F99237000D1FB94 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = CL4SXN6CJ2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = top.seanhub.LaunchManagerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -467,14 +466,13 @@
 		};
 		14F5EF352F99237000D1FB94 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = CL4SXN6CJ2;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
-				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = top.seanhub.LaunchManagerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -485,12 +483,11 @@
 		};
 		14F5EF372F99237000D1FB94 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = CL4SXN6CJ2;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = top.seanhub.LaunchManagerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -501,12 +498,11 @@
 		};
 		14F5EF382F99237000D1FB94 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 14F5EF392F99237000D1FB94 /* SharedSigning.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = CL4SXN6CJ2;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.6.2;
 				PRODUCT_BUNDLE_IDENTIFIER = top.seanhub.LaunchManagerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

@@ -53,6 +53,22 @@ open LaunchManager.xcodeproj
 
 Build and run with Xcode (`⌘R`).
 
+## Releasing
+
+1. Add bullets under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) as you develop.
+2. Run `./scripts/release.sh patch` (or `minor`, `major`, or an explicit `X.Y.Z`).
+3. GitHub Actions builds the universal DMG, creates the GitHub Release, and updates the Homebrew tap.
+
+Local test build only (no publish):
+
+```bash
+./scripts/build-dmg.sh   # → build/LaunchManager.dmg
+```
+
+Version numbers live in [Version.xcconfig](Version.xcconfig) only — do not edit `project.pbxproj` by hand.
+
+**CI secret:** set `HOMEBREW_TAP_TOKEN` in repo Settings → Secrets (PAT with push access to `Sean10000/homebrew-tap`).
+
 ## Usage
 
 1. Select a scope from the sidebar: **User Agents**, **System Agents**, **System Daemons**, or **Services**

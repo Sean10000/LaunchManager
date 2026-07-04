@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Build archive
+        run: |
+          xcodebuild archive \
+            -project LaunchManager.xcodeproj \
+            -scheme LaunchManager \
+            -configuration Release \
+            -archivePath /tmp/LaunchManager.xcarchive \
+            ARCHS="arm64 x86_64" \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            DEVELOPMENT_TEAM=""
+
+      - name: Package DMG
+        run: |
+          APP_PATH=$(find /tmp/LaunchManager.xcarchive -name "LaunchManager.app" -maxdepth 5 | head -1)
+          STAGING=/tmp/LaunchManager-dmg
+          rm -rf "$STAGING" && mkdir "$STAGING"
+          cp -R "$APP_PATH" "$STAGING/"
+          hdiutil create -volname "LaunchManager" -srcfolder "$STAGING" -ov -format UDZO /tmp/LaunchManager.dmg
+
+      - name: Compute SHA256
+        id: sha
+        run: echo "sha256=$(shasum -a 256 /tmp/LaunchManager.dmg | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare release notes
+        run: |
+          chmod +x scripts/extract-changelog.sh
+          ./scripts/extract-changelog.sh "${{ steps.version.outputs.version }}" > /tmp/release-notes.md
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" /tmp/LaunchManager.dmg \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes-file /tmp/release-notes.md \
+            --repo "${{ github.repository }}"
+
+      - name: Update Homebrew tap
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          SHA256: ${{ steps.sha.outputs.sha256 }}
+        run: |
+          if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
+            echo "::warning::HOMEBREW_TAP_TOKEN not set — skipping homebrew-tap update"
+            exit 0
+          fi
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/Sean10000/homebrew-tap.git" /tmp/homebrew-tap
+          chmod +x scripts/update-homebrew-tap.sh
+          ./scripts/update-homebrew-tap.sh "$VERSION" "$SHA256" /tmp/homebrew-tap
+          git -C /tmp/homebrew-tap add Casks/launchmanager.rb
+          git -C /tmp/homebrew-tap -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "chore: bump LaunchManager to v${VERSION}"
+          git -C /tmp/homebrew-tap push
