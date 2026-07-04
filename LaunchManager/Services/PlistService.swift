@@ -17,12 +17,18 @@ extension PlistValidationError: LocalizedError {
 }
 
 struct PlistService {
+    /// When set (e.g. in unit tests), overrides `LaunchItem.Scope.directoryURL` for scan and clone destinations.
+    var scopeDirectoryOverrides: [LaunchItem.Scope: URL] = [:]
+
+    func directoryURL(for scope: LaunchItem.Scope) -> URL {
+        scopeDirectoryOverrides[scope] ?? scope.directoryURL
+    }
 
     func scanAll() -> (items: [LaunchItem], invalid: [InvalidPlist]) {
         var items: [LaunchItem] = []
         var invalid: [InvalidPlist] = []
         for scope in LaunchItem.Scope.allCases {
-            let (scopeItems, scopeInvalid) = scanDirectory(scope.directoryURL, scope: scope)
+            let (scopeItems, scopeInvalid) = scanDirectory(directoryURL(for: scope), scope: scope)
             items.append(contentsOf: scopeItems)
             invalid.append(contentsOf: scopeInvalid)
         }
@@ -199,7 +205,7 @@ struct PlistService {
             dict = d
         }
         dict["Label"] = newLabel
-        let dir = targetDirectory ?? targetScope.directoryURL
+        let dir = targetDirectory ?? directoryURL(for: targetScope)
         let dest = dir.appendingPathComponent("\(newLabel).plist")
         let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
         guard let destString = String(data: data, encoding: .utf8) else {

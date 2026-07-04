@@ -400,6 +400,109 @@ final class AgentStorePendingTests: XCTestCase {
     }
 }
 
+// MARK: - AgentStore Plist Tests
+
+@MainActor
+final class AgentStorePlistTests: XCTestCase {
+    var tmpDir: URL!
+    var plistService: PlistService!
+    var store: AgentStore!
+
+    override func setUp() {
+        tmpDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try! FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
+        plistService = PlistService(scopeDirectoryOverrides: [.userAgent: tmpDir])
+        store = AgentStore(
+            plistService: plistService,
+            launchctlService: LaunchctlService(shell: NoopShell())
+        )
+    }
+
+    override func tearDown() {
+        try? FileManager.default.removeItem(at: tmpDir)
+    }
+
+    private func samplePlistXML(label: String = "com.test.import") -> String {
+        """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>\(label)</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>RunAtLoad</key><true/>
+        </dict></plist>
+        """
+    }
+
+    func test_importPlist_createsItemInStore() throws {
+        let source = tmpDir.appendingPathComponent("source.plist")
+        try samplePlistXML().write(to: source, atomically: true, encoding: .utf8)
+
+        let item = try store.importPlist(from: source, scope: .userAgent, overwrite: false)
+
+        XCTAssertEqual(item.label, "com.test.import")
+        XCTAssertEqual(item.scope, .userAgent)
+        XCTAssertTrue(store.items.contains(where: { $0.label == "com.test.import" }))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: item.plistURL.path))
+    }
+
+    func test_importPlist_existingWithoutOverwrite_throws() throws {
+        let source = tmpDir.appendingPathComponent("source.plist")
+        try samplePlistXML().write(to: source, atomically: true, encoding: .utf8)
+        _ = try store.importPlist(from: source, scope: .userAgent, overwrite: false)
+
+        do {
+            _ = try store.importPlist(from: source, scope: .userAgent, overwrite: false)
+            XCTFail("expected duplicate import error")
+        } catch PlistValidationError.invalidFormat(let message) {
+            XCTAssertEqual(message, String(localized: "文件已存在"))
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+    }
+
+    func test_cloneItem_createsCopyWithNewLabel() throws {
+        let source = tmpDir.appendingPathComponent("com.test.source.plist")
+        try samplePlistXML(label: "com.test.source").write(to: source, atomically: true, encoding: .utf8)
+        store.refresh()
+        let original = try XCTUnwrap(store.items.first(where: { $0.label == "com.test.source" }))
+
+        try store.cloneItem(original, newLabel: "com.test.cloned", scope: .userAgent)
+
+        XCTAssertTrue(store.items.contains(where: { $0.label == "com.test.cloned" }))
+        let cloned = try XCTUnwrap(store.items.first(where: { $0.label == "com.test.cloned" }))
+        XCTAssertEqual(cloned.program, original.program)
+        XCTAssertEqual(cloned.runAtLoad, original.runAtLoad)
+    }
+
+    func test_cloneItem_existingLabel_throws() throws {
+        let source = tmpDir.appendingPathComponent("com.test.source.plist")
+        try samplePlistXML(label: "com.test.source").write(to: source, atomically: true, encoding: .utf8)
+        store.refresh()
+        let original = try XCTUnwrap(store.items.first(where: { $0.label == "com.test.source" }))
+
+        try store.cloneItem(original, newLabel: "com.test.copy", scope: .userAgent)
+
+        do {
+            try store.cloneItem(original, newLabel: "com.test.copy", scope: .userAgent)
+            XCTFail("expected duplicate label error")
+        } catch PlistValidationError.invalidFormat(let message) {
+            XCTAssertEqual(message, String(localized: "Label 已存在"))
+        } catch {
+            XCTFail("unexpected error: \(error)")
+        }
+    }
+
+    func test_saveRawXml_refreshesStore() throws {
+        let url = tmpDir.appendingPathComponent("com.test.raw.plist")
+        try store.saveRawXml(samplePlistXML(label: "com.test.raw"), to: url, scope: .userAgent)
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+        XCTAssertTrue(store.items.contains(where: { $0.label == "com.test.raw" }))
+    }
+}
+
 // MARK: - CommandLineParser Tests
 
 final class CommandLineParserTests: XCTestCase {
