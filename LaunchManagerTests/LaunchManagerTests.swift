@@ -104,6 +104,47 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertEqual(item?.program, "/usr/local/bin/mytool")
     }
 
+    func test_parsePlist_workingDirectory() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.cwd</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>WorkingDirectory</key><string>/Users/sean/project</string>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.cwd.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let item = svc.parsePlist(at: url, scope: .userAgent)
+        XCTAssertEqual(item?.workingDirectory, "/Users/sean/project")
+    }
+
+    func test_roundtrip_workingDirectory() throws {
+        let original = LaunchItem(
+            label: "com.test.cwd",
+            plistURL: tmpDir.appendingPathComponent("com.test.cwd.plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            triggerType: .atLoad,
+            calendarInterval: nil,
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: true,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: "/tmp/work",
+            isLoaded: false,
+            pid: nil,
+            lastExitCode: nil
+        )
+        try svc.save(original, privilege: PrivilegeService())
+        let parsed = svc.parsePlist(at: original.plistURL, scope: .userAgent)
+        XCTAssertEqual(parsed?.workingDirectory, "/tmp/work")
+    }
+
     func test_roundtrip() throws {
         let original = LaunchItem(
             label: "com.test.roundtrip",
@@ -119,6 +160,7 @@ final class PlistServiceTests: XCTestCase {
             keepAlive: false,
             standardOutPath: "/tmp/out.log",
             standardErrorPath: nil,
+            workingDirectory: nil,
             isLoaded: false,
             pid: nil,
             lastExitCode: nil
@@ -239,6 +281,7 @@ final class AgentStorePendingTests: XCTestCase {
             keepAlive: false,
             standardOutPath: nil,
             standardErrorPath: nil,
+            workingDirectory: nil,
             isLoaded: true,
             pid: nil,
             lastExitCode: 0

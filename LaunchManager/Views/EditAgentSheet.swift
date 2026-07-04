@@ -179,6 +179,7 @@ struct EditAgentSheet: View {
             runAtLoad: runAtLoad, keepAlive: keepAlive,
             standardOutPath:   stdoutPath.isEmpty  ? nil : stdoutPath,
             standardErrorPath: stderrPath.isEmpty  ? nil : stderrPath,
+            workingDirectory: existingItem?.workingDirectory,
             isLoaded: existingItem?.isLoaded ?? false,
             pid: existingItem?.pid,
             lastExitCode: existingItem?.lastExitCode
