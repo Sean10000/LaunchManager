@@ -2,7 +2,9 @@
 
 A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create, edit, and control your system's scheduled tasks from a clean native UI.
 
-![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green) ![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-blueviolet?logo=anthropic)
+**Website:** [launchmanager.dev](https://www.launchmanager.dev) · **Docs:** [Help](https://www.launchmanager.dev/help) · **Templates:** [launchmanager.dev/templates](https://www.launchmanager.dev/templates)
+
+![Version](https://img.shields.io/badge/version-1.6.4-blue) ![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green) ![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-blueviolet?logo=anthropic)
 
 ## Star History
 
@@ -13,15 +15,35 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&legend=top-left" />
  </picture>
 </a>
+
 ## Features
 
-- **Browse** all LaunchAgents and LaunchDaemons across User, System Agent, and System Daemon scopes
-- **Services** — discover **host TCP listeners only** (Next.js, Redis, Docker containers published on Mac, etc.), group by Docker vs local instance, stop processes or containers safely
-- **Create & edit** plist jobs with a form UI — no manual XML editing required
+### Launch Agents
+
+- **Browse** all LaunchAgents and LaunchDaemons across User, System Agent, and System Daemon scopes in one unified list with collapsible scope groups
+- **Search** across all scopes from a single search field
+- **Create & edit** plist jobs with a **Form** or **XML** editor — extra plist keys are preserved in XML mode
+- **Import plist** — bring external `.plist` files into user/global Agent or LaunchDaemon directories
+- **Clone job** — duplicate an existing agent with a new Label
+- **Paste XML** — create a new job from clipboard XML
 - **Control** jobs: load, unload, start, stop
 - **View logs** — both file-based stdout/stderr logs and system log (via `log show`)
 - **Handle invalid plists** — empty or malformed plist files are shown inline with an option to delete them
 - **Privilege escalation** for system-level operations (prompts for admin password when needed)
+- **Agent templates** — quick link to curated examples on [launchmanager.dev/templates](https://www.launchmanager.dev/templates)
+
+### Services
+
+- Discover **host TCP listeners only** (Next.js, Redis, Docker containers published on Mac, etc.)
+- Group by Docker vs local instance; collapse/expand sections when many services are listed
+- Stop processes or containers safely; rename entries and open URLs
+- **Create Launch Agent** from a running local service (prefills command and working directory)
+
+### Other
+
+- **Login Items guide** — explains the difference between launchd and macOS Login Items, with a shortcut to System Settings
+- **Auto-update check** — once per day, compares to GitHub Releases; manual **Check for Updates** in About
+- **Bilingual UI** — English and Chinese (follows system language)
 
 ## Requirements
 
@@ -71,11 +93,12 @@ Version numbers live in [Version.xcconfig](Version.xcconfig) only — do not edi
 
 ## Usage
 
-1. Select a scope from the sidebar: **User Agents**, **System Agents**, **System Daemons**, or **Services**
-2. Click **+** to create a new job, or click the pencil icon to edit an existing one
-3. Use the row buttons to **load / start / stop** a job
-4. Expand a row (chevron) to see details and view logs
-5. On **Services**, refresh the list, rename entries, open URLs, or stop local processes / Docker containers
+1. Select a section from the sidebar: **Launch Agents**, **Login Items**, or **Services**
+2. On **Launch Agents**, use the **New** menu to pick scope (user / global Agent or LaunchDaemon), or **Import** / **Paste XML** from the toolbar
+3. Click **+** or edit an existing job; switch between **Form** and **XML** tabs in the editor
+4. Use row actions to **load / start / stop**; expand a row (chevron) for details and logs
+5. Right-click or use the row menu to **clone** an agent
+6. On **Services**, refresh the list, rename entries, open URLs, stop processes/containers, or **create a Launch Agent** from a running service
 
 ## Services
 
@@ -90,7 +113,7 @@ The **Services** sidebar scans **TCP ports listening on your Mac** (`lsof -iTCP 
 
 - **Outbound connections only** (`ESTABLISHED` where your Mac is the client)
 - Services running **inside a VM, NAS, or another machine** on the LAN (unless their port is forwarded so the Mac is listening locally)
-- **UDP** listeners (v1 is TCP only)
+- **UDP** listeners (TCP only in current release)
 
 ### Quick check
 
@@ -117,23 +140,24 @@ lsof -i :5666
 | **System Agent / Daemon support** | ✅ | ✅ | ✅ (Pro) | Limited |
 | **Privilege escalation** | ✅ | ✅ | ✅ | — |
 | **Invalid plist detection** | ✅ Inline with delete | ❌ | ❌ | ❌ |
+| **Local TCP / Docker services view** | ✅ | ❌ | ❌ | ❌ |
 | **App must stay running** | ❌ Not required | ❌ Not required | ⚠️ Required | ❌ Not required |
 | **AI assistant** | ❌ | ✅ (7 LLM providers) | ❌ | ❌ |
-| **XML / Expert editor** | ❌ | ✅ | ❌ | ❌ |
+| **XML / Expert editor** | ✅ Form + XML tabs | ✅ Advanced | ❌ | ❌ |
 | **Open Source** | ✅ MIT | ❌ | ❌ | ❌ |
 | **macOS requirement** | 14 Sonoma+ | 11 Big Sur+ | 14 Sonoma+ | — |
 
-> LaunchManager is ideal if you want a **free, native, open-source** tool for everyday launchd management.
-> For power users needing an AI assistant or expert XML editor, [LaunchControl](https://www.soma-zone.com/LaunchControl/) is the most feature-complete paid option.
+> LaunchManager is ideal if you want a **free, native, open-source** tool for everyday launchd management and local dev service discovery.
+> For power users needing an AI assistant or advanced XML tooling (syntax highlighting, diff), [LaunchControl](https://www.soma-zone.com/LaunchControl/) remains the most feature-complete paid option.
 
 ## Project Structure
 
 ```
 LaunchManager/
-├── Models/          # LaunchItem, InvalidPlist, Service, ListeningProcess
-├── Services/        # PlistService, LaunchctlService, ProcessDiscovery, Docker/, resolvers
+├── Models/          # LaunchItem, InvalidPlist, LaunchAgentDraft, Service, ListeningProcess
+├── Services/        # PlistService, LaunchctlService, UpdateChecker, ProcessDiscovery, Docker/
 ├── Store/           # AgentStore, ServiceStore, ServiceNameStore
-└── Views/           # SwiftUI views (AgentList, ServicesList, …)
+└── Views/           # SwiftUI views (AgentList, ServicesList, EditAgentSheet, …)
 ```
 
 ## License
