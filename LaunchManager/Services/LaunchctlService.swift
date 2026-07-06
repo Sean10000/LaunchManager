@@ -78,7 +78,40 @@ struct LaunchctlService {
         }
     }
 
+    // MARK: - Override database
+
+    func disabledLabels(domain: String) throws -> Set<String> {
+        let output = try shell.run("/bin/launchctl", arguments: ["print-disabled", domain])
+        return Self.parseDisabledLabels(output)
+    }
+
+    func enable(_ label: String, scope: LaunchItem.Scope) throws {
+        let target = serviceTarget(label: label, scope: scope)
+        if scope.requiresPrivilege {
+            try privilege.run("/bin/launchctl enable \(shellQuote(target))")
+        } else {
+            _ = try shell.run("/bin/launchctl", arguments: ["enable", target])
+        }
+    }
+
+    static func parseDisabledLabels(_ output: String) -> Set<String> {
+        var labels = Set<String>()
+        for line in output.components(separatedBy: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard trimmed.contains("=>"), trimmed.contains("disabled") else { continue }
+            guard let start = trimmed.firstIndex(of: "\""),
+                  let end = trimmed[trimmed.index(after: start)...].firstIndex(of: "\"") else { continue }
+            let label = String(trimmed[trimmed.index(after: start)..<end])
+            if !label.isEmpty { labels.insert(label) }
+        }
+        return labels
+    }
+
     // MARK: - Helpers
+
+    private func serviceTarget(label: String, scope: LaunchItem.Scope) -> String {
+        "\(launchdDomain(for: scope))/\(label)"
+    }
 
     private func launchdDomain(for scope: LaunchItem.Scope) -> String {
         switch scope {

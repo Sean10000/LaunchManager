@@ -17,11 +17,51 @@ extension PlistValidationError: LocalizedError {
 }
 
 struct PlistService {
+    /// Keys the form editor reads and writes. Any other key on disk requires XML mode.
+    static let formManagedKeys: Set<String> = [
+        "Label", "Program", "ProgramArguments",
+        "StartCalendarInterval", "StartInterval", "WatchPaths",
+        "RunAtLoad", "KeepAlive",
+        "StandardOutPath", "StandardErrorPath", "WorkingDirectory",
+        "EnvironmentVariables",
+    ]
+
     /// When set (e.g. in unit tests), overrides `LaunchItem.Scope.directoryURL` for scan and clone destinations.
     var scopeDirectoryOverrides: [LaunchItem.Scope: URL] = [:]
 
     func directoryURL(for scope: LaunchItem.Scope) -> URL {
         scopeDirectoryOverrides[scope] ?? scope.directoryURL
+    }
+
+    func readDictionary(from url: URL) throws -> [String: Any] {
+        let data = try Data(contentsOf: url)
+        guard let dict = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any] else {
+            throw PlistValidationError.invalidFormat("Root must be a dictionary")
+        }
+        return dict
+    }
+
+    func extraKeys(in dict: [String: Any]) -> [String] {
+        dict.keys.filter { !Self.formManagedKeys.contains($0) }.sorted()
+    }
+
+    func formIncompatibilityReason(for dict: [String: Any]) -> String? {
+        let extra = extraKeys(in: dict)
+        if !extra.isEmpty {
+            return String(localized: "此 plist 包含表单不支持的键：\(extra.joined(separator: ", "))。请使用 XML 模式编辑。")
+        }
+        if let keepAlive = dict["KeepAlive"], keepAlive is Bool == false {
+            return String(localized: "KeepAlive 使用了表单不支持的格式，请使用 XML 模式编辑。")
+        }
+        let triggers = [
+            dict["StartCalendarInterval"] != nil,
+            dict["StartInterval"] != nil,
+            dict["WatchPaths"] != nil,
+        ].filter { $0 }.count
+        if triggers > 1 {
+            return String(localized: "存在多个触发器，请使用 XML 模式编辑。")
+        }
+        return nil
     }
 
     func scanAll() -> (items: [LaunchItem], invalid: [InvalidPlist]) {
@@ -98,8 +138,20 @@ struct PlistService {
             standardOutPath: dict["StandardOutPath"] as? String,
             standardErrorPath: dict["StandardErrorPath"] as? String,
             workingDirectory: dict["WorkingDirectory"] as? String,
-            isLoaded: false, pid: nil, lastExitCode: nil
+            environmentVariables: parseEnvironmentVariables(dict["EnvironmentVariables"]),
+            isLoaded: false, isDisabledByOverride: false, pid: nil, lastExitCode: nil
         )
+    }
+
+    func parseEnvironmentVariables(_ value: Any?) -> [String: String] {
+        guard let dict = value as? [String: Any] else { return [:] }
+        var result: [String: String] = [:]
+        for (key, val) in dict {
+            if let string = val as? String {
+                result[key] = string
+            }
+        }
+        return result
     }
 
     func toDictionary(_ item: LaunchItem) -> [String: Any] {
@@ -129,10 +181,17 @@ struct PlistService {
         if let o = item.standardOutPath   { dict["StandardOutPath"]   = o }
         if let e = item.standardErrorPath { dict["StandardErrorPath"] = e }
         if let wd = item.workingDirectory { dict["WorkingDirectory"] = wd }
+        if !item.environmentVariables.isEmpty { dict["EnvironmentVariables"] = item.environmentVariables }
         return dict
     }
 
     func save(_ item: LaunchItem, privilege: PrivilegeService) throws {
+        if FileManager.default.fileExists(atPath: item.plistURL.path) {
+            let dict = try readDictionary(from: item.plistURL)
+            if let reason = formIncompatibilityReason(for: dict) {
+                throw PlistValidationError.invalidFormat(reason)
+            }
+        }
         let data = try PropertyListSerialization.data(
             fromPropertyList: toDictionary(item), format: .xml, options: 0)
         if item.scope.requiresPrivilege {

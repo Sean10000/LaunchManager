@@ -17,7 +17,9 @@ struct LaunchItem: Identifiable, Hashable {
     var standardOutPath: String?
     var standardErrorPath: String?
     var workingDirectory: String?
+    var environmentVariables: [String: String] = [:]
     var isLoaded: Bool
+    var isDisabledByOverride: Bool = false
     var pid: Int?
     var lastExitCode: Int?
 

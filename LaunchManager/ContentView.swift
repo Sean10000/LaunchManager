@@ -50,6 +50,7 @@ struct ContentView: View {
         ))
         .onAppear {
             store.refresh()
+            store.startWatching()
             serviceStore.startPolling(isActive: scenePhase == .active)
             if !hasSeenOnboarding {
                 showOnboarding = true
@@ -67,6 +68,9 @@ struct ContentView: View {
         }
         .onChange(of: scenePhase) { _, phase in
             serviceStore.startPolling(isActive: phase == .active)
+            if phase == .active {
+                store.refresh()
+            }
         }
         .onChange(of: selection) { _, newSelection in
             if newSelection == .services {

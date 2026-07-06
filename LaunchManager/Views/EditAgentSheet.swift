@@ -22,6 +22,7 @@ struct EditAgentSheet: View {
     @State private var keepAlive: Bool
     @State private var stdoutPath: String
     @State private var stderrPath: String
+    @State private var envVarRows: [EnvVarRow]
     @State private var xmlText: String
     @State private var xmlError: String?
     @State private var formDisabledReason: String?
@@ -58,6 +59,7 @@ struct EditAgentSheet: View {
         _keepAlive = State(initialValue: d?.keepAlive ?? i?.keepAlive ?? false)
         _stdoutPath = State(initialValue: i?.standardOutPath ?? "")
         _stderrPath = State(initialValue: i?.standardErrorPath ?? "")
+        _envVarRows = State(initialValue: Self.envRows(from: i?.environmentVariables ?? [:]))
         _xmlText = State(initialValue: initialXml ?? "")
     }
 
@@ -120,6 +122,7 @@ struct EditAgentSheet: View {
                 loadXmlFromCurrentState()
             }
             validateXmlText()
+            checkFormCompatibilityFromDisk()
         }
         .onChange(of: xmlText) { _, _ in
             validateXmlText()
@@ -216,6 +219,32 @@ struct EditAgentSheet: View {
                 Toggle("保持存活（崩溃后自动重启）", isOn: $keepAlive)
             }
 
+            Section("环境变量 EnvironmentVariables（可选）") {
+                if envVarRows.isEmpty {
+                    Text("无环境变量").font(.caption).foregroundStyle(.secondary)
+                }
+                ForEach($envVarRows) { $row in
+                    HStack(spacing: 8) {
+                        TextField("KEY", text: $row.key)
+                            .textFieldStyle(.roundedBorder)
+                        TextField("value", text: $row.value)
+                            .textFieldStyle(.roundedBorder)
+                        Button {
+                            envVarRows.removeAll { $0.id == row.id }
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.borderless)
+                    }
+                }
+                Button {
+                    envVarRows.append(EnvVarRow())
+                } label: {
+                    Label("添加变量", systemImage: "plus")
+                }
+            }
+
             Section("日志路径（可选）") {
                 TextField("标准输出 StandardOutPath", text: $stdoutPath)
                 TextField("标准错误 StandardErrorPath", text: $stderrPath)
@@ -307,15 +336,36 @@ struct EditAgentSheet: View {
     private func syncFormFromXmlIfPossible() {
         formDisabledReason = nil
         switch plistService.validateXml(xmlText) {
-        case .failure(let err):
+        case .failure:
             formDisabledReason = String(localized: "当前 plist 含表单无法完整表示的内容，请使用 XML 模式编辑。")
-            _ = err
         case .success(let dict):
+            if let reason = plistService.formIncompatibilityReason(for: dict) {
+                formDisabledReason = reason
+                return
+            }
             guard let parsed = parseLaunchItem(from: dict) else {
                 formDisabledReason = String(localized: "当前 plist 含表单无法完整表示的内容，请使用 XML 模式编辑。")
                 return
             }
             applyFormFields(from: parsed)
+        }
+    }
+
+    private func checkFormCompatibilityFromDisk() {
+        guard editorMode == .form, let existingItem else { return }
+        guard let dict = try? plistService.readDictionary(from: existingItem.plistURL) else { return }
+        formDisabledReason = plistService.formIncompatibilityReason(for: dict)
+    }
+
+    private static func envRows(from variables: [String: String]) -> [EnvVarRow] {
+        variables.keys.sorted().map { EnvVarRow(key: $0, value: variables[$0] ?? "") }
+    }
+
+    private var environmentVariablesFromRows: [String: String] {
+        envVarRows.reduce(into: [:]) { result, row in
+            let key = row.key.trimmingCharacters(in: .whitespaces)
+            guard !key.isEmpty else { return }
+            result[key] = row.value
         }
     }
 
@@ -371,7 +421,9 @@ struct EditAgentSheet: View {
             standardOutPath: dict["StandardOutPath"] as? String,
             standardErrorPath: dict["StandardErrorPath"] as? String,
             workingDirectory: dict["WorkingDirectory"] as? String,
+            environmentVariables: plistService.parseEnvironmentVariables(dict["EnvironmentVariables"]),
             isLoaded: existingItem?.isLoaded ?? false,
+            isDisabledByOverride: existingItem?.isDisabledByOverride ?? false,
             pid: existingItem?.pid,
             lastExitCode: existingItem?.lastExitCode
         )
@@ -392,6 +444,7 @@ struct EditAgentSheet: View {
         keepAlive = item.keepAlive
         stdoutPath = item.standardOutPath ?? ""
         stderrPath = item.standardErrorPath ?? ""
+        envVarRows = Self.envRows(from: item.environmentVariables)
     }
 
     private func validateXmlText() {
@@ -426,7 +479,9 @@ struct EditAgentSheet: View {
             standardOutPath: stdoutPath.isEmpty ? nil : stdoutPath,
             standardErrorPath: stderrPath.isEmpty ? nil : stderrPath,
             workingDirectory: workingDirectory.isEmpty ? nil : workingDirectory,
+            environmentVariables: environmentVariablesFromRows,
             isLoaded: existingItem?.isLoaded ?? false,
+            isDisabledByOverride: existingItem?.isDisabledByOverride ?? false,
             pid: existingItem?.pid,
             lastExitCode: existingItem?.lastExitCode
         )
@@ -464,4 +519,15 @@ struct EditAgentSheet: View {
 private enum EditorMode: String, CaseIterable {
     case form
     case xml
+}
+
+private struct EnvVarRow: Identifiable {
+    let id = UUID()
+    var key: String
+    var value: String
+
+    init(key: String = "", value: String = "") {
+        self.key = key
+        self.value = value
+    }
 }

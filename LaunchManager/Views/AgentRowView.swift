@@ -22,6 +22,7 @@ struct AgentRowView: View {
 
     var statusColor: Color {
         if pending != nil { return .yellow }
+        if item.isDisabledByOverride && item.pid == nil { return .orange }
         if item.pid != nil { return .green }
         if let code = item.lastExitCode {
             if code == 0  { return .blue.opacity(0.7) }
@@ -32,6 +33,9 @@ struct AgentRowView: View {
     }
 
     var statusTooltip: LocalizedStringKey {
+        if item.isDisabledByOverride {
+            return "已被系统禁用（launchctl override）"
+        }
         if let pid = item.pid { return "运行中 (PID \(pid))" }
         if let code = item.lastExitCode {
             if code == 0  { return "上次执行：正常退出 (0)" }
@@ -158,6 +162,11 @@ struct AgentRowView: View {
         } else if item.pid != nil {
             Button("停止") {
                 store.stop(item) { errorMessage = $0 }
+            }
+            .buttonStyle(.borderedProminent).controlSize(.small)
+        } else if item.isDisabledByOverride && !item.isLoaded {
+            Button("启用") {
+                store.enable(item) { errorMessage = $0 }
             }
             .buttonStyle(.borderedProminent).controlSize(.small)
         } else if item.isLoaded {

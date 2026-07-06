@@ -64,6 +64,29 @@
         }
       }
     },
+    "%@失败" : {
+
+    },
+    "%@失败：%@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@失败：%2$@"
+          }
+        }
+      }
+    },
+    "%@失败：%@\n\n%@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@失败：%2$@\n\n%3$@"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -146,6 +169,12 @@
       }
     },
     "Invalid plist" : {
+
+    },
+    "KeepAlive 使用了表单不支持的格式，请使用 XML 模式编辑。" : {
+
+    },
+    "KEY" : {
 
     },
     "Kill Process…" : {
@@ -326,6 +355,9 @@
     "Plist must contain a Label key" : {
 
     },
+    "plist 无法载入，请检查语法与路径" : {
+
+    },
     "Reveal in Finder" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -359,6 +391,9 @@
           }
         }
       }
+    },
+    "value" : {
+
     },
     "WorkingDirectory（可选）" : {
 
@@ -693,6 +728,12 @@
         }
       }
     },
+    "启用" : {
+
+    },
+    "启用中…" : {
+
+    },
     "周%lld" : {
       "localizations" : {
         "en" : {
@@ -849,6 +890,9 @@
         }
       }
     },
+    "存在多个触发器，请使用 XML 模式编辑。" : {
+
+    },
     "定时" : {
       "localizations" : {
         "en" : {
@@ -994,6 +1038,9 @@
           }
         }
       }
+    },
+    "已被系统禁用（launchctl override）" : {
+
     },
     "开始使用" : {
       "localizations" : {
@@ -1150,6 +1197,9 @@
     "文件已存在，是否覆盖？" : {
 
     },
+    "文件或路径不存在" : {
+
+    },
     "文件日志" : {
       "localizations" : {
         "en" : {
@@ -1272,6 +1322,9 @@
         }
       }
     },
+    "无环境变量" : {
+
+    },
     "日志 — %@" : {
       "localizations" : {
         "en" : {
@@ -1355,6 +1408,12 @@
         }
       }
     },
+    "服务已载入" : {
+
+    },
+    "服务未载入或已停止" : {
+
+    },
     "未加载" : {
       "localizations" : {
         "en" : {
@@ -1404,6 +1463,12 @@
           }
         }
       }
+    },
+    "权限不足或路径无法访问" : {
+
+    },
+    "权限被拒绝" : {
+
     },
     "查看 XML" : {
       "localizations" : {
@@ -1464,6 +1529,9 @@
           }
         }
       }
+    },
+    "此 plist 包含表单不支持的键：%@。请使用 XML 模式编辑。" : {
+
     },
     "此分类下暂无 LaunchAgent / Daemon" : {
       "extractionState" : "stale",
@@ -1621,6 +1689,9 @@
         }
       }
     },
+    "添加变量" : {
+
+    },
     "清空日志" : {
       "localizations" : {
         "en" : {
@@ -1661,6 +1732,9 @@
           }
         }
       }
+    },
+    "环境变量 EnvironmentVariables（可选）" : {
+
     },
     "用户 · 全局 · 系统" : {
       "localizations" : {

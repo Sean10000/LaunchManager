@@ -9,6 +9,7 @@ final class AgentStore: ObservableObject {
     private let plistService: PlistService
     private let launchctlService: LaunchctlService
     private let privilegeService: PrivilegeService
+    private var directoryWatcher: DirectoryWatcher?
 
     init(plistService: PlistService = PlistService(),
          launchctlService: LaunchctlService = LaunchctlService(),
@@ -18,9 +19,25 @@ final class AgentStore: ObservableObject {
         self.privilegeService = privilegeService
     }
 
+    func startWatching() {
+        guard directoryWatcher == nil else { return }
+        let paths = LaunchItem.Scope.allCases.map { plistService.directoryURL(for: $0) }
+        let watcher = DirectoryWatcher { [weak self] in
+            Task { @MainActor in self?.refresh() }
+        }
+        watcher.start(watching: paths)
+        directoryWatcher = watcher
+    }
+
+    func stopWatching() {
+        directoryWatcher?.stop()
+        directoryWatcher = nil
+    }
+
     func refresh() {
         let (scanned, invalid) = plistService.scanAll()
         let statuses = (try? launchctlService.listAll()) ?? [:]
+        let disabledLabels = fetchDisabledLabels()
         items = scanned.map { item in
             var copy = item
             if let s = statuses[item.label] {
@@ -28,13 +45,14 @@ final class AgentStore: ObservableObject {
                 copy.pid          = s.pid
                 copy.lastExitCode = s.exitCode
             }
+            copy.isDisabledByOverride = disabledLabels.contains(item.label)
             return copy
         }
         invalidItems = invalid
     }
 
     func bootstrap(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
-        runPending(item.label, .loading, onError: onError) {
+        runPending(item.label, .loading, operationName: String(localized: "载入"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.bootstrap(item.plistURL, scope: item.scope)
             }
@@ -43,7 +61,7 @@ final class AgentStore: ObservableObject {
     }
 
     func bootout(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
-        runPending(item.label, .unloading, onError: onError) {
+        runPending(item.label, .unloading, operationName: String(localized: "移除"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.bootout(item.plistURL, scope: item.scope)
             }
@@ -52,7 +70,7 @@ final class AgentStore: ObservableObject {
     }
 
     func start(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
-        runPending(item.label, .starting, onError: onError) {
+        runPending(item.label, .starting, operationName: String(localized: "启动"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.start(item.label, scope: item.scope)
             }
@@ -63,11 +81,20 @@ final class AgentStore: ObservableObject {
     }
 
     func stop(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
-        runPending(item.label, .stopping, onError: onError) {
+        runPending(item.label, .stopping, operationName: String(localized: "停止"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.stop(item.label, scope: item.scope)
             }
             await self.waitUntilStopped(label: item.label, scope: item.scope)
+        }
+    }
+
+    func enable(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
+        runPending(item.label, .enabling, operationName: String(localized: "启用"), onError: onError) {
+            try await self.runLaunchctl(scope: item.scope) {
+                try self.launchctlService.enable(item.label, scope: item.scope)
+            }
+            await self.refresh()
         }
     }
 
@@ -129,9 +156,22 @@ final class AgentStore: ObservableObject {
 
     // MARK: - Private
 
+    private func fetchDisabledLabels() -> Set<String> {
+        var labels = Set<String>()
+        let guiDomain = "gui/\(getuid())"
+        if let gui = try? launchctlService.disabledLabels(domain: guiDomain) {
+            labels.formUnion(gui)
+        }
+        if let system = try? launchctlService.disabledLabels(domain: "system") {
+            labels.formUnion(system)
+        }
+        return labels
+    }
+
     private func runPending(
         _ label: String,
         _ operation: PendingOperation,
+        operationName: String,
         onError: @escaping (String) -> Void,
         work: @escaping () async throws -> Void
     ) {
@@ -143,8 +183,10 @@ final class AgentStore: ObservableObject {
                 try await work()
             } catch PrivilegeError.cancelled {
                 // user dismissed admin dialog — no alert
+            } catch let error as ShellError {
+                onError(LaunchctlErrorFormatter.message(operation: operationName, detail: error.launchctlUserMessage))
             } catch {
-                onError(error.localizedDescription)
+                onError(LaunchctlErrorFormatter.message(operation: operationName, detail: error.localizedDescription))
             }
         }
     }

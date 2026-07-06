@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **EnvironmentVariables** — key-value editor in agent form.
+- **Override status** — shows jobs disabled via `launchctl override`; **启用** button calls `launchctl enable`.
+- **Directory watching** — agent list auto-refreshes when plist folders change (FSEvents) and when the app returns to foreground.
+
+### Improved
+- **Form save safety** — blocks form save when plist contains keys the form cannot represent; lists unsupported keys and directs users to XML mode.
+- **launchctl errors** — load/unload/start/stop/enable failures show a short hint plus raw `launchctl` output.
+
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
 ## [1.6.4] - 2026-07-04

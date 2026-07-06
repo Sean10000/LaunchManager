@@ -41,6 +41,17 @@ final class LaunchctlServiceTests: XCTestCase {
         let result = LaunchctlService().parseListOutput(output)
         XCTAssertEqual(result.count, 1)
     }
+
+    func test_parseDisabledLabels() {
+        let output = """
+        disabled services = {
+            "com.example.disabled" => disabled
+            "com.example.enabled" => enabled
+        }
+        """
+        let labels = LaunchctlService.parseDisabledLabels(output)
+        XCTAssertEqual(labels, ["com.example.disabled"])
+    }
 }
 
 // MARK: - PlistService Tests
@@ -143,6 +154,86 @@ final class PlistServiceTests: XCTestCase {
         try svc.save(original, privilege: PrivilegeService())
         let parsed = svc.parsePlist(at: original.plistURL, scope: .userAgent)
         XCTAssertEqual(parsed?.workingDirectory, "/tmp/work")
+    }
+
+    func test_extraKeys_detectsUnknownKeys() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.extra</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>MachServices</key><dict/>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.extra.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let dict = try svc.readDictionary(from: url)
+        XCTAssertEqual(svc.extraKeys(in: dict), ["MachServices"])
+        XCTAssertNotNil(svc.formIncompatibilityReason(for: dict))
+    }
+
+    func test_save_rejectsFormSaveWhenExtraKeysPresent() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.extra</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>EnvironmentVariables</key>
+            <dict><key>FOO</key><string>bar</string></dict>
+            <key>MachServices</key><dict/>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.extra.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let item = LaunchItem(
+            label: "com.test.extra",
+            plistURL: url,
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            triggerType: .atLoad,
+            calendarInterval: nil,
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: false,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            environmentVariables: ["FOO": "bar"],
+            isLoaded: false,
+            pid: nil,
+            lastExitCode: nil
+        )
+        XCTAssertThrowsError(try svc.save(item, privilege: PrivilegeService()))
+    }
+
+    func test_roundtrip_environmentVariables() throws {
+        let original = LaunchItem(
+            label: "com.test.env",
+            plistURL: tmpDir.appendingPathComponent("com.test.env.plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            triggerType: .atLoad,
+            calendarInterval: nil,
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: true,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            environmentVariables: ["NODE_ENV": "production", "PATH": "/usr/local/bin:/usr/bin"],
+            isLoaded: false,
+            pid: nil,
+            lastExitCode: nil
+        )
+        try svc.save(original, privilege: PrivilegeService())
+        let parsed = svc.parsePlist(at: original.plistURL, scope: .userAgent)
+        XCTAssertEqual(parsed?.environmentVariables, original.environmentVariables)
     }
 
     func test_roundtrip() throws {
