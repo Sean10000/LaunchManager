@@ -204,6 +204,316 @@
         }
       }
     },
+    "Crontab" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crontab"
+          }
+        }
+      }
+    },
+    "用户定时任务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User scheduled jobs"
+          }
+        }
+      }
+    },
+    "没有 Cron 任务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cron jobs"
+          }
+        }
+      }
+    },
+    "用户 crontab 与 /etc/crontab 均为空，点击「新建」添加定时任务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Both user crontab and /etc/crontab are empty. Click New to add a scheduled job."
+          }
+        }
+      }
+    },
+    "用户 · 系统" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User · System"
+          }
+        }
+      }
+    },
+    "用户 Crontab" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User Crontab"
+          }
+        }
+      }
+    },
+    "系统 Crontab" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Crontab"
+          }
+        }
+      }
+    },
+    "新建用户 Cron 任务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New User Cron Job"
+          }
+        }
+      }
+    },
+    "新建系统 Cron 任务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New System Cron Job"
+          }
+        }
+      }
+    },
+    "运行用户" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run as user"
+          }
+        }
+      }
+    },
+    "保存时将提示输入管理员密码，与系统 LaunchAgent 写入方式相同。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving will prompt for an administrator password, same as writing a system LaunchAgent."
+          }
+        }
+      }
+    },
+    "写入时需管理员密码" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requires admin password to write"
+          }
+        }
+      }
+    },
+    "文件头部" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File header"
+          }
+        }
+      }
+    },
+    "搜索命令或计划" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search command or schedule"
+          }
+        }
+      }
+    },
+    "新建 Cron 任务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Cron Job"
+          }
+        }
+      }
+    },
+    "编辑 Cron 任务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Cron Job"
+          }
+        }
+      }
+    },
+    "Crontab 头部" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crontab header"
+          }
+        }
+      }
+    },
+    "Homebrew Services" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew Services"
+          }
+        }
+      }
+    },
+    "用户服务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User Services"
+          }
+        }
+      }
+    },
+    "系统服务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Services"
+          }
+        }
+      }
+    },
+    "brew services · ~/Library/LaunchAgents" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew services · ~/Library/LaunchAgents"
+          }
+        }
+      }
+    },
+    "sudo brew services · /Library/LaunchDaemons" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sudo brew services · /Library/LaunchDaemons"
+          }
+        }
+      }
+    },
+    "未找到 Homebrew" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew Not Found"
+          }
+        }
+      }
+    },
+    "请安装 Homebrew，或确认 /opt/homebrew/bin/brew 可用。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install Homebrew, or ensure /opt/homebrew/bin/brew is available."
+          }
+        }
+      }
+    },
+    "没有 Homebrew 服务" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Homebrew services"
+          }
+        }
+      }
+    },
+    "通过 brew install 安装带 service 的 formula 后，会显示在这里" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install a formula with a service definition via brew install to see it here."
+          }
+        }
+      }
+    },
+    "搜索服务名或 Label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search service name or label"
+          }
+        }
+      }
+    },
+    "运行中" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running"
+          }
+        }
+      }
+    },
+    "未注册" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not registered"
+          }
+        }
+      }
+    },
+    "启动/停止时需管理员密码" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Admin password required to start/stop"
+          }
+        }
+      }
+    },
+    "重启中…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restarting…"
+          }
+        }
+      }
+    },
     "Launchd（本应用管理）" : {
       "localizations" : {
         "en" : {

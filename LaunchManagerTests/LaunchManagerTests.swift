@@ -1146,3 +1146,177 @@ final class DevServiceFilterTests: XCTestCase {
         )
     }
 }
+
+// MARK: - CrontabParser Tests
+
+final class CrontabParserTests: XCTestCase {
+    func test_parseEnabledJob() {
+        let lines = CrontabParser.parse("0 8 * * * /usr/bin/date\n")
+        XCTAssertEqual(lines.count, 1)
+        guard case .job(let job) = lines[0] else {
+            return XCTFail("Expected job line")
+        }
+        XCTAssertEqual(job.minute, "0")
+        XCTAssertEqual(job.hour, "8")
+        XCTAssertEqual(job.command, "/usr/bin/date")
+        XCTAssertTrue(job.isEnabled)
+    }
+
+    func test_parseDisabledJob() {
+        let lines = CrontabParser.parse("# 15 9 * * 1 /usr/bin/backup.sh\n")
+        guard case .job(let job) = lines[0] else {
+            return XCTFail("Expected job line")
+        }
+        XCTAssertEqual(job.minute, "15")
+        XCTAssertEqual(job.hour, "9")
+        XCTAssertEqual(job.weekday, "1")
+        XCTAssertEqual(job.command, "/usr/bin/backup.sh")
+        XCTAssertFalse(job.isEnabled)
+    }
+
+    func test_parseEnvironmentAndComment() {
+        let text = """
+        # backup jobs
+        MAILTO=ops@example.com
+        PATH=/usr/bin:/bin
+
+        0 2 * * * /usr/local/bin/backup.sh
+        """
+        let lines = CrontabParser.parse(text)
+        XCTAssertEqual(lines.count, 5)
+        guard case .comment = lines[0] else { return XCTFail("Expected comment") }
+        guard case .environment(_, let key, let value) = lines[1] else { return XCTFail("Expected env") }
+        XCTAssertEqual(key, "MAILTO")
+        XCTAssertEqual(value, "ops@example.com")
+        guard case .blank = lines[3] else { return XCTFail("Expected blank line") }
+        guard case .job(let job) = lines[4] else { return XCTFail("Expected job") }
+        XCTAssertEqual(job.command, "/usr/local/bin/backup.sh")
+    }
+
+    func test_serializeRoundTrip() {
+        let original = """
+        MAILTO=me@example.com
+        0 8 * * * /usr/bin/date
+        # 30 9 * * * /usr/bin/disabled
+        """
+        let lines = CrontabParser.parse(original)
+        let serialized = CrontabParser.serialize(lines)
+        let reparsed = CrontabParser.parse(serialized)
+        XCTAssertEqual(CrontabParser.jobs(from: lines, scope: .user).count, 2)
+        XCTAssertEqual(CrontabParser.jobs(from: reparsed, scope: .user).map(\.command), ["/usr/bin/date", "/usr/bin/disabled"])
+        XCTAssertEqual(CrontabParser.jobs(from: reparsed, scope: .user).map(\.isEnabled), [true, false])
+    }
+
+    func test_parseCommandWithSpacesInQuotes() {
+        let lines = CrontabParser.parse("0 9 * * * /bin/echo \"hello world\"\n")
+        guard case .job(let job) = lines[0] else {
+            return XCTFail("Expected job line")
+        }
+        XCTAssertEqual(job.command, "/bin/echo \"hello world\"")
+    }
+
+    func test_parseSystemJob() {
+        let lines = CrontabParser.parse("*/5 * * * * root /usr/libexec/atrun\n", format: .system)
+        guard case .job(let job) = lines[0] else {
+            return XCTFail("Expected job line")
+        }
+        XCTAssertEqual(job.minute, "*/5")
+        XCTAssertEqual(job.runAsUser, "root")
+        XCTAssertEqual(job.command, "/usr/libexec/atrun")
+        XCTAssertTrue(job.isEnabled)
+    }
+
+    func test_parseDisabledSystemJob() {
+        let lines = CrontabParser.parse("# 0 2 * * * daemon /usr/sbin/periodic daily\n", format: .system)
+        guard case .job(let job) = lines[0] else {
+            return XCTFail("Expected job line")
+        }
+        XCTAssertEqual(job.runAsUser, "daemon")
+        XCTAssertEqual(job.command, "/usr/sbin/periodic daily")
+        XCTAssertFalse(job.isEnabled)
+    }
+
+    func test_serializeSystemJob() {
+        let job = CronJob(
+            scope: .system,
+            minute: "0",
+            hour: "3",
+            dayOfMonth: "*",
+            month: "*",
+            weekday: "*",
+            runAsUser: "root",
+            command: "/usr/bin/find /tmp -mtime +7 -delete"
+        )
+        let serialized = CrontabParser.serialize([.job(job)], format: .system)
+        XCTAssertEqual(serialized, "0 3 * * * root /usr/bin/find /tmp -mtime +7 -delete\n")
+    }
+}
+
+// MARK: - BrewServicesService Tests
+
+final class BrewServicesServiceTests: XCTestCase {
+    private struct MockShell: ShellRunner {
+        let brewJSON: String
+        let launchctlOutputs: [String: String]
+
+        func run(_ path: String, arguments: [String]) throws -> String {
+            if path.hasSuffix("/brew"), arguments.first == "services" {
+                return brewJSON
+            }
+            if path.hasSuffix("/launchctl"), arguments.first == "print", arguments.count == 2 {
+                return launchctlOutputs[arguments[1]] ?? "Could not find service"
+            }
+            return ""
+        }
+    }
+
+    func test_listUserServices_parsesJSON() throws {
+        let json = """
+        [{"name":"colima","status":"started","user":"sean","file":"/opt/homebrew/opt/colima/homebrew.mxcl.colima.plist","exit_code":0}]
+        """
+        let service = BrewServicesService(
+            shell: MockShell(brewJSON: json, launchctlOutputs: [:]),
+            brewPath: "/opt/homebrew/bin/brew"
+        )
+        let items = try service.listServices(scope: .user)
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items[0].name, "colima")
+        XCTAssertEqual(items[0].status, .started)
+        XCTAssertEqual(items[0].label, "homebrew.mxcl.colima")
+    }
+
+    func test_listRootServices_usesSystemLaunchctlStatus() throws {
+        let json = """
+        [{"name":"nginx","status":"none","user":null,"file":"/opt/homebrew/opt/nginx/homebrew.mxcl.nginx.plist","exit_code":null}]
+        """
+        let tmp = FileManager.default.temporaryDirectory
+            .appendingPathComponent("brew-root-test-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tmp) }
+
+        let daemonPath = tmp.appendingPathComponent("homebrew.mxcl.nginx.plist")
+        try Data().write(to: daemonPath)
+
+        let brewService = BrewServicesService(
+            shell: MockShell(
+                brewJSON: json,
+                launchctlOutputs: ["system/homebrew.mxcl.nginx": "state = running\n"]
+            ),
+            brewPath: "/opt/homebrew/bin/brew",
+            systemDaemonDirectory: tmp.path
+        )
+
+        let items = try brewService.listServices(scope: .root)
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items[0].scope, .root)
+        XCTAssertEqual(items[0].status, .started)
+        XCTAssertEqual(items[0].plistPath, daemonPath.path)
+    }
+
+    func test_homebrewServiceStatus_mapping() {
+        XCTAssertEqual(HomebrewServiceStatus(brewStatus: "started"), .started)
+        XCTAssertEqual(HomebrewServiceStatus(brewStatus: "stopped"), .stopped)
+        XCTAssertEqual(HomebrewServiceStatus(brewStatus: "none"), .none)
+        XCTAssertEqual(HomebrewServiceStatus(brewStatus: "error"), .error)
+    }
+}

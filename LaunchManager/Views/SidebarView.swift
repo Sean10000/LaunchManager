@@ -3,6 +3,8 @@ import SwiftUI
 struct SidebarView: View {
     @Binding var selection: SidebarSelection?
     @ObservedObject var store: AgentStore
+    @ObservedObject var crontabStore: CrontabStore
+    @ObservedObject var homebrewStore: HomebrewServiceStore
 
     private var agentCount: Int {
         store.items.count + store.invalidItems.count
@@ -18,6 +20,28 @@ struct SidebarView: View {
                     subtitle: Text("用户 · 全局 · 系统"),
                     icon: "list.bullet.rectangle",
                     badge: agentCount
+                )
+            }
+
+            Section {
+                SidebarRowButton(
+                    selection: $selection,
+                    tag: .crontab,
+                    title: Text("Crontab"),
+                    subtitle: Text("用户 · 系统"),
+                    icon: "clock",
+                    badge: crontabStore.jobs.count
+                )
+            }
+
+            Section {
+                SidebarRowButton(
+                    selection: $selection,
+                    tag: .homebrew,
+                    title: Text("Homebrew Services"),
+                    subtitle: Text("用户 · 系统"),
+                    icon: "mug.fill",
+                    badge: homebrewStore.services.count
                 )
             }
 
