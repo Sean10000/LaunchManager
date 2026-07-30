@@ -9,7 +9,10 @@ import AppKit
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var moduleSettings = ModuleSettingsStore()
     @StateObject private var store = AgentStore()
+    @StateObject private var crontabStore = CrontabStore()
+    @StateObject private var homebrewStore = HomebrewServiceStore()
     @StateObject private var serviceStore = ServiceStore()
     @StateObject private var updateChecker = UpdateChecker()
     @Environment(\.scenePhase) private var scenePhase
@@ -17,13 +20,21 @@ struct ContentView: View {
     @State private var showingNewAgent = false
     @State private var showingNewFromXml = false
     @State private var newAgentScope: LaunchItem.Scope = .userAgent
+    @State private var showingNewCron = false
+    @State private var newCronScope: CrontabScope = .user
     @State private var serviceLaunchDraft: LaunchAgentDraft?
     @State private var searchText = ""
     @State private var errorMessage: String?
+    @State private var showModuleSettings = false
+    @State private var showHelpConfirm = false
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var showOnboarding = false
     @State private var showAbout = false
     @State private var pendingUpdateCheck = false
+
+    private var isCrontabView: Bool {
+        selection == .crontab
+    }
 
     private var isLoginItemsGuide: Bool {
         selection == .loginItems
@@ -39,19 +50,25 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            SidebarView(selection: $selection, store: store)
+            SidebarView(
+                selection: $selection,
+                moduleSettings: moduleSettings,
+                store: store,
+                crontabStore: crontabStore,
+                showModuleSettings: $showModuleSettings,
+                onHelpTapped: { showHelpConfirm = true }
+            )
         } detail: {
             detailView
         }
         .modifier(ConditionalSearchable(
-            isEnabled: isAgentsView && !isLoginItemsGuide && !isServicesView,
+            isEnabled: (isAgentsView || isCrontabView) && !isLoginItemsGuide && !isServicesView,
             text: $searchText,
-            prompt: "搜索 Label 或路径"
+            prompt: searchPrompt
         ))
         .onAppear {
-            store.refresh()
-            store.startWatching()
-            serviceStore.startPolling(isActive: scenePhase == .active)
+            ensureValidSelection()
+            syncModuleScanning()
             if !hasSeenOnboarding {
                 showOnboarding = true
                 hasSeenOnboarding = true
@@ -67,15 +84,35 @@ struct ContentView: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in
-            serviceStore.startPolling(isActive: phase == .active)
-            if phase == .active {
+            syncModuleScanning(active: phase == .active)
+        }
+        .onChange(of: selection) { _, newSelection in
+            guard let newSelection else { return }
+            refreshModuleIfNeeded(newSelection)
+        }
+        .onChange(of: moduleSettings.settings) { _, _ in
+            ensureValidSelection()
+            syncModuleScanning()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .brewServicesDidChange)) { _ in
+            if isAgentsView, moduleSettings.isEnabled(.agents) {
                 store.refresh()
             }
         }
-        .onChange(of: selection) { _, newSelection in
-            if newSelection == .services {
-                serviceStore.refreshNow()
+        .sheet(isPresented: $showModuleSettings) {
+            ModuleSettingsSheet(moduleSettings: moduleSettings)
+        }
+        .confirmationDialog(
+            "打开用户手册？",
+            isPresented: $showHelpConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("在浏览器中打开") {
+                NSWorkspace.shared.open(AppLinks.helpURL)
             }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("将在默认浏览器中打开 launchmanager.dev/help")
         }
         .sheet(isPresented: $showOnboarding) {
             OnboardingView(isPresented: $showOnboarding)
@@ -117,6 +154,14 @@ struct ContentView: View {
                 draft: draft
             )
         }
+        .sheet(isPresented: $showingNewCron) {
+            EditCronSheet(
+                existingJob: nil,
+                scope: newCronScope,
+                store: crontabStore,
+                errorMessage: $errorMessage
+            )
+        }
         .alert("错误", isPresented: Binding(
             get: { errorMessage != nil },
             set: { if !$0 { errorMessage = nil } }
@@ -146,29 +191,103 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detailView: some View {
-        switch selection {
+        if !isCurrentModuleEnabled {
+            ContentUnavailableView(
+                "模块已关闭",
+                systemImage: "gearshape",
+                description: Text("在左下角设置中启用此模块。")
+            )
+        } else {
+            switch selection {
+            case .services:
+                ServicesListView(
+                    store: serviceStore,
+                    errorMessage: $errorMessage,
+                    onCreateLaunchAgent: { draft in serviceLaunchDraft = draft }
+                )
+            case .crontab:
+                CronListView(
+                    store: crontabStore,
+                    searchText: searchText,
+                    newCronScope: $newCronScope,
+                    showingNewCron: $showingNewCron,
+                    errorMessage: $errorMessage
+                )
+            case .loginItems:
+                LoginItemsGuideView()
+            case .agents, .none:
+                AgentListView(
+                    store: store,
+                    homebrewStore: homebrewStore,
+                    searchText: searchText,
+                    newAgentScope: $newAgentScope,
+                    showingNewAgent: $showingNewAgent,
+                    showingNewFromXml: $showingNewFromXml,
+                    errorMessage: $errorMessage
+                )
+            }
+        }
+    }
+
+    private var isCurrentModuleEnabled: Bool {
+        guard let selection, let module = selection.appModule else { return true }
+        return moduleSettings.isEnabled(module)
+    }
+
+    private var searchPrompt: LocalizedStringKey {
+        if isCrontabView {
+            return "搜索命令或计划"
+        }
+        return "搜索 Label、路径或 formula"
+    }
+
+    private func ensureValidSelection() {
+        if let current = selection,
+           let module = current.appModule,
+           moduleSettings.isEnabled(module) {
+            return
+        }
+        selection = moduleSettings.settings.firstEnabledSelection
+    }
+
+    private func syncModuleScanning(active: Bool = true) {
+        let settings = moduleSettings.settings
+
+        if settings.agents {
+            store.refresh()
+            store.startWatching()
+            homebrewStore.refresh()
+        } else {
+            store.stopWatching()
+        }
+
+        if settings.crontab {
+            crontabStore.refresh()
+        }
+
+        if settings.services, active {
+            serviceStore.startPolling(isActive: true)
+        } else {
+            serviceStore.stopPolling()
+        }
+    }
+
+    private func refreshModuleIfNeeded(_ selection: SidebarSelection) {
+        guard let module = selection.appModule, moduleSettings.isEnabled(module) else { return }
+        switch module {
         case .services:
-            ServicesListView(
-                store: serviceStore,
-                errorMessage: $errorMessage,
-                onCreateLaunchAgent: { draft in serviceLaunchDraft = draft }
-            )
+            serviceStore.refreshNow()
+        case .crontab:
+            crontabStore.refresh()
         case .loginItems:
-            LoginItemsGuideView()
-        case .agents, .none:
-            AgentListView(
-                store: store,
-                searchText: searchText,
-                newAgentScope: $newAgentScope,
-                showingNewAgent: $showingNewAgent,
-                showingNewFromXml: $showingNewFromXml,
-                errorMessage: $errorMessage
-            )
+            break
+        case .agents:
+            homebrewStore.refresh()
         }
     }
 }
 
-/// Applies `.searchable` only when listing launchd agents (hidden on Login Items guide).
+/// Applies `.searchable` when listing launchd agents or crontab jobs.
 private struct ConditionalSearchable: ViewModifier {
     let isEnabled: Bool
     @Binding var text: String

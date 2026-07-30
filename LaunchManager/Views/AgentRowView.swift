@@ -2,6 +2,9 @@ import SwiftUI
 
 struct AgentRowView: View {
     let item: LaunchItem
+    let brewService: HomebrewService?
+    let brewPending: PendingOperation?
+    let brewActions: BrewRowActions?
     @ObservedObject var store: AgentStore
     @Binding var errorMessage: String?
 
@@ -12,8 +15,12 @@ struct AgentRowView: View {
     @State private var showingDeleteConfirm = false
     @State private var pulseOpacity = false
 
+    private var usesBrewOperations: Bool {
+        item.isBrewManaged && brewService != nil && brewActions != nil
+    }
+
     private var pending: PendingOperation? {
-        store.pendingOperations[item.label]
+        brewPending ?? store.pendingOperations[item.label]
     }
 
     private var isRowLocked: Bool {
@@ -22,27 +29,50 @@ struct AgentRowView: View {
 
     var statusColor: Color {
         if pending != nil { return .yellow }
+        if usesBrewOperations, let brewService {
+            switch brewService.status {
+            case .started:
+                return item.pid != nil ? .green : .yellow
+            case .stopped:
+                if item.pid != nil { return .yellow }
+                return .orange
+            case .error: return .red
+            case .none: return Color(nsColor: .tertiaryLabelColor)
+            case .unknown: return .yellow
+            }
+        }
         if item.isDisabledByOverride && item.pid == nil { return .orange }
         if item.pid != nil { return .green }
         if let code = item.lastExitCode {
             if code == 0  { return .blue.opacity(0.7) }
             if code > 0   { return .yellow }
-            // negative code = killed by signal (intentional stop) → gray
         }
         return Color(nsColor: .tertiaryLabelColor)
     }
 
-    var statusTooltip: LocalizedStringKey {
+    private var statusTooltip: String {
         if item.isDisabledByOverride {
-            return "已被系统禁用（launchctl override）"
+            return String(localized: "已被系统禁用（launchctl override）")
         }
-        if let pid = item.pid { return "运行中 (PID \(pid))" }
+        if usesBrewOperations, let brewService {
+            if let exitCode = brewService.exitCode, brewService.status == .error {
+                return "Homebrew: \(brewService.status.localizedName) (退出码 \(exitCode))"
+            }
+            if brewService.status == .stopped, item.pid != nil {
+                return String(localized: "Brew 已停止，但进程仍在运行 (PID \(item.pid!))")
+            }
+            if brewService.status == .started, item.pid == nil {
+                return String(localized: "Brew: 运行中，等待进程启动")
+            }
+            return "Homebrew: \(brewService.status.localizedName)"
+        }
+        if let pid = item.pid { return String(localized: "运行中 (PID \(pid))") }
         if let code = item.lastExitCode {
-            if code == 0  { return "上次执行：正常退出 (0)" }
-            if code < 0   { return "已停止 (信号 \(-code))" }
-            return "上次执行：退出码 \(code)"
+            if code == 0  { return String(localized: "上次执行：正常退出 (0)") }
+            if code < 0   { return String(localized: "已停止 (信号 \(-code))") }
+            return String(localized: "上次执行：退出码 \(code)")
         }
-        return item.isLoaded ? "已加载，等待触发" : "未加载"
+        return String(localized: item.isLoaded ? "已加载，等待触发" : "未加载")
     }
 
     var body: some View {
@@ -60,7 +90,10 @@ struct AgentRowView: View {
                     .onChange(of: isRowLocked) { _, locked in
                         pulseOpacity = locked
                     }
-                    .help(statusTooltip)
+                    .help(Text(statusTooltip))
+                if item.isBrewManaged {
+                    HomebrewTag()
+                }
                 Text(item.label)
                     .font(.system(.body, design: .monospaced))
                     .lineLimit(1)
@@ -94,11 +127,32 @@ struct AgentRowView: View {
             if isExpanded {
                 Divider()
                 VStack(alignment: .leading, spacing: 4) {
+                    if let formula = item.brewFormulaName {
+                        detailRow("Formula", formula)
+                    }
+                    if usesBrewOperations, let brewService {
+                        detailRow("管理方式", String(localized: "brew services"))
+                        detailRow("Brew 状态", brewService.status.localizedName)
+                        if let exitCode = brewService.exitCode {
+                            detailRow("退出码", "\(exitCode)")
+                        }
+                        if let user = brewService.runAsUser {
+                            detailRow("用户", user)
+                        }
+                    }
                     detailRow("程序", FilePathNormalizer.display(([item.program] + item.programArguments).joined(separator: " ")))
                     detailRow("触发", triggerDescription)
                     detailRow("路径", FilePathNormalizer.display(item.plistURL.path))
                     HStack(spacing: 8) {
-                        if item.isLoaded {
+                        if usesBrewOperations, let brewService, let brewActions {
+                            if brewService.isRunning {
+                                Button("重启") {
+                                    brewActions.onRestart(brewService)
+                                }
+                                .buttonStyle(.bordered).controlSize(.small)
+                                .disabled(isRowLocked)
+                            }
+                        } else if item.isLoaded {
                             Button("移除") {
                                 store.bootout(item) { errorMessage = $0 }
                             }
@@ -159,6 +213,18 @@ struct AgentRowView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
             .disabled(true)
+        } else if usesBrewOperations, let brewService, let brewActions {
+            if brewService.isRunning {
+                Button("停止") {
+                    brewActions.onStop(brewService)
+                }
+                .buttonStyle(.borderedProminent).controlSize(.small)
+            } else {
+                Button("启动") {
+                    brewActions.onStart(brewService)
+                }
+                .buttonStyle(.bordered).controlSize(.small)
+            }
         } else if item.pid != nil {
             Button("停止") {
                 store.stop(item) { errorMessage = $0 }
@@ -186,7 +252,7 @@ struct AgentRowView: View {
         HStack(alignment: .top, spacing: 8) {
             Text(label)
                 .foregroundStyle(.secondary)
-                .frame(width: 36, alignment: .leading)
+                .frame(width: 56, alignment: .leading)
             Text(value)
                 .font(.system(.caption, design: .monospaced))
                 .textSelection(.enabled)

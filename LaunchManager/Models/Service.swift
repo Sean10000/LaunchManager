@@ -67,4 +67,16 @@ struct Service: Identifiable, Hashable, Sendable {
         if case .blocked(let reason) = stopMethod { return reason }
         return nil
     }
+
+    var brewFormulaName: String? {
+        BrewManagedSupport.formulaName(fromExecutable: executable)
+    }
+
+    var isHomebrewManaged: Bool {
+        brewFormulaName != nil
+    }
+
+    var brewLaunchdLabel: String? {
+        brewFormulaName.map { BrewManagedSupport.label(forFormula: $0) }
+    }
 }

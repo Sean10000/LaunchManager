@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Crontab** — browse, create, edit, enable/disable, and delete user and system (`/etc/crontab`) cron jobs from the sidebar (similar to Launch Agents). System writes use the same admin password prompt as system LaunchAgents.
+- **Homebrew Services** — list, start, stop, and restart `brew services` for user and system scopes; system operations use the same `PrivilegeService` admin prompt as system LaunchAgents.
+
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
 ## [1.7.0] - 2026-07-06
