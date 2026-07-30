@@ -6,9 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Localization fallback** — non-English/Chinese systems now default to English instead of Chinese (Issue #5).
+- **Login Items** — updated to use `SMAppService.openSystemSettingsLoginItems()` on macOS 13+.
+
 ### Added
-- **Crontab** — browse, create, edit, enable/disable, and delete user and system (`/etc/crontab`) cron jobs from the sidebar (similar to Launch Agents). System writes use the same admin password prompt as system LaunchAgents.
-- **Homebrew Services** — list, start, stop, and restart `brew services` for user and system scopes; system operations use the same `PrivilegeService` admin prompt as system LaunchAgents.
+- **Crontab** — browse, create, edit, enable/disable, and delete user and system (`/etc/crontab`) cron jobs from the sidebar. System writes use the same admin password prompt as system LaunchAgents.
+- **Homebrew integration** — Homebrew services merged into Launch Agents list; filter by Homebrew tag, detect brew-managed plists; start/stop/restart from agent rows; register unregistered brew services.
+- **Module settings** — enable/disable Agents, Crontab, Login Items, and Services from sidebar bottom gear icon.
+- **User manual link** — sidebar "用户手册" button opens launchmanager.dev/help.
+
+### Changed
+- **Sidebar** — dynamic module list adapts to enabled/disabled modules.
 
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
