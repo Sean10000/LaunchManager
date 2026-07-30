@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+<!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
+
+## [1.7.1] - 2026-07-30
+
 ### Fixed
 - **Localization fallback** — non-English/Chinese systems now default to English instead of Chinese (Issue #5).
 - **Login Items** — updated to use `SMAppService.openSystemSettingsLoginItems()` on macOS 13+.
@@ -19,7 +23,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - **Sidebar** — dynamic module list adapts to enabled/disabled modules.
 
-<!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
 ## [1.7.0] - 2026-07-06
 
