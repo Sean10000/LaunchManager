@@ -1320,3 +1320,70 @@ final class BrewServicesServiceTests: XCTestCase {
         XCTAssertEqual(HomebrewServiceStatus(brewStatus: "error"), .error)
     }
 }
+
+// MARK: - BrewManagedSupport Tests
+
+final class BrewManagedSupportTests: XCTestCase {
+    func test_formulaName_fromLabel() {
+        XCTAssertEqual(
+            BrewManagedSupport.formulaName(fromLabel: "homebrew.mxcl.cloudflared"),
+            "cloudflared"
+        )
+        XCTAssertNil(BrewManagedSupport.formulaName(fromLabel: "com.cloudflare.cloudflared"))
+    }
+
+    func test_formulaName_fromExecutable_optPath() {
+        XCTAssertEqual(
+            BrewManagedSupport.formulaName(fromExecutable: "/opt/homebrew/opt/postgresql@16/bin/postgres"),
+            "postgresql@16"
+        )
+    }
+
+    func test_formulaName_fromExecutable_binPath() {
+        XCTAssertEqual(
+            BrewManagedSupport.formulaName(fromExecutable: "/opt/homebrew/bin/cloudflared"),
+            "cloudflared"
+        )
+    }
+
+    func test_launchItem_brewManaged() {
+        let item = LaunchItem(
+            label: "homebrew.mxcl.cloudflared",
+            plistURL: URL(fileURLWithPath: "/tmp/test.plist"),
+            scope: .userAgent,
+            program: "/opt/homebrew/bin/cloudflared",
+            programArguments: [],
+            triggerType: .atLoad,
+            calendarInterval: nil,
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: true,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            isLoaded: false
+        )
+        XCTAssertTrue(item.isBrewManaged)
+        XCTAssertEqual(item.brewFormulaName, "cloudflared")
+    }
+}
+
+// MARK: - ModuleSettings Tests
+
+final class ModuleSettingsTests: XCTestCase {
+    func test_requiresAtLeastOneEnabledModule() {
+        var settings = ModuleSettings()
+        XCTAssertTrue(settings.setEnabled(.agents, enabled: false))
+        XCTAssertTrue(settings.setEnabled(.crontab, enabled: false))
+        XCTAssertTrue(settings.setEnabled(.loginItems, enabled: false))
+        XCTAssertFalse(settings.setEnabled(.services, enabled: false))
+        XCTAssertTrue(settings.isEnabled(.services))
+    }
+
+    func test_enableAll() {
+        var settings = ModuleSettings(agents: false, crontab: false, loginItems: false, services: true)
+        settings.enableAll()
+        XCTAssertEqual(settings.enabledCount, 4)
+    }
+}

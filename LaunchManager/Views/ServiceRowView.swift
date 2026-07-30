@@ -27,6 +27,10 @@ struct ServiceRowView: View {
                     .frame(width: 8, height: 8)
                     .help("PID \(service.pid)")
 
+                if service.isHomebrewManaged {
+                    HomebrewTag()
+                }
+
                 summaryText
                     .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
 
@@ -54,6 +58,12 @@ struct ServiceRowView: View {
                 Divider()
                 VStack(alignment: .leading, spacing: 4) {
                     renameSection
+                    if service.isHomebrewManaged, let formula = service.brewFormulaName {
+                        detailRow("来源", "Homebrew · \(formula)")
+                        if let label = service.brewLaunchdLabel {
+                            detailRow("Launchd", label)
+                        }
+                    }
                     if service.identityKind == .hostMechanism {
                         detailRow("类型", String(localized: "宿主机制"))
                     }

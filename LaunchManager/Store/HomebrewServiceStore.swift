@@ -8,6 +8,7 @@ final class HomebrewServiceStore: ObservableObject {
     @Published var pendingOperations: [String: PendingOperation] = [:]
 
     private let service: BrewServicesService
+    private var refreshTask: Task<Void, Never>?
 
     init(service: BrewServicesService = BrewServicesService()) {
         self.service = service
@@ -18,54 +19,74 @@ final class HomebrewServiceStore: ObservableObject {
         HomebrewServiceScope.allCases.flatMap { services(for: $0) }
     }
 
+    var servicesByLabel: [String: HomebrewService] {
+        Dictionary(services.map { ($0.label, $0) }, uniquingKeysWith: { first, _ in first })
+    }
+
     func services(for scope: HomebrewServiceScope) -> [HomebrewService] {
         servicesByScope[scope] ?? []
     }
 
-    func refresh() {
-        guard !isRefreshing else { return }
+    func refresh(notifyAgentsOnComplete: Bool = false) {
+        refreshTask?.cancel()
         isRefreshing = true
-        defer { isRefreshing = false }
+        let brewService = service
 
-        brewAvailable = service.isBrewAvailable
-        guard brewAvailable else {
-            servicesByScope = [:]
-            return
-        }
+        refreshTask = Task {
+            let available = brewService.isBrewAvailable
+            var updated: [HomebrewServiceScope: [HomebrewService]] = [:]
 
-        var updated: [HomebrewServiceScope: [HomebrewService]] = [:]
-        for scope in HomebrewServiceScope.allCases {
-            do {
-                updated[scope] = try service.listServices(scope: scope)
-            } catch {
-                updated[scope] = servicesByScope[scope] ?? []
+            if available {
+                for scope in HomebrewServiceScope.allCases {
+                    if Task.isCancelled { return }
+                    let items = await Task.detached(priority: .userInitiated) {
+                        (try? brewService.listServices(scope: scope)) ?? []
+                    }.value
+                    updated[scope] = items
+                }
+            }
+
+            guard !Task.isCancelled else {
+                isRefreshing = false
+                return
+            }
+
+            brewAvailable = available
+            servicesByScope = available ? updated : [:]
+            isRefreshing = false
+
+            if notifyAgentsOnComplete {
+                NotificationCenter.default.post(name: .brewServicesDidChange, object: nil)
             }
         }
-        servicesByScope = updated
     }
 
     func start(_ item: HomebrewService, onError: @escaping (String) -> Void = { _ in }) {
         runPending(item, .starting, operationName: String(localized: "启动"), onError: onError) {
             try self.service.start(item.name, scope: item.scope)
-            self.refresh()
+            self.refreshAfterMutation()
         }
     }
 
     func stop(_ item: HomebrewService, onError: @escaping (String) -> Void = { _ in }) {
         runPending(item, .stopping, operationName: String(localized: "停止"), onError: onError) {
             try self.service.stop(item.name, scope: item.scope)
-            self.refresh()
+            self.refreshAfterMutation()
         }
     }
 
     func restart(_ item: HomebrewService, onError: @escaping (String) -> Void = { _ in }) {
         runPending(item, .restarting, operationName: String(localized: "重启"), onError: onError) {
             try self.service.restart(item.name, scope: item.scope)
-            self.refresh()
+            self.refreshAfterMutation()
         }
     }
 
     // MARK: - Private
+
+    private func refreshAfterMutation() {
+        refresh(notifyAgentsOnComplete: true)
+    }
 
     private func runPending(
         _ item: HomebrewService,

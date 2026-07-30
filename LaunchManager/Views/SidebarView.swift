@@ -1,74 +1,94 @@
+import AppKit
 import SwiftUI
 
 struct SidebarView: View {
     @Binding var selection: SidebarSelection?
+    @ObservedObject var moduleSettings: ModuleSettingsStore
     @ObservedObject var store: AgentStore
     @ObservedObject var crontabStore: CrontabStore
-    @ObservedObject var homebrewStore: HomebrewServiceStore
+    @Binding var showModuleSettings: Bool
+    var onHelpTapped: () -> Void
 
     private var agentCount: Int {
         store.items.count + store.invalidItems.count
     }
 
+    private var enabledModules: [AppModule] {
+        moduleSettings.settings.enabledModules
+    }
+
     var body: some View {
-        List {
-            Section {
-                SidebarRowButton(
-                    selection: $selection,
-                    tag: .agents,
-                    title: Text("Launch Agents"),
-                    subtitle: Text("用户 · 全局 · 系统"),
-                    icon: "list.bullet.rectangle",
-                    badge: agentCount
-                )
-            }
+        VStack(spacing: 0) {
+            List {
+                Section {
+                    ForEach(enabledModules) { module in
+                        SidebarRowButton(
+                            selection: $selection,
+                            tag: module.sidebarSelection,
+                            title: Text(module.title),
+                            subtitle: Text(module.subtitle),
+                            icon: module.systemImage,
+                            badge: badge(for: module)
+                        )
+                    }
+                }
 
-            Section {
-                SidebarRowButton(
-                    selection: $selection,
-                    tag: .crontab,
-                    title: Text("Crontab"),
-                    subtitle: Text("用户 · 系统"),
-                    icon: "clock",
-                    badge: crontabStore.jobs.count
-                )
+                Section {
+                    Button {
+                        onHelpTapped()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "book.fill")
+                                .frame(width: 20)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("用户手册")
+                                Text("launchmanager.dev/help")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .listStyle(.sidebar)
+            .navigationTitle("LaunchManager")
 
-            Section {
-                SidebarRowButton(
-                    selection: $selection,
-                    tag: .homebrew,
-                    title: Text("Homebrew Services"),
-                    subtitle: Text("用户 · 系统"),
-                    icon: "mug.fill",
-                    badge: homebrewStore.services.count
-                )
-            }
+            Divider()
 
-            Section {
-                SidebarRowButton(
-                    selection: $selection,
-                    tag: .loginItems,
-                    title: Text("Login Items"),
-                    subtitle: Text("说明 · 系统设置"),
-                    icon: "key.fill",
-                    badge: 0
-                )
-            }
+            HStack(spacing: 10) {
+                Button {
+                    showModuleSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 15))
+                }
+                .buttonStyle(.plain)
+                .help("模块设置")
 
-            Section {
-                SidebarRowButton(
-                    selection: $selection,
-                    tag: .services,
-                    title: Text("Services"),
-                    subtitle: Text("本地开发环境"),
-                    icon: "bolt.fill",
-                    badge: 0
-                )
+                Spacer()
+
+                Text(AppVersion.current.displayString)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
-        .listStyle(.sidebar)
-        .navigationTitle("LaunchManager")
+    }
+
+    private func badge(for module: AppModule) -> Int {
+        switch module {
+        case .agents: return agentCount
+        case .crontab: return crontabStore.jobs.count
+        case .loginItems, .services: return 0
+        }
     }
 }
 

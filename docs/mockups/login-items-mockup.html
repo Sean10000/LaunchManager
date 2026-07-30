@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LaunchManager — Login Items 原型</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      background: #1e1e1e;
+      color: #e8e8e8;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .app {
+      display: flex;
+      height: 100vh;
+      border: 1px solid #3a3a3c;
+      margin: 12px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,.45);
+    }
+    .titlebar {
+      position: absolute;
+      top: 12px; left: 12px; right: 12px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding-left: 72px;
+      background: linear-gradient(#3d3d3d, #323232);
+      border-radius: 10px 10px 0 0;
+      border: 1px solid #3a3a3c;
+      border-bottom: none;
+      z-index: 10;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .traffic { position: absolute; left: 16px; top: 20px; display: flex; gap: 8px; z-index: 11; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #febc2e; }
+    .dot.g { background: #28c840; }
+    .shell { display: flex; flex: 1; margin-top: 28px; height: calc(100% - 28px); }
+    .sidebar {
+      width: 220px;
+      background: #2b2b2b;
+      border-right: 1px solid #3a3a3c;
+      padding: 12px 8px;
+      flex-shrink: 0;
+    }
+    .sidebar h1 { font-size: 15px; font-weight: 600; padding: 8px 12px 16px; color: #fff; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #ccc;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover { background: #3a3a3c; }
+    .nav-item.active { background: #0a84ff; color: #fff; }
+    .nav-item .meta { font-size: 11px; color: #888; margin-left: auto; }
+    .nav-item.active .meta { color: rgba(255,255,255,.7); }
+    .icon { width: 20px; text-align: center; opacity: .85; }
+    .main { flex: 1; display: flex; flex-direction: column; background: #1c1c1e; min-width: 0; }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #3a3a3c;
+      background: #252525;
+    }
+    .search {
+      flex: 1;
+      max-width: 280px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #48484a;
+      background: #1c1c1e;
+      color: #e8e8e8;
+      font-size: 13px;
+    }
+    .btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid #48484a;
+      background: #3a3a3c;
+      color: #e8e8e8;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn.primary { background: #0a84ff; border-color: #0a84ff; color: #fff; }
+    .btn:hover { filter: brightness(1.1); }
+    .content { flex: 1; overflow-y: auto; padding: 12px 16px; }
+    .row {
+      background: #2c2c2e;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+    .row-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+    .status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status.on { background: #30d158; }
+    .status.off { background: #636366; }
+    .status.warn { background: #ffd60a; }
+    .status.block { background: #ff453a; }
+    .row-title {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 13px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .row-actions .btn { padding: 4px 10px; font-size: 11px; }
+    .row-detail {
+      padding: 0 12px 12px 48px;
+      font-size: 12px;
+      color: #98989d;
+      line-height: 1.6;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-right: 6px;
+      margin-top: 4px;
+    }
+    .badge.type { background: #3a3a5c; color: #aeb8ff; }
+    .badge.dup { background: #3d3520; color: #ffd60a; }
+    .badge.dis { background: #3d2020; color: #ff9f9f; }
+    .badge.ok { background: #1e3d2a; color: #30d158; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .note {
+      background: #2a2a1a;
+      border: 1px solid #5c5c20;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: #d4c86a;
+      line-height: 1.5;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 11px;
+      color: #888;
+    }
+    .legend span { padding: 4px 8px; background: #2c2c2e; border-radius: 4px; }
+    .tabs-decision {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: #0a84ff;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(10,132,255,.4);
+    }
+    #decision-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #decision-modal.open { display: flex; }
+    .modal-box {
+      background: #2c2c2e;
+      border-radius: 12px;
+      max-width: 520px;
+      padding: 24px;
+      border: 1px solid #48484a;
+    }
+    .modal-box h3 { margin-bottom: 12px; font-size: 16px; }
+    .modal-box ul { font-size: 13px; line-height: 1.7; color: #ccc; padding-left: 20px; }
+    .modal-box .btn { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="traffic">
+    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+  </div>
+  <div class="titlebar">LaunchManager — UI 原型（决策用）</div>
+
+  <div class="app" style="margin-top: 40px; height: calc(100vh - 52px);">
+    <div class="shell">
+      <aside class="sidebar">
+        <h1>LaunchManager</h1>
+        <div class="nav-item" data-panel="agents" onclick="selectNav(this)">
+          <span class="icon">👤</span>
+          <div>
+            <div>LaunchAgent</div>
+            <div style="font-size:11px;color:#888">用户级 · ~/Library</div>
+          </div>
+          <span class="meta">12</span>
+        </div>
+        <div class="nav-item" data-panel="agents" onclick="selectNav(this)">
+          <span class="icon">⚙️</span>
+          <div>
+            <div>LaunchAgent</div>
+            <div style="font-size:11px;color:#888">全局 · /Library</div>
+          </div>
+          <span class="meta">8</span>
+        </div>
+        <div class="nav-item" data-panel="agents" onclick="selectNav(this)">
+          <span class="icon">🖥</span>
+          <div>
+            <div>LaunchDaemon</div>
+            <div style="font-size:11px;color:#888">系统级 · /Library</div>
+          </div>
+          <span class="meta">24</span>
+        </div>
+        <div class="nav-item active" data-panel="login" onclick="selectNav(this)">
+          <span class="icon">🔑</span>
+          <div>
+            <div><strong>Login Items</strong></div>
+            <div style="font-size:11px;color:#888">系统设置 · BTM</div>
+          </div>
+          <span class="meta">18</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div id="panel-login" class="panel active">
+          <div class="toolbar">
+            <input class="search" type="search" placeholder="搜索名称、Identifier 或路径" />
+            <button class="btn">刷新</button>
+            <button class="btn primary">打开登录项设置</button>
+          </div>
+          <div class="content">
+            <div class="note">
+              数据来源：<code>sfltool dumpbtm</code>（与「系统设置 → 通用 → 登录项」一致）。
+              有 plist 的项可「载入/移除」；其余项请用「系统设置」开关（Apple 无公开 API）。
+            </div>
+            <div class="legend">
+              <span>🟢 已启用且允许</span>
+              <span>🟡 已在 LaunchAgents 中</span>
+              <span>🔴 已禁用或未允许</span>
+            </div>
+
+            <div class="row">
+              <div class="row-header">
+                <span class="status on"></span>
+                <span class="row-title">ScriptRunner.app</span>
+                <div class="row-actions">
+                  <button class="btn">系统设置</button>
+                </div>
+              </div>
+              <div class="row-detail">
+                <span class="badge type">app · SMAppService</span>
+                <span class="badge ok">enabled · allowed</span><br/>
+                Identifier: com.example.ScriptRunner<br/>
+                /Applications/ScriptRunner.app
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="row-header">
+                <span class="status on"></span>
+                <span class="row-title">com.cloudflare.cloudflared</span>
+                <div class="row-actions">
+                  <button class="btn">移除</button>
+                  <button class="btn">系统设置</button>
+                </div>
+              </div>
+              <div class="row-detail">
+                <span class="badge type">legacy daemon</span>
+                <span class="badge dup">已在 LaunchDaemons</span>
+                <span class="badge ok">enabled · allowed</span><br/>
+                /Library/LaunchDaemons/com.cloudflare.cloudflared.plist<br/>
+                /usr/local/bin/cloudflared
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="row-header">
+                <span class="status block"></span>
+                <span class="row-title">GoogleUpdater</span>
+                <div class="row-actions">
+                  <button class="btn primary">载入</button>
+                  <button class="btn">系统设置</button>
+                </div>
+              </div>
+              <div class="row-detail">
+                <span class="badge type">legacy daemon</span>
+                <span class="badge dup">已在 LaunchDaemons</span>
+                <span class="badge dis">disabled · disallowed</span><br/>
+                需在系统设置中「允许」后才能启用
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="row-header">
+                <span class="status warn"></span>
+                <span class="row-title">ClashX.ProxyConfigHelper</span>
+                <div class="row-actions">
+                  <button class="btn">系统设置</button>
+                </div>
+              </div>
+              <div class="row-detail">
+                <span class="badge type">developer</span>
+                <span class="badge dis">disabled · allowed</span><br/>
+                嵌入式 Helper，无独立 plist 操作
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-agents" class="panel">
+          <div class="toolbar">
+            <input class="search" type="search" placeholder="搜索 Label 或路径" />
+            <button class="btn primary">+ 新建</button>
+            <button class="btn">刷新</button>
+          </div>
+          <div class="content">
+            <div class="note" style="background:#1a2a3d;border-color:#2a5080;color:#7eb8ff;">
+              现有界面保持不变：按 plist 目录分三类。Login Items 为第四类独立列表。
+            </div>
+            <div class="row">
+              <div class="row-header">
+                <span class="status on"></span>
+                <span class="row-title">com.cloudflare.cloudflared</span>
+                <div class="row-actions">
+                  <button class="btn">停止</button>
+                  <button class="btn">✎</button>
+                  <button class="btn">🗑</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="tabs-decision" onclick="document.getElementById('decision-modal').classList.add('open')">
+    决策要点
+  </div>
+  <div id="decision-modal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h3>原型说明（v1.5 方案）</h3>
+      <ul>
+        <li>侧边栏第 4 项：<strong>Login Items</strong>，与三类 launchd 并列</li>
+        <li>列表来自 BTM（dumpbtm），展示类型、Disposition、路径</li>
+        <li>与 launchd 重复项显示黄色徽章「已在 LaunchDaemons」</li>
+        <li>有 plist：载入 / 移除（复用 bootstrap/bootout）</li>
+        <li>无 plist 或需用户授权：仅「打开登录项设置」</li>
+        <li>不做：在应用内直接切换 BTM 开关（无公开 API）</li>
+      </ul>
+      <button class="btn primary" onclick="document.getElementById('decision-modal').classList.remove('open')">关闭</button>
+    </div>
+  </div>
+
+  <script>
+    function selectNav(el) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
+      const panel = el.dataset.panel;
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + panel).classList.add('active');
+    }
+  </script>
+</body>
+</html>

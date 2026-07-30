@@ -1,2572 +1,3479 @@
 {
-  "sourceLanguage" : "zh-Hans",
-  "strings" : {
-    "" : {
-
-    },
-    " *" : {
-
-    },
-    ":" : {
-
-    },
-    "…（仅显示文件末尾 %lld KB）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "…(showing last %lld KB of file)"
-          }
-        }
-      }
-    },
-    "·" : {
-
-    },
-    "（无日志）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(No logs)"
-          }
-        }
-      }
-    },
-    "（日志为空）" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "(Log is empty)"
-          }
-        }
-      }
-    },
-    "/Library/LaunchAgents" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/Library/LaunchAgents"
-          }
-        }
-      }
-    },
-    "/Library/LaunchDaemons" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "/Library/LaunchDaemons"
-          }
-        }
-      }
-    },
-    "%@失败" : {
-
-    },
-    "%@失败：%@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@失败：%2$@"
-          }
-        }
-      }
-    },
-    "%@失败：%@\n\n%@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@失败：%2$@\n\n%3$@"
-          }
-        }
-      }
-    },
-    "%lld" : {
-
-    },
-    "~/Library/LaunchAgents" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "~/Library/LaunchAgents"
-          }
-        }
-      }
-    },
-    "⚠️ 无法解析" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚠️ Cannot Parse"
-          }
-        }
-      }
-    },
-    "🚀" : {
-
-    },
-    "Compose" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compose"
-          }
-        }
-      }
-    },
-    "Copy" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy"
-          }
-        }
-      }
-    },
-    "Copy URL" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy URL"
-          }
-        }
-      }
-    },
-    "Docker 端口转发" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Docker Port Forward"
-          }
-        }
-      }
-    },
-    "GitHub: Sean10000/LaunchManager" : {
-
-    },
-    "Homebrew 升级" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upgrade via Homebrew"
-          }
-        }
-      }
-    },
-    "Invalid plist" : {
-
-    },
-    "KeepAlive 使用了表单不支持的格式，请使用 XML 模式编辑。" : {
-
-    },
-    "KEY" : {
-
-    },
-    "Kill Process…" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kill Process…"
-          }
-        }
-      }
-    },
-    "Label" : {
-
-    },
-    "Label 已存在" : {
-
-    },
-    "Launch Agents" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launch Agents"
-          }
-        }
-      }
-    },
-    "Crontab" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Crontab"
-          }
-        }
-      }
-    },
-    "用户定时任务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User scheduled jobs"
-          }
-        }
-      }
-    },
-    "没有 Cron 任务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No cron jobs"
-          }
-        }
-      }
-    },
-    "用户 crontab 与 /etc/crontab 均为空，点击「新建」添加定时任务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Both user crontab and /etc/crontab are empty. Click New to add a scheduled job."
-          }
-        }
-      }
-    },
-    "用户 · 系统" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User · System"
-          }
-        }
-      }
-    },
-    "用户 Crontab" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User Crontab"
-          }
-        }
-      }
-    },
-    "系统 Crontab" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Crontab"
-          }
-        }
-      }
-    },
-    "新建用户 Cron 任务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New User Cron Job"
-          }
-        }
-      }
-    },
-    "新建系统 Cron 任务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New System Cron Job"
-          }
-        }
-      }
-    },
-    "运行用户" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Run as user"
-          }
-        }
-      }
-    },
-    "保存时将提示输入管理员密码，与系统 LaunchAgent 写入方式相同。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saving will prompt for an administrator password, same as writing a system LaunchAgent."
-          }
-        }
-      }
-    },
-    "写入时需管理员密码" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requires admin password to write"
-          }
-        }
-      }
-    },
-    "文件头部" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "File header"
-          }
-        }
-      }
-    },
-    "搜索命令或计划" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search command or schedule"
-          }
-        }
-      }
-    },
-    "新建 Cron 任务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New Cron Job"
-          }
-        }
-      }
-    },
-    "编辑 Cron 任务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit Cron Job"
-          }
-        }
-      }
-    },
-    "Crontab 头部" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Crontab header"
-          }
-        }
-      }
-    },
-    "Homebrew Services" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew Services"
-          }
-        }
-      }
-    },
-    "用户服务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User Services"
-          }
-        }
-      }
-    },
-    "系统服务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Services"
-          }
-        }
-      }
-    },
-    "brew services · ~/Library/LaunchAgents" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brew services · ~/Library/LaunchAgents"
-          }
-        }
-      }
-    },
-    "sudo brew services · /Library/LaunchDaemons" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sudo brew services · /Library/LaunchDaemons"
-          }
-        }
-      }
-    },
-    "未找到 Homebrew" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew Not Found"
-          }
-        }
-      }
-    },
-    "请安装 Homebrew，或确认 /opt/homebrew/bin/brew 可用。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Install Homebrew, or ensure /opt/homebrew/bin/brew is available."
-          }
-        }
-      }
-    },
-    "没有 Homebrew 服务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Homebrew services"
-          }
-        }
-      }
-    },
-    "通过 brew install 安装带 service 的 formula 后，会显示在这里" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Install a formula with a service definition via brew install to see it here."
-          }
-        }
-      }
-    },
-    "搜索服务名或 Label" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search service name or label"
-          }
-        }
-      }
-    },
-    "运行中" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Running"
-          }
-        }
-      }
-    },
-    "未注册" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not registered"
-          }
-        }
-      }
-    },
-    "启动/停止时需管理员密码" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Admin password required to start/stop"
-          }
-        }
-      }
-    },
-    "重启中…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restarting…"
-          }
-        }
-      }
-    },
-    "Launchd（本应用管理）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launchd (managed in this app)"
-          }
-        }
-      }
-    },
-    "LaunchDaemons" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LaunchDaemons"
-          }
-        }
-      }
-    },
-    "LaunchManager" : {
-
-    },
-    "LaunchManager %@ 已发布" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LaunchManager %@ is available"
-          }
-        }
-      }
-    },
-    "LaunchManager 帮助" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LaunchManager Help"
-          }
-        }
-      }
-    },
-    "Login Items" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Login Items"
-          }
-        }
-      }
-    },
-    "Login Items 与 Launchd 的区别" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Login Items vs. Launchd"
-          }
-        }
-      }
-    },
-    "Login Items（系统设置管理）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Login Items (System Settings)"
-          }
-        }
-      }
-    },
-    "macOS 定时任务与开机启动管理" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manage macOS scheduled tasks and startup items"
-          }
-        }
-      }
-    },
-    "macOS 定时任务与开机启动管理工具" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "macOS launch item manager for scheduled tasks and startup entries"
-          }
-        }
-      }
-    },
-    "MIT License · 开源免费" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MIT License · Free & Open Source"
-          }
-        }
-      }
-    },
-    "Open" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open"
-          }
-        }
-      }
-    },
-    "Open in Browser" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open in Browser"
-          }
-        }
-      }
-    },
-    "PID" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PID"
-          }
-        }
-      }
-    },
-    "PID %d" : {
-
-    },
-    "PID %lld" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "PID %lld"
-          }
-        }
-      }
-    },
-    "Plist must contain a Label key" : {
-
-    },
-    "plist 无法载入，请检查语法与路径" : {
-
-    },
-    "Reveal in Finder" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reveal in Finder"
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "": {},
+    " *": {},
+    ":": {},
+    "…（仅显示文件末尾 %lld KB）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "…(showing last %lld KB of file)"
           }
         }
       }
-    },
-    "Scope" : {
-
     },
-    "Services" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Services"
+    "·": {},
+    "（无日志）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(No logs)"
           }
         }
       }
     },
-    "SSH 端口转发" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SSH Port Forward"
+    "（日志为空）": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(Log is empty)"
           }
         }
       }
-    },
-    "value" : {
-
-    },
-    "WorkingDirectory（可选）" : {
-
-    },
-    "XML" : {
-
     },
-    "上次执行：正常退出 (0)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last run: exited normally (0)"
+    "/etc/crontab": {},
+    "/Library/LaunchAgents": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/LaunchAgents"
           }
         }
       }
     },
-    "上次执行：退出码 %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last run: exit code %lld"
+    "/Library/LaunchDaemons": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Library/LaunchDaemons"
           }
         }
       }
     },
-    "下载 LaunchManager.dmg" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Download LaunchManager.dmg"
+    "%@失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ failed"
           }
         }
       }
     },
-    "仅显示最近 %lld 行（最近 %@）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Showing last %1$lld lines (%2$@)"
+    "%@失败：%@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@失败：%2$@"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "仅显示最近 %1$lld 行（最近 %2$@）"
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ failed: %2$@"
           }
         }
       }
     },
-    "从 XML 粘贴…" : {
-
+    "%@失败：%@\n\n%@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@失败：%2$@\n\n%3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ failed: %2$@\n\n%3$@"
+          }
+        }
+      }
+    },
+    "%lld": {},
+    "~/Library/LaunchAgents": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/Library/LaunchAgents"
+          }
+        }
+      }
+    },
+    "⚠️ 无法解析": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠️ Cannot Parse"
+          }
+        }
+      }
+    },
+    "🚀": {},
+    "brew services": {},
+    "brew services · ~/Library/LaunchAgents": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brew services · ~/Library/LaunchAgents"
+          }
+        }
+      }
+    },
+    "Brew 已停止，但进程仍在运行 (PID %lld)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brew stopped, but process is still running (PID %lld)"
+          }
+        }
+      }
+    },
+    "Brew 状态": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brew Status"
+          }
+        }
+      }
+    },
+    "Brew: 运行中，等待进程启动": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brew: running, waiting for process to start"
+          }
+        }
+      }
+    },
+    "Compose": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compose"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy"
+          }
+        }
+      }
+    },
+    "Copy URL": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy URL"
+          }
+        }
+      }
+    },
+    "Crontab": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crontab"
+          }
+        }
+      }
+    },
+    "crontab -l": {},
+    "Crontab 头部": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crontab header"
+          }
+        }
+      }
+    },
+    "Daemon": {},
+    "Docker 端口转发": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker Port Forward"
+          }
+        }
+      }
+    },
+    "Formula": {},
+    "GitHub: Sean10000/LaunchManager": {},
+    "Homebrew": {},
+    "Homebrew Services": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew Services"
+          }
+        }
+      }
+    },
+    "Homebrew 升级": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upgrade via Homebrew"
+          }
+        }
+      }
+    },
+    "Invalid plist": {},
+    "KeepAlive 使用了表单不支持的格式，请使用 XML 模式编辑。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KeepAlive uses a format not supported by the form. Please edit in XML mode."
+          }
+        }
+      }
+    },
+    "KEY": {},
+    "Kill Process…": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kill Process…"
+          }
+        }
+      }
+    },
+    "Label": {},
+    "Label 已存在": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Label already exists"
+          }
+        }
+      }
+    },
+    "Launch Agents": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch Agents"
+          }
+        }
+      }
+    },
+    "Launchd": {},
+    "Launchd（本应用管理）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launchd (managed in this app)"
+          }
+        }
+      }
+    },
+    "LaunchDaemons": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LaunchDaemons"
+          }
+        }
+      }
+    },
+    "LaunchManager": {},
+    "LaunchManager %@ 已发布": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LaunchManager %@ is available"
+          }
+        }
+      }
+    },
+    "LaunchManager 帮助": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LaunchManager Help"
+          }
+        }
+      }
+    },
+    "launchmanager.dev/help": {},
+    "Login Items": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Login Items"
+          }
+        }
+      }
+    },
+    "Login Items 与 Launchd 的区别": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Login Items vs. Launchd"
+          }
+        }
+      }
+    },
+    "Login Items（系统设置管理）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Login Items (System Settings)"
+          }
+        }
+      }
+    },
+    "macOS 定时任务与开机启动管理": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage macOS scheduled tasks and startup items"
+          }
+        }
+      }
+    },
+    "macOS 定时任务与开机启动管理工具": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS launch item manager for scheduled tasks and startup entries"
+          }
+        }
+      }
+    },
+    "MIT License · 开源免费": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIT License · Free & Open Source"
+          }
+        }
+      }
+    },
+    "Open": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open"
+          }
+        }
+      }
+    },
+    "Open in Browser": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Browser"
+          }
+        }
+      }
+    },
+    "PID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PID"
+          }
+        }
+      }
+    },
+    "PID %d": {},
+    "PID %lld": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PID %lld"
+          }
+        }
+      }
+    },
+    "Plist": {},
+    "Plist must contain a Label key": {},
+    "plist 无法载入，请检查语法与路径": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to load plist. Check syntax and path."
+          }
+        }
+      }
+    },
+    "Reveal in Finder": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reveal in Finder"
+          }
+        }
+      }
+    },
+    "Scope": {},
+    "Services": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Services"
+          }
+        }
+      }
+    },
+    "SSH 端口转发": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SSH Port Forward"
+          }
+        }
+      }
+    },
+    "sudo brew services · /Library/LaunchDaemons": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sudo brew services · /Library/LaunchDaemons"
+          }
+        }
+      }
+    },
+    "value": {},
+    "WorkingDirectory（可选）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working Directory (Optional)"
+          }
+        }
+      }
+    },
+    "XML": {},
+    "上次执行：正常退出 (0)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last run: exited normally (0)"
+          }
+        }
+      }
+    },
+    "上次执行：退出码 %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last run: exit code %lld"
+          }
+        }
+      }
+    },
+    "下载 LaunchManager.dmg": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download LaunchManager.dmg"
+          }
+        }
+      }
+    },
+    "仅显示最近 %lld 行（最近 %@）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Showing last %1$lld lines (%2$@)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "仅显示最近 %1$lld 行（最近 %2$@）"
+          }
+        }
+      }
+    },
+    "从 XML 粘贴…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste from XML…"
+          }
+        }
+      }
+    },
+    "位于「系统设置 → 通用 → 登录项」，包括「打开时登录」的应用与「允许在后台」的项目。由 macOS 统一管理，本应用不提供列表或开关。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Found in System Settings → General → Login Items (open at login and background items). Managed by macOS only; this app does not list or toggle them."
+          }
+        }
+      }
+    },
+    "保存": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        }
+      }
+    },
+    "保存时将提示输入管理员密码，与系统 LaunchAgent 写入方式相同。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving will prompt for an administrator password, same as writing a system LaunchAgent."
+          }
+        }
+      }
+    },
+    "保持存活（崩溃后自动重启）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep Alive (auto-restart on crash)"
+          }
+        }
+      }
+    },
+    "停止": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop"
+          }
+        }
+      }
+    },
+    "停止中…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopping…"
+          }
+        }
+      }
+    },
+    "停止容器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Container"
+          }
+        }
+      }
+    },
+    "停止容器…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop Container…"
+          }
+        }
+      }
+    },
+    "全局": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Global"
+          }
+        }
+      }
+    },
+    "全局 · /Library": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Global · /Library"
+          }
+        }
+      }
+    },
+    "全局 Agents": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Global Agents"
+          }
+        }
+      }
+    },
+    "全选": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select All"
+          }
+        }
+      }
+    },
+    "全部": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
+    "关于 LaunchManager": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About LaunchManager"
+          }
+        }
+      }
+    },
+    "关于删除操作": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About Deletion"
+          }
+        }
+      }
+    },
+    "关闭": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        }
+      }
+    },
+    "最新版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest Version"
+          }
+        }
+      }
+    },
+    "写入时需管理员密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requires admin password to write"
+          }
+        }
+      }
+    },
+    "分": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Min"
+          }
+        }
+      }
+    },
+    "分钟": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minute"
+          }
+        }
+      }
+    },
+    "创建": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create"
+          }
+        }
+      }
+    },
+    "创建 Launch Agent…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Launch Agent…"
+          }
+        }
+      }
+    },
+    "删除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete"
+          }
+        }
+      }
+    },
+    "删除 plist 仅移除自动执行配置，不影响应用本身。删除后该任务不再自动运行（如开机自启或定时执行）。系统级操作需要管理员密码授权。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleting a plist only removes the automatic execution schedule — it does not affect the app itself. The task will no longer run automatically. System-level operations require administrator password."
+          }
+        }
+      }
+    },
+    "刷新": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        }
+      }
+    },
+    "加载": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load"
+          }
+        }
+      }
+    },
+    "加载 vs 运行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load vs. Running"
+          }
+        }
+      }
+    },
+    "加载：launchd 登记该任务。运行：任务当前正在执行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load: launchd registers the task. Running: the task is currently executing."
+          }
+        }
+      }
+    },
+    "加载时自动运行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run at Load"
+          }
+        }
+      }
+    },
+    "卸载": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unload"
+          }
+        }
+      }
+    },
+    "发现新版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Available"
+          }
+        }
+      }
+    },
+    "取消": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "可执行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Executable"
+          }
+        }
+      }
+    },
+    "启动": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start"
+          }
+        }
+      }
+    },
+    "启动/停止时需管理员密码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Admin password required to start/stop"
+          }
+        }
+      }
+    },
+    "启动中…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting…"
+          }
+        }
+      }
+    },
+    "启用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable"
+          }
+        }
+      }
+    },
+    "启用中…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enabling…"
+          }
+        }
+      }
+    },
+    "周%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekday %lld"
+          }
+        }
+      }
+    },
+    "周一": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mon"
+          }
+        }
+      }
+    },
+    "周三": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wed"
+          }
+        }
+      }
+    },
+    "周二": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tue"
+          }
+        }
+      }
+    },
+    "周五": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fri"
+          }
+        }
+      }
+    },
+    "周六": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sat"
+          }
+        }
+      }
+    },
+    "周四": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thu"
+          }
+        }
+      }
+    },
+    "周日": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sun"
+          }
+        }
+      }
     },
-    "位于「系统设置 → 通用 → 登录项」，包括「打开时登录」的应用与「允许在后台」的项目。由 macOS 统一管理，本应用不提供列表或开关。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Found in System Settings → General → Login Items (open at login and background items). Managed by macOS only; this app does not list or toggle them."
+    "命令": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Command"
           }
         }
       }
     },
-    "保存" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save"
+    "在 GitHub 查看 Release": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Release on GitHub"
           }
         }
       }
     },
-    "保持存活（崩溃后自动重启）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep Alive (auto-restart on crash)"
+    "在左下角设置中启用此模块。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable this module in settings at the bottom left."
           }
         }
       }
     },
-    "停止" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stop"
+    "在浏览器中打开": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Browser"
           }
         }
       }
     },
-    "停止中…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stopping…"
+    "在编辑 Agent 时填写 StandardOutPath / StandardErrorPath 即可启用。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set StandardOutPath or StandardErrorPath when editing the agent."
           }
         }
       }
     },
-    "停止容器" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stop Container"
+    "基本信息": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basic Info"
           }
         }
       }
     },
-    "停止容器…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stop Container…"
+    "复制 Agent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate Agent"
           }
         }
       }
     },
-    "全局 · /Library" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Global · /Library"
+    "复制…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate…"
           }
         }
       }
     },
-    "全局 Agents" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Global Agents"
+    "复制命令": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Command"
           }
         }
       }
     },
-    "关于 LaunchManager" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "About LaunchManager"
+    "复制地址": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy Address"
           }
         }
       }
     },
-    "关于删除操作" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "About Deletion"
+    "如 /usr/local/bin/mytool": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. /usr/local/bin/mytool"
           }
         }
       }
     },
-    "关闭" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close"
+    "如 com.example.mytask": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. com.example.mytask"
           }
         }
       }
     },
-    "最新版本" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Latest Version"
+    "存在多个触发器，请使用 XML 模式编辑。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Multiple triggers found. Please edit in XML mode."
           }
         }
       }
     },
-    "分" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Min"
+    "完成": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
           }
         }
       }
     },
-    "创建" : {
-
+    "定时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        }
+      }
+    },
+    "容器": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container"
+          }
+        }
+      }
+    },
+    "容器 ID": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container ID"
+          }
+        }
+      }
+    },
+    "容器: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Container: %@"
+          }
+        }
+      }
+    },
+    "宿主机制": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Host Mechanism"
+          }
+        }
+      }
+    },
+    "对应侧边栏中的 LaunchAgent / LaunchDaemon，plist 位于 ~/Library/LaunchAgents、/Library/LaunchAgents、/Library/LaunchDaemons。可在本应用中载入、移除、启动与停止。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LaunchAgents and LaunchDaemons in the sidebar use plists under ~/Library/LaunchAgents, /Library/LaunchAgents, and /Library/LaunchDaemons. Load, unload, start, and stop them here."
+          }
+        }
+      }
+    },
+    "导入": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        }
+      }
+    },
+    "导入 Plist": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Plist"
+          }
+        }
+      }
+    },
+    "导入到": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import to"
+          }
+        }
+      }
+    },
+    "将在默认浏览器中打开 launchmanager.dev/help": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will open launchmanager.dev/help in your default browser"
+          }
+        }
+      }
+    },
+    "小时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hour"
+          }
+        }
+      }
+    },
+    "尝试其他搜索词": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try a different search term"
+          }
+        }
+      }
+    },
+    "尝试启动 dev server，或开启「显示全部」": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start a dev server, or enable \"Show All\""
+          }
+        }
+      }
+    },
+    "展开 %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expand %@"
+          }
+        }
+      }
+    },
+    "工作目录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working Directory"
+          }
+        }
+      }
+    },
+    "已停止": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped"
+          }
+        }
+      }
+    },
+    "已停止 (信号 %lld)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopped (signal %lld)"
+          }
+        }
+      }
+    },
+    "已加载，等待触发": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loaded, waiting to trigger"
+          }
+        }
+      }
+    },
+    "已启用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enabled"
+          }
+        }
+      }
+    },
+    "已在 LaunchAgents / Daemons：%@": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also in LaunchAgents / Daemons: %@"
+          }
+        }
+      }
+    },
+    "已复制": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied"
+          }
+        }
+      }
+    },
+    "已安装的 brew formula 在启动后会出现在对应分组中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installed brew formulas appear in the corresponding group after launch"
+          }
+        }
+      }
+    },
+    "已禁用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disabled"
+          }
+        }
+      }
+    },
+    "已自定义名称（自动识别: %@）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom name (auto-detected: %@)"
+          }
+        }
+      }
+    },
+    "已被系统禁用（launchctl override）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disabled by system (launchctl override)"
+          }
+        }
+      }
+    },
+    "开始使用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get Started"
+          }
+        }
+      }
+    },
+    "当前 plist 含表单无法完整表示的内容，请使用 XML 模式编辑。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This plist contains content the form cannot fully represent. Please edit in XML mode."
+          }
+        }
+      }
+    },
+    "当前没有监听中的 TCP 服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No TCP services are currently listening"
+          }
+        }
+      }
+    },
+    "当前版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current Version"
+          }
+        }
+      }
+    },
+    "当前用户下未检测到 BTM 登录项": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No BTM login items found for the current user"
+          }
+        }
+      }
+    },
+    "恢复自动": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to Auto"
+          }
+        }
+      }
+    },
+    "打开用户手册？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the user guide?"
+          }
+        }
+      }
+    },
+    "打开登录项设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Login Items Settings"
+          }
+        }
+      }
+    },
+    "执行失败：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Execution failed: %@"
+          }
+        }
+      }
+    },
+    "扫描 LaunchAgent / LaunchDaemon 与 Homebrew 服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan LaunchAgents / LaunchDaemons and Homebrew services"
+          }
+        }
+      }
+    },
+    "扫描失败": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan Failed"
+          }
+        }
+      }
+    },
+    "扫描本地监听端口与开发服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan local listening ports and development services"
+          }
+        }
+      }
+    },
+    "扫描用户与系统 Crontab": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan user and system Crontab"
+          }
+        }
+      }
+    },
+    "按时间、间隔或路径变化触发，灵活配置执行计划": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trigger by time, interval, or path changes"
+          }
+        }
+      }
     },
-    "创建 Launch Agent…" : {
-
+    "搜索 Label 或路径": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search by label or path"
+          }
+        }
+      }
     },
-    "删除" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete"
+    "搜索 Label、路径或 formula": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search label, path, or formula"
           }
         }
       }
     },
-    "删除 plist 仅移除自动执行配置，不影响应用本身。删除后该任务不再自动运行（如开机自启或定时执行）。系统级操作需要管理员密码授权。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deleting a plist only removes the automatic execution schedule — it does not affect the app itself. The task will no longer run automatically. System-level operations require administrator password."
+    "搜索名称、Identifier 或路径": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search name, identifier, or path"
           }
         }
       }
     },
-    "刷新" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refresh"
+    "搜索命令或计划": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search command or schedule"
           }
         }
       }
     },
-    "加载" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load"
+    "搜索服务名、端口、项目…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search name, port, project…"
           }
         }
       }
     },
-    "加载 vs 运行" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load vs. Running"
+    "搜索服务名或 Label": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search service name or label"
           }
         }
       }
     },
-    "加载：launchd 登记该任务。运行：任务当前正在执行" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load: launchd registers the task. Running: the task is currently executing."
+    "操作已取消": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Operation cancelled"
           }
         }
       }
     },
-    "加载时自动运行" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Run at Load"
+    "收起 %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapse %@"
           }
         }
       }
     },
-    "卸载" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unload"
+    "数据来源：sfltool dumpbtm，与「系统设置 → 通用 → 登录项」一致。有 plist 的项可载入/移除；其余请用系统设置。": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data from sfltool dumpbtm (same as System Settings → General → Login Items). Items with a plist can be loaded/unloaded; use System Settings for others."
           }
         }
       }
     },
-    "发现新版本" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Update Available"
+    "文件头部": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File header"
           }
         }
       }
     },
-    "取消" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
+    "文件已存在": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File already exists"
           }
         }
       }
     },
-    "可执行" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Executable"
+    "文件已存在，是否覆盖？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File already exists. Overwrite?"
           }
         }
       }
     },
-    "启动" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start"
+    "文件或路径不存在": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File or path does not exist"
           }
         }
       }
     },
-    "启动中…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starting…"
+    "文件日志": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File Logs"
           }
         }
       }
     },
-    "启用" : {
-
+    "新 Job": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Job"
+          }
+        }
+      }
     },
-    "启用中…" : {
-
+    "新建": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New"
+          }
+        }
+      }
     },
-    "周%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weekday %lld"
+    "新建 Agent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Agent"
           }
         }
       }
     },
-    "周一" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mon"
+    "新建 Cron 任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Cron Job"
           }
         }
       }
     },
-    "周三" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wed"
+    "新建 LaunchDaemon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New LaunchDaemon"
           }
         }
       }
     },
-    "周二" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tue"
+    "新建全局 Agent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Global Agent"
           }
         }
       }
     },
-    "周五" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fri"
+    "新建用户 Agent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New User Agent"
           }
         }
       }
     },
-    "周六" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sat"
+    "新建用户 Cron 任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New User Cron Job"
           }
         }
       }
     },
-    "周四" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Thu"
+    "新建系统 Cron 任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New System Cron Job"
           }
         }
       }
     },
-    "周日" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sun"
+    "无法停止 Docker 容器：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to stop Docker container: %@"
           }
         }
       }
     },
-    "在 GitHub 查看 Release" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View Release on GitHub"
+    "无法向 PID %d 发送信号": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot send signal to PID %d"
           }
         }
       }
     },
-    "在编辑 Agent 时填写 StandardOutPath / StandardErrorPath 即可启用。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set StandardOutPath or StandardErrorPath when editing the agent."
+    "无法向 PID %lld 发送信号": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot send signal to PID %lld"
           }
         }
       }
     },
-    "基本信息" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Basic Info"
+    "无法定位 Docker 容器，不能直接终止 docker-proxy（会破坏 Docker 网络）。请使用 docker stop 或在 Docker Desktop 中停止。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot locate the Docker container. Do not kill docker-proxy directly (it will break Docker networking). Use docker stop or stop it in Docker Desktop."
           }
         }
       }
     },
-    "复制 Agent" : {
-
+    "无法终止 PID %d：权限不足": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot terminate PID %d: permission denied"
+          }
+        }
+      }
     },
-    "复制…" : {
-
+    "无法终止 PID %lld：权限不足": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot terminate PID %lld: permission denied"
+          }
+        }
+      }
     },
-    "复制命令" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy Command"
+    "无法读取 Login Items": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot Read Login Items"
           }
         }
       }
     },
-    "复制地址" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy Address"
+    "无环境变量": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No environment variables"
           }
         }
       }
     },
-    "如 /usr/local/bin/mytool" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "e.g. /usr/local/bin/mytool"
+    "日": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Day"
           }
         }
       }
     },
-    "如 com.example.mytask" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "e.g. com.example.mytask"
+    "日志 — %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logs — %@"
           }
         }
       }
     },
-    "存在多个触发器，请使用 XML 模式编辑。" : {
-
+    "日志路径（可选）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log Paths (Optional)"
+          }
+        }
+      }
     },
-    "定时" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Calendar"
+    "日期": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Date"
           }
         }
       }
     },
-    "容器" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Container"
+    "时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hour"
           }
         }
       }
     },
-    "容器 ID" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Container ID"
+    "时间": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
           }
         }
       }
     },
-    "容器: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Container: %@"
+    "星期": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekday"
           }
         }
       }
     },
-    "宿主机制" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Host Mechanism"
+    "是否立即载入？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load immediately?"
           }
         }
       }
     },
-    "对应侧边栏中的 LaunchAgent / LaunchDaemon，plist 位于 ~/Library/LaunchAgents、/Library/LaunchAgents、/Library/LaunchDaemons。可在本应用中载入、移除、启动与停止。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LaunchAgents and LaunchDaemons in the sidebar use plists under ~/Library/LaunchAgents, /Library/LaunchAgents, and /Library/LaunchDaemons. Load, unload, start, and stop them here."
+    "显示与扫描": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display & Scan"
           }
         }
       }
     },
-    "导入" : {
-
+    "显示全部": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show All"
+          }
+        }
+      }
     },
-    "导入 Plist" : {
-
+    "显示名称": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display Name"
+          }
+        }
+      }
     },
-    "导入到" : {
-
+    "暂无 LaunchAgent / LaunchDaemon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No LaunchAgents or LaunchDaemons yet"
+          }
+        }
+      }
     },
-    "尝试其他搜索词" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try a different search term"
+    "月": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month"
           }
         }
       }
     },
-    "尝试启动 dev server，或开启「显示全部」" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a dev server, or enable \"Show All\""
+    "服务已载入": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service loaded"
           }
         }
       }
     },
-    "展开 %@" : {
-
+    "服务未载入或已停止": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service not loaded or stopped"
+          }
+        }
+      }
     },
-    "工作目录" : {
-
+    "未加载": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not loaded"
+          }
+        }
+      }
     },
-    "已停止 (信号 %lld)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stopped (signal %lld)"
+    "未找到 docker 可执行文件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Docker executable not found"
           }
         }
       }
     },
-    "已加载，等待触发" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loaded, waiting to trigger"
+    "未找到 Homebrew": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew Not Found"
           }
         }
       }
     },
-    "已在 LaunchAgents / Daemons：%@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Also in LaunchAgents / Daemons: %@"
+    "未找到 Homebrew。请先安装 Homebrew 或确认 brew 在 PATH 中。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew not found. Install Homebrew or ensure brew is in PATH."
           }
         }
       }
     },
-    "已复制" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copied"
+    "未注册": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not registered"
           }
         }
       }
     },
-    "已自定义名称（自动识别: %@）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Custom name (auto-detected: %@)"
+    "未注册的 Homebrew 服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unregistered Homebrew services"
           }
         }
       }
     },
-    "已被系统禁用（launchctl override）" : {
-
+    "未知": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        }
+      }
     },
-    "开始使用" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get Started"
+    "未配置日志文件路径": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Log File Configured"
           }
         }
       }
     },
-    "当前 plist 含表单无法完整表示的内容，请使用 XML 模式编辑。" : {
-
+    "本地实例": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local Instances"
+          }
+        }
+      }
     },
-    "当前没有监听中的 TCP 服务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No TCP services are currently listening"
+    "本地开发环境": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local Dev Environment"
           }
         }
       }
     },
-    "当前版本" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Current Version"
+    "权限": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permission"
           }
         }
       }
     },
-    "当前用户下未检测到 BTM 登录项" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No BTM login items found for the current user"
+    "权限不足或路径无法访问": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permission denied or path inaccessible"
           }
         }
       }
     },
-    "恢复自动" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset to Auto"
+    "权限被拒绝": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permission denied"
           }
         }
       }
     },
-    "打开登录项设置" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open Login Items Settings"
+    "来源": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source"
           }
         }
       }
     },
-    "执行失败：%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Execution failed: %@"
+    "查看 XML": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View XML"
           }
         }
       }
     },
-    "扫描失败" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scan Failed"
+    "查看日志": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Logs"
           }
         }
       }
     },
-    "按时间、间隔或路径变化触发，灵活配置执行计划" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trigger by time, interval, or path changes"
+    "标准输出 StandardOutPath": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard Output Path"
           }
         }
       }
     },
-    "搜索 Label 或路径" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search by label or path"
+    "标准错误 StandardErrorPath": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard Error Path"
           }
         }
       }
     },
-    "搜索名称、Identifier 或路径" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search name, identifier, or path"
+    "检查更新…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for Updates…"
           }
         }
       }
     },
-    "搜索服务名、端口、项目…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search name, port, project…"
+    "模块已关闭": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module disabled"
           }
         }
       }
     },
-    "操作已取消" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Operation cancelled"
+    "模块设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Module Settings"
           }
         }
       }
     },
-    "收起 %@" : {
-
+    "欢迎使用 LaunchManager": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to LaunchManager"
+          }
+        }
+      }
     },
-    "数据来源：sfltool dumpbtm，与「系统设置 → 通用 → 登录项」一致。有 plist 的项可载入/移除；其余请用系统设置。" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Data from sfltool dumpbtm (same as System Settings → General → Login Items). Items with a plist can be loaded/unloaded; use System Settings for others."
+    "此 plist 包含表单不支持的键：%@。请使用 XML 模式编辑。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This plist contains keys not supported by the form: %@. Please edit in XML mode."
           }
         }
       }
     },
-    "文件已存在" : {
-
+    "此分类下暂无 LaunchAgent / Daemon": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No LaunchAgents or Daemons in this category"
+          }
+        }
+      }
     },
-    "文件已存在，是否覆盖？" : {
-
+    "此操作将 bootout 并永久删除 plist 文件，无法撤销。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will unregister the job and permanently delete the plist file. This cannot be undone."
+          }
+        }
+      }
     },
-    "文件或路径不存在" : {
-
+    "此操作将 unload 并永久删除 plist 文件，无法撤销。": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will unload and permanently delete the plist file. This cannot be undone."
+          }
+        }
+      }
     },
-    "文件日志" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "File Logs"
+    "此操作将永久删除该 plist 文件，无法撤销。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will permanently delete the plist file. This cannot be undone."
           }
         }
       }
     },
-    "新 Job" : {
-
+    "此文件为空或格式无效，无法作为 launchd 条目加载。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file is empty or has an invalid format and cannot be loaded as a launchd entry."
+          }
+        }
+      }
     },
-    "新建" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New"
+    "每 %lld 秒": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every %lld seconds"
           }
         }
       }
     },
-    "新建 Agent" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New Agent"
+    "每%@ %@:%@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "每%1$@ %2$@:%3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every %1$@ %2$@:%3$@"
           }
         }
       }
     },
-    "新建 LaunchDaemon" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New LaunchDaemon"
+    "每分钟": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every minute"
           }
         }
       }
     },
-    "新建全局 Agent" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New Global Agent"
+    "每周": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every week"
           }
         }
       }
     },
-    "新建用户 Agent" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New User Agent"
+    "每天": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every day"
           }
         }
       }
     },
-    "无法停止 Docker 容器：%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed to stop Docker container: %@"
+    "每天 %@:%@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "每天 %1$@:%2$@"
           }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every day %1$@:%2$@"
+          }
         }
       }
     },
-    "无法向 PID %d 发送信号" : {
-
+    "每小时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every hour"
+          }
+        }
+      }
     },
-    "无法向 PID %lld 发送信号" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cannot send signal to PID %lld"
+    "每小时整点": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every hour on the hour"
           }
         }
       }
     },
-    "无法定位 Docker 容器，不能直接终止 docker-proxy（会破坏 Docker 网络）。请使用 docker stop 或在 Docker Desktop 中停止。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cannot locate the Docker container. Do not kill docker-proxy directly (it will break Docker networking). Use docker stop or stop it in Docker Desktop."
+    "每月": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every month"
           }
         }
       }
     },
-    "无法终止 PID %d：权限不足" : {
-
+    "每月 %@ 日 %@:%@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "每月 %1$@ 日 %2$@:%3$@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every month on day %1$@ at %2$@:%3$@"
+          }
+        }
+      }
     },
-    "无法终止 PID %lld：权限不足" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cannot terminate PID %lld: permission denied"
+    "每行一个参数": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One argument per line"
           }
         }
       }
     },
-    "无法读取 Login Items" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cannot Read Login Items"
+    "每隔": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every"
           }
         }
       }
     },
-    "无环境变量" : {
-
+    "没有 Agent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Agents"
+          }
+        }
+      }
     },
-    "日志 — %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Logs — %@"
+    "没有 Cron 任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cron jobs"
           }
         }
       }
     },
-    "日志路径（可选）" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log Paths (Optional)"
+    "没有 Homebrew 服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Homebrew services"
           }
         }
       }
     },
-    "时" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hour"
+    "没有 Login Items": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Login Items"
           }
         }
       }
     },
-    "时间" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time"
+    "没有匹配结果": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Matching Results"
           }
         }
       }
     },
-    "星期" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weekday"
+    "没有发现开发服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No dev services found"
           }
         }
       }
     },
-    "是否立即载入？" : {
-
+    "没有发现服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Services Found"
+          }
+        }
+      }
     },
-    "显示全部" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show All"
+    "注册并启动": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Register and Start"
           }
         }
       }
     },
-    "显示名称" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Display Name"
+    "浏览 Launch Agent 模板…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse Launch Agent templates…"
           }
         }
       }
     },
-    "暂无 LaunchAgent / LaunchDaemon" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No LaunchAgents or LaunchDaemons yet"
+    "浏览 LaunchAgent 和 LaunchDaemon，无需打开终端": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Browse LaunchAgents and LaunchDaemons without a terminal"
           }
         }
       }
     },
-    "服务已载入" : {
-
+    "添加变量": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Variable"
+          }
+        }
+      }
     },
-    "服务未载入或已停止" : {
-
+    "清空日志": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Logs"
+          }
+        }
+      }
     },
-    "未加载" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not loaded"
+    "点击刷新加载系统日志": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click refresh to load system logs"
           }
         }
       }
     },
-    "未找到 docker 可执行文件" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Docker executable not found"
+    "版本 %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %@"
           }
         }
       }
     },
-    "未配置日志文件路径" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Log File Configured"
+    "状态": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
           }
         }
       }
     },
-    "本地实例" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Local Instances"
+    "环境变量 EnvironmentVariables（可选）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Environment Variables (Optional)"
           }
         }
       }
     },
-    "本地开发环境" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Local Dev Environment"
+    "用户": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User"
           }
         }
       }
     },
-    "权限不足或路径无法访问" : {
-
+    "用户 · 全局 · 系统": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User · Global · System"
+          }
+        }
+      }
     },
-    "权限被拒绝" : {
-
+    "用户 · 全局 · 系统 · Homebrew": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User · Global · System · Homebrew"
+          }
+        }
+      }
     },
-    "查看 XML" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View XML"
+    "用户 · 系统": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User · System"
           }
         }
       }
     },
-    "查看日志" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "View Logs"
+    "用户 Agents": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User Agents"
           }
         }
       }
     },
-    "标准输出 StandardOutPath" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Standard Output Path"
+    "用户 Crontab": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User Crontab"
           }
         }
       }
     },
-    "标准错误 StandardErrorPath" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Standard Error Path"
+    "用户 crontab 与 /etc/crontab 均为空，点击「新建」添加定时任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Both user crontab and /etc/crontab are empty. Click New to add a scheduled job."
           }
         }
       }
     },
-    "检查更新…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Check for Updates…"
+    "用户定时任务": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User scheduled jobs"
           }
         }
       }
     },
-    "欢迎使用 LaunchManager" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Welcome to LaunchManager"
+    "用户手册": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User Guide"
           }
         }
       }
     },
-    "此 plist 包含表单不支持的键：%@。请使用 XML 模式编辑。" : {
-
+    "用户服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User Services"
+          }
+        }
+      }
     },
-    "此分类下暂无 LaunchAgent / Daemon" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No LaunchAgents or Daemons in this category"
+    "用户级": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User"
           }
         }
       }
     },
-    "此操作将 bootout 并永久删除 plist 文件，无法撤销。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will unregister the job and permanently delete the plist file. This cannot be undone."
+    "用户级 · ~/Library": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User · ~/Library"
           }
         }
       }
     },
-    "此操作将 unload 并永久删除 plist 文件，无法撤销。" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will unload and permanently delete the plist file. This cannot be undone."
+    "登录或加载时执行一次": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run once at login or load"
           }
         }
       }
     },
-    "此操作将永久删除该 plist 文件，无法撤销。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will permanently delete the plist file. This cannot be undone."
+    "登录时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At Login"
           }
         }
       }
     },
-    "此文件为空或格式无效，无法作为 launchd 条目加载。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This file is empty or has an invalid format and cannot be loaded as a launchd entry."
+    "监视路径": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch Path"
           }
         }
       }
     },
-    "每 %lld 秒" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every %lld seconds"
+    "监视路径：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch path: %@"
           }
         }
       }
     },
-    "每天" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every day"
+    "直接下载": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Direct Download"
           }
         }
       }
     },
-    "每行一个参数" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One argument per line"
+    "直接在界面打开 plist 配置文件，一键查看原始内容": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open plist files directly to view raw XML content"
           }
         }
       }
     },
-    "每隔" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Every"
+    "确定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
     },
-    "没有 Agent" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Agents"
+    "确认停止容器？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop this container?"
           }
         }
       }
     },
-    "没有 Login Items" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Login Items"
+    "确认删除 %@？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete %@?"
           }
         }
       }
     },
-    "没有匹配结果" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Matching Results"
+    "确认删除此 Cron 任务？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this cron job?"
           }
         }
       }
     },
-    "没有发现开发服务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No dev services found"
+    "确认终止服务？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kill this service?"
           }
         }
       }
     },
-    "没有发现服务" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Services Found"
+    "禁用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disable"
           }
         }
       }
     },
-    "浏览 Launch Agent 模板…" : {
-
+    "秒": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sec"
+          }
+        }
+      }
     },
-    "浏览 LaunchAgent 和 LaunchDaemon，无需打开终端" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Browse LaunchAgents and LaunchDaemons without a terminal"
+    "秒执行一次": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "seconds"
           }
         }
       }
     },
-    "添加变量" : {
-
+    "移除": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unload"
+          }
+        }
+      }
     },
-    "清空日志" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear Logs"
+    "移除中…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unloading…"
           }
         }
       }
     },
-    "点击刷新加载系统日志" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Click refresh to load system logs"
+    "程序": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Program"
           }
         }
       }
     },
-    "版本 %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Version %@"
+    "程序路径": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Program Path"
           }
         }
       }
     },
-    "状态" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Status"
+    "稍后": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
           }
         }
       }
     },
-    "环境变量 EnvironmentVariables（可选）" : {
-
+    "管理启动项": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage Launch Items"
+          }
+        }
+      }
     },
-    "用户 · 全局 · 系统" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User · Global · System"
+    "管理方式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Managed by"
           }
         }
       }
     },
-    "用户 Agents" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User Agents"
+    "类型": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
           }
         }
       }
     },
-    "用户级 · ~/Library" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "User · ~/Library"
+    "系统 Crontab": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Crontab"
           }
         }
       }
     },
-    "登录或加载时执行一次" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Run once at login or load"
+    "系统「登录项」请在本页了解后，前往系统设置管理。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learn how Login Items differ from launchd here, then manage them in System Settings."
           }
         }
       }
     },
-    "登录时" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "At Login"
+    "系统日志": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Logs"
           }
         }
       }
     },
-    "监视路径" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch Path"
+    "系统服务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Services"
           }
         }
       }
     },
-    "监视路径：%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Watch path: %@"
+    "系统服务 (launchd)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Service (launchd)"
           }
         }
       }
     },
-    "直接下载" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Direct Download"
+    "系统级 · /Library": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System · /Library"
           }
         }
       }
     },
-    "直接在界面打开 plist 配置文件，一键查看原始内容" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open plist files directly to view raw XML content"
+    "系统设置": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System Settings"
           }
         }
       }
     },
-    "确定" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
+    "终止进程": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kill Process"
           }
         }
       }
     },
-    "确认停止容器？" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stop this container?"
+    "终止进程…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kill Process…"
           }
         }
       }
     },
-    "确认删除 %@？" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Delete %@?"
+    "编辑 Agent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Agent"
           }
         }
       }
     },
-    "确认终止服务？" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kill this service?"
+    "编辑 Cron 任务": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Cron Job"
           }
         }
       }
     },
-    "秒" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sec"
+    "编辑模式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Mode"
           }
         }
       }
     },
-    "秒执行一次" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "seconds"
+    "自定义": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
           }
         }
       }
     },
-    "移除" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unload"
+    "自定义调度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom Scheduling"
           }
         }
       }
     },
-    "移除中…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unloading…"
+    "至少保留一个模块": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep at least one module"
           }
         }
       }
     },
-    "程序" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Program"
+    "至少保留一个模块。未勾选的模块不会出现在侧边栏，也不会执行后台扫描。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep at least one module. Unchecked modules will not appear in the sidebar and will not be scanned in the background."
           }
         }
       }
     },
-    "程序路径" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Program Path"
+    "表单": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Form"
           }
         }
       }
     },
-    "稍后" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Later"
+    "表达式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expression"
           }
         }
       }
     },
-    "管理启动项" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manage Launch Items"
+    "要执行的命令": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Command to run"
           }
         }
       }
     },
-    "类型" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type"
+    "覆盖": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overwrite"
           }
         }
       }
     },
-    "系统「登录项」请在本页了解后，前往系统设置管理。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Learn how Login Items differ from launchd here, then manage them in System Settings."
+    "触发": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trigger"
           }
         }
       }
     },
-    "系统日志" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Logs"
+    "触发方式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trigger"
           }
         }
       }
     },
-    "系统服务 (launchd)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Service (launchd)"
+    "计划": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schedule"
           }
         }
       }
     },
-    "系统级 · /Library" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System · /Library"
+    "许多 Login Item 背后对应同一个 launchd plist，若已在 Launch Agents / LaunchDaemons 中出现，请在本应用相应分类中管理。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Many Login Items share the same launchd plist. If it already appears under Launch Agents or LaunchDaemons, manage it there."
           }
         }
       }
     },
-    "系统设置" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System Settings"
+    "许多 Login Item 背后对应同一个 launchd plist，若已在 LaunchAgents / LaunchDaemons 中出现，请在本应用相应分类中管理。": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Many Login Items share the same launchd plist. If it already appears under LaunchAgents or LaunchDaemons, manage it there."
           }
         }
       }
     },
-    "终止进程" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kill Process"
+    "说明 · 系统设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guide · System Settings"
           }
         }
       }
     },
-    "终止进程…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kill Process…"
+    "说明页 · 跳转系统设置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guide · Open System Settings"
           }
         }
       }
     },
-    "编辑 Agent" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Edit Agent"
+    "请安装 Homebrew，或确认 /opt/homebrew/bin/brew 可用。": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install Homebrew, or ensure /opt/homebrew/bin/brew is available."
           }
         }
       }
     },
-    "编辑模式" : {
-
+    "请至少启用一个模块。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please enable at least one module."
+          }
+        }
+      }
     },
-    "自定义调度" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Custom Scheduling"
+    "读取系统日志失败：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to read system logs: %@"
           }
         }
       }
     },
-    "表单" : {
-
+    "路径": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Path"
+          }
+        }
+      }
     },
-    "覆盖" : {
-
+    "跳过此版本": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip This Version"
+          }
+        }
+      }
     },
-    "触发" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trigger"
+    "载入": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load"
           }
         }
       }
     },
-    "触发方式" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trigger"
+    "载入中…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading…"
           }
         }
       }
     },
-    "许多 Login Item 背后对应同一个 launchd plist，若已在 LaunchAgents / LaunchDaemons 中出现，请在本应用相应分类中管理。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Many Login Items share the same launchd plist. If it already appears under LaunchAgents or LaunchDaemons, manage it there."
+    "过滤关键字": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter"
           }
         }
       }
     },
-    "说明 · 系统设置" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Guide · System Settings"
+    "运行中": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running"
           }
         }
       }
     },
-    "读取系统日志失败：%@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed to read system logs: %@"
+    "运行中 (PID %lld)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running (PID %lld)"
           }
         }
       }
     },
-    "路径" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Path"
+    "运行用户": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run as user"
           }
         }
       }
     },
-    "跳过此版本" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skip This Version"
+    "进程目录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Process Directory"
           }
         }
       }
     },
-    "载入" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Load"
+    "退出码": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit Code"
           }
         }
       }
     },
-    "载入中…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Loading…"
+    "选择…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose…"
           }
         }
       }
     },
-    "过滤关键字" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Filter"
+    "选项": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Options"
           }
         }
       }
     },
-    "运行中 (PID %lld)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Running (PID %lld)"
+    "通过 brew install 安装带 service 的 formula 后，会显示在这里": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install a formula with a service definition via brew install to see it here."
           }
         }
       }
     },
-    "进程目录" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Process Directory"
+    "重启": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart"
           }
         }
       }
     },
-    "选择…" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose…"
+    "重启中…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restarting…"
           }
         }
       }
     },
-    "选项" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Options"
+    "重试": {
+      "extractionState": "stale",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
           }
         }
       }
     },
-    "重试" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retry"
+    "错误": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error"
           }
         }
       }
     },
-    "错误" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error"
+    "镜像": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
           }
         }
       }
     },
-    "镜像" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image"
+    "镜像: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image: %@"
           }
         }
       }
     },
-    "镜像: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image: %@"
+    "间隔": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interval"
           }
         }
       }
     },
-    "间隔" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interval"
+    "项目目录": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Project Directory"
           }
         }
       }
     },
-    "项目目录" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Project Directory"
+    "频率": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frequency"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

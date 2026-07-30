@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LaunchManager — Launch Agents 合并分组 原型</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      background: #1e1e1e;
+      color: #e8e8e8;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .wrap { display: flex; flex-direction: column; height: 100vh; padding: 12px; gap: 0; }
+    .titlebar {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      padding-left: 72px;
+      background: linear-gradient(#3d3d3d, #323232);
+      border-radius: 10px 10px 0 0;
+      border: 1px solid #3a3a3c;
+      border-bottom: none;
+      font-size: 13px;
+      color: #aaa;
+      position: relative;
+    }
+    .traffic { position: absolute; left: 16px; top: 8px; display: flex; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #febc2e; }
+    .dot.g { background: #28c840; }
+    .app {
+      display: flex;
+      flex: 1;
+      border: 1px solid #3a3a3c;
+      border-radius: 0 0 10px 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,.45);
+      min-height: 0;
+    }
+    .sidebar {
+      width: 220px;
+      background: #2b2b2b;
+      border-right: 1px solid #3a3a3c;
+      padding: 12px 8px;
+      flex-shrink: 0;
+    }
+    .sidebar h1 { font-size: 15px; font-weight: 600; padding: 8px 12px 16px; color: #fff; }
+    .nav-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: default;
+      font-size: 13px;
+      color: #ccc;
+      margin-bottom: 2px;
+    }
+    .nav-item.active { background: #0a84ff; color: #fff; }
+    .nav-item .col { flex: 1; min-width: 0; }
+    .nav-item .sub { font-size: 11px; color: #888; margin-top: 2px; }
+    .nav-item.active .sub { color: rgba(255,255,255,.65); }
+    .nav-item .badge {
+      font-size: 11px;
+      color: #888;
+      margin-left: auto;
+      align-self: center;
+    }
+    .nav-item.active .badge { color: rgba(255,255,255,.7); }
+    .icon { width: 20px; text-align: center; opacity: .85; flex-shrink: 0; padding-top: 1px; }
+    .main { flex: 1; display: flex; flex-direction: column; background: #1c1c1e; min-width: 0; }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid #3a3a3c;
+      background: #252525;
+      flex-wrap: wrap;
+    }
+    .search {
+      flex: 1;
+      min-width: 160px;
+      max-width: 280px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #48484a;
+      background: #1c1c1e;
+      color: #e8e8e8;
+      font-size: 13px;
+    }
+    .btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid #48484a;
+      background: #3a3a3c;
+      color: #e8e8e8;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn.primary { background: #0a84ff; border-color: #0a84ff; color: #fff; }
+    .btn:hover { filter: brightness(1.08); }
+    .btn.menu::after { content: " ▾"; font-size: 10px; opacity: .7; }
+    .scope-picker {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: #1c1c1e;
+      border: 1px solid #48484a;
+      border-radius: 8px;
+      padding: 3px;
+    }
+    .scope-picker.visible { display: flex; }
+    .scope-picker button {
+      border: none;
+      background: transparent;
+      color: #98989d;
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .scope-picker button.active {
+      background: #3a3a3c;
+      color: #fff;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #98989d;
+      margin-left: auto;
+    }
+    .toggle-row input { accent-color: #0a84ff; cursor: pointer; }
+    .content { flex: 1; overflow-y: auto; padding: 12px 16px; }
+    .note {
+      background: #1a2a3a;
+      border: 1px solid #2a5080;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 12px;
+      color: #7eb8ff;
+      line-height: 1.55;
+    }
+    .group { margin-bottom: 14px; }
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 4px 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .group-header:hover .group-title { color: #fff; }
+    .group-title { font-size: 15px; font-weight: 600; color: #e8e8e8; }
+    .group-sub { font-size: 11px; color: #636366; margin-left: 4px; font-weight: 400; }
+    .count-pill {
+      font-size: 11px;
+      color: #98989d;
+      background: #2c2c2e;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .chevron { margin-left: auto; color: #636366; font-size: 12px; }
+    .group-body { display: flex; flex-direction: column; gap: 6px; }
+    .group-body.collapsed { display: none; }
+    .row {
+      background: #2c2c2e;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    }
+    .row-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+    .status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status.on { background: #30d158; }
+    .status.off { background: #636366; }
+    .status.load { background: #0a84ff; }
+    .status.warn { background: #ffd60a; }
+    .row-title { font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row-title code { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 12px; }
+    .row-meta { font-size: 11px; color: #636366; }
+    .scope-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #3a3a5c;
+      color: #aeb8ff;
+      flex-shrink: 0;
+    }
+    .row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .row-actions .btn { padding: 3px 8px; font-size: 11px; }
+    .invalid { border-left: 3px solid #ff453a; }
+    .proto-bar {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2c2c2e;
+      border: 1px solid #48484a;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: #98989d;
+      z-index: 50;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    }
+    .proto-bar strong { color: #fff; }
+    .mode-label { color: #30d158; font-weight: 600; }
+    .dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 4px;
+      background: #2c2c2e;
+      border: 1px solid #48484a;
+      border-radius: 8px;
+      min-width: 220px;
+      z-index: 20;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+    .dropdown.open { display: block; }
+    .dropdown button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 14px;
+      border: none;
+      background: transparent;
+      color: #e8e8e8;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .dropdown button:hover { background: #3a3a3c; }
+    .new-wrap { position: relative; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="titlebar">
+      <div class="traffic">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      </div>
+      LaunchManager — Launch Agents 合并分组 · 交互原型
+    </div>
+    <div class="app">
+      <aside class="sidebar">
+        <h1>LaunchManager</h1>
+        <div class="nav-item active">
+          <span class="icon">📋</span>
+          <div class="col">
+            <div>Launch Agents</div>
+            <div class="sub">用户 · 全局 · 系统</div>
+          </div>
+          <span class="badge">20</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">🔑</span>
+          <div class="col">
+            <div>Login Items</div>
+            <div class="sub">说明 · 系统设置</div>
+          </div>
+        </div>
+        <div class="nav-item">
+          <span class="icon">⚡</span>
+          <div class="col">
+            <div>Services</div>
+            <div class="sub">本地开发环境</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="toolbar">
+          <input class="search" type="search" placeholder="搜索 Label 或路径" />
+          <div class="scope-picker" id="scopePicker">
+            <button type="button" class="active" data-filter="all">全部</button>
+            <button type="button" data-filter="user">用户级</button>
+            <button type="button" data-filter="global">全局 Agent</button>
+            <button type="button" data-filter="daemon">LaunchDaemon</button>
+          </div>
+          <div class="new-wrap">
+            <button class="btn primary menu" type="button" id="newBtn">新建</button>
+            <div class="dropdown" id="newMenu">
+              <button type="button">新建用户 Agent · ~/Library</button>
+              <button type="button">新建全局 Agent · /Library</button>
+              <button type="button">新建 LaunchDaemon · /Library</button>
+            </div>
+          </div>
+          <button class="btn" type="button">刷新</button>
+          <label class="toggle-row">
+            <input type="checkbox" id="toolbarMode" />
+            在工具栏显示分组
+          </label>
+        </div>
+
+        <div class="content" id="content">
+          <div class="note" id="modeNote">
+            <strong>模式 A（默认）</strong>：列表内可折叠分组，与 Services 页一致。点击分组标题可收起/展开。
+          </div>
+
+          <div id="groupedView">
+            <div class="group" data-scope="user">
+              <div class="group-header" onclick="toggleGroup(this)">
+                <span class="icon">👤</span>
+                <span class="group-title">用户 Agents</span>
+                <span class="group-sub">~/Library/LaunchAgents</span>
+                <span class="count-pill">12</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="group-body">
+                <div class="row"><div class="row-header">
+                  <span class="status on"></span>
+                  <span class="row-title"><code>com.google.keystone.agent</code></span>
+                  <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+                </div></div>
+                <div class="row"><div class="row-header">
+                  <span class="status load"></span>
+                  <span class="row-title"><code>com.syncthing.start</code></span>
+                  <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+                </div></div>
+                <div class="row"><div class="row-header">
+                  <span class="status off"></span>
+                  <span class="row-title"><code>homebrew.mxcl.redis</code></span>
+                  <div class="row-actions"><button class="btn primary">启动</button><button class="btn">▼</button></div>
+                </div></div>
+              </div>
+            </div>
+
+            <div class="group" data-scope="global">
+              <div class="group-header" onclick="toggleGroup(this)">
+                <span class="icon">⚙️</span>
+                <span class="group-title">全局 Agents</span>
+                <span class="group-sub">/Library/LaunchAgents</span>
+                <span class="count-pill">3</span>
+                <span class="chevron">▼</span>
+              </div>
+              <div class="group-body">
+                <div class="row"><div class="row-header">
+                  <span class="status on"></span>
+                  <span class="row-title"><code>com.docker.socket</code></span>
+                  <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+                </div></div>
+              </div>
+            </div>
+
+            <div class="group" data-scope="daemon">
+              <div class="group-header" onclick="toggleGroup(this)">
+                <span class="icon">🖥</span>
+                <span class="group-title">LaunchDaemons</span>
+                <span class="group-sub">/Library/LaunchDaemons</span>
+                <span class="count-pill">5</span>
+                <span class="chevron">▶</span>
+              </div>
+              <div class="group-body collapsed">
+                <div class="row"><div class="row-header">
+                  <span class="status on"></span>
+                  <span class="row-title"><code>com.apple.smbd</code></span>
+                  <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+                </div></div>
+                <div class="row invalid"><div class="row-header">
+                  <span class="status warn"></span>
+                  <span class="row-title"><code>broken.plist</code> <span class="row-meta">— 无效 plist</span></span>
+                  <div class="row-actions"><button class="btn">删除</button></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="flatView" style="display:none">
+            <div class="row" data-scope="user"><div class="row-header">
+              <span class="status on"></span>
+              <span class="scope-tag">用户</span>
+              <span class="row-title"><code>com.google.keystone.agent</code></span>
+              <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+            </div></div>
+            <div class="row" data-scope="user"><div class="row-header">
+              <span class="status load"></span>
+              <span class="scope-tag">用户</span>
+              <span class="row-title"><code>com.syncthing.start</code></span>
+              <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+            </div></div>
+            <div class="row" data-scope="user"><div class="row-header">
+              <span class="status off"></span>
+              <span class="scope-tag">用户</span>
+              <span class="row-title"><code>homebrew.mxcl.redis</code></span>
+              <div class="row-actions"><button class="btn primary">启动</button><button class="btn">▼</button></div>
+            </div></div>
+            <div class="row" data-scope="global"><div class="row-header">
+              <span class="status on"></span>
+              <span class="scope-tag">全局</span>
+              <span class="row-title"><code>com.docker.socket</code></span>
+              <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+            </div></div>
+            <div class="row" data-scope="daemon"><div class="row-header">
+              <span class="status on"></span>
+              <span class="scope-tag">Daemon</span>
+              <span class="row-title"><code>com.apple.smbd</code></span>
+              <div class="row-actions"><button class="btn">停止</button><button class="btn">▼</button></div>
+            </div></div>
+            <div class="row invalid" data-scope="daemon"><div class="row-header">
+              <span class="status warn"></span>
+              <span class="scope-tag">Daemon</span>
+              <span class="row-title"><code>broken.plist</code> <span class="row-meta">— 无效 plist</span></span>
+              <div class="row-actions"><button class="btn">删除</button></div>
+            </div></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="proto-bar">
+    当前：<span class="mode-label" id="modeLabel">模式 A · 列表内分组</span>
+    · 勾选右上角切换 <strong>模式 B</strong>
+  </div>
+
+  <script>
+    function toggleGroup(header) {
+      const body = header.nextElementSibling;
+      const chev = header.querySelector('.chevron');
+      body.classList.toggle('collapsed');
+      chev.textContent = body.classList.contains('collapsed') ? '▶' : '▼';
+    }
+
+    const toolbarMode = document.getElementById('toolbarMode');
+    const scopePicker = document.getElementById('scopePicker');
+    const groupedView = document.getElementById('groupedView');
+    const flatView = document.getElementById('flatView');
+    const modeNote = document.getElementById('modeNote');
+    const modeLabel = document.getElementById('modeLabel');
+
+    toolbarMode.addEventListener('change', () => {
+      const on = toolbarMode.checked;
+      scopePicker.classList.toggle('visible', on);
+      groupedView.style.display = on ? 'none' : 'block';
+      flatView.style.display = on ? 'block' : 'none';
+      if (on) {
+        modeNote.innerHTML = '<strong>模式 B（可选）</strong>：分组切换移到工具栏 Picker，列表扁平显示，每行带 scope 小标签。';
+        modeLabel.textContent = '模式 B · 工具栏分组';
+      } else {
+        modeNote.innerHTML = '<strong>模式 A（默认）</strong>：列表内可折叠分组，与 Services 页一致。点击分组标题可收起/展开。';
+        modeLabel.textContent = '模式 A · 列表内分组';
+      }
+    });
+
+    scopePicker.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        scopePicker.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        flatView.querySelectorAll('.row').forEach(row => {
+          row.style.display = (f === 'all' || row.dataset.scope === f) ? 'block' : 'none';
+        });
+      });
+    });
+
+    document.getElementById('newBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('newMenu').classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      document.getElementById('newMenu').classList.remove('open');
+    });
+  </script>
+</body>
+</html>

@@ -43,6 +43,11 @@ final class ServiceStore: ObservableObject {
         }
     }
 
+    func stopPolling() {
+        timerTask?.cancel()
+        timerTask = nil
+    }
+
     func refreshNow() {
         Task { await performScan() }
     }

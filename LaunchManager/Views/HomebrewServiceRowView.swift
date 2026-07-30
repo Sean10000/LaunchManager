@@ -4,6 +4,7 @@ struct HomebrewServiceRowView: View {
     let service: HomebrewService
     @ObservedObject var store: HomebrewServiceStore
     @Binding var errorMessage: String?
+    var startButtonTitle: LocalizedStringKey = "启动"
 
     @State private var isExpanded = false
     @State private var pulseOpacity = false
@@ -123,7 +124,7 @@ struct HomebrewServiceRowView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
         } else {
-            Button("启动") {
+            Button(startButtonTitle) {
                 store.start(service) { errorMessage = $0 }
             }
             .buttonStyle(.bordered)

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum CrontabScope: String, CaseIterable, Hashable {
     case user

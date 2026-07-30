@@ -1,5 +1,16 @@
-import SwiftUI
+import AppKit
 import ServiceManagement
+import SwiftUI
+
+enum LoginItemsSettings {
+    static func openSystemSettings() {
+        if #available(macOS 13.0, *) {
+            SMAppService.openSystemSettingsLoginItems()
+        } else if let url = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+}
 
 struct LoginItemsGuideView: View {
     var body: some View {
@@ -29,7 +40,7 @@ struct LoginItemsGuideView: View {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "info.circle")
                         .foregroundStyle(.secondary)
-                    Text("许多 Login Item 背后对应同一个 launchd plist，若已在 LaunchAgents / LaunchDaemons 中出现，请在本应用相应分类中管理。")
+                    Text("许多 Login Item 背后对应同一个 launchd plist，若已在 Launch Agents / LaunchDaemons 中出现，请在本应用相应分类中管理。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -39,7 +50,7 @@ struct LoginItemsGuideView: View {
                 .cornerRadius(8)
 
                 Button {
-                    SMAppService.openSystemSettingsLoginItems()
+                    LoginItemsSettings.openSystemSettings()
                 } label: {
                     Label("打开登录项设置", systemImage: "arrow.up.forward.app")
                 }
@@ -50,6 +61,7 @@ struct LoginItemsGuideView: View {
             .frame(maxWidth: 560, alignment: .leading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .navigationTitle("Login Items")
     }
 }
 

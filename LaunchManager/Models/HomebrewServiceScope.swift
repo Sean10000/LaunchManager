@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum HomebrewServiceScope: String, CaseIterable, Hashable {
     case user
