@@ -393,6 +393,147 @@ final class PlistServiceTests: XCTestCase {
         let item = svc.parsePlist(at: dest, scope: .userAgent)
         XCTAssertEqual(item?.label, "com.test.copy")
     }
+
+    func test_parsePlist_multipleTriggers() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.multi</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>StartCalendarInterval</key>
+            <dict><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+            <key>StartInterval</key><integer>300</integer>
+            <key>WatchPaths</key>
+            <array><string>/tmp/watch</string></array>
+            <key>RunAtLoad</key><true/>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.multi.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let item = svc.parsePlist(at: url, scope: .userAgent)
+        XCTAssertEqual(item?.calendarIntervals.count, 1)
+        XCTAssertEqual(item?.calendarIntervals.first?.hour, 8)
+        XCTAssertEqual(item?.startInterval, 300)
+        XCTAssertEqual(item?.watchPaths, ["/tmp/watch"])
+        XCTAssertEqual(item?.runAtLoad, true)
+    }
+
+    func test_parsePlist_calendarIntervalArray() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.calarray</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>StartCalendarInterval</key>
+            <array>
+                <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>0</integer></dict>
+                <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+            </array>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.calarray.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let item = svc.parsePlist(at: url, scope: .userAgent)
+        XCTAssertEqual(item?.calendarIntervals.count, 2)
+        XCTAssertEqual(item?.calendarIntervals[0].weekday, 1)
+        XCTAssertEqual(item?.calendarIntervals[0].hour, 8)
+        XCTAssertEqual(item?.calendarIntervals[1].weekday, 5)
+        XCTAssertEqual(item?.calendarIntervals[1].minute, 30)
+    }
+
+    func test_toDictionary_multipleCalendars_writesArray() {
+        let item = LaunchItem(
+            label: "com.test.calout",
+            plistURL: tmpDir.appendingPathComponent("com.test.calout.plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            calendarIntervals: [
+                .init(weekday: 1, hour: 8, minute: 0),
+                .init(weekday: nil, hour: 12, minute: 15),
+            ],
+            startInterval: 60,
+            watchPaths: ["/tmp/a"],
+            runAtLoad: false,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            isLoaded: false,
+            pid: nil,
+            lastExitCode: nil
+        )
+        let dict = svc.toDictionary(item)
+        let cal = dict["StartCalendarInterval"] as? [[String: Int]]
+        XCTAssertEqual(cal?.count, 2)
+        XCTAssertEqual(dict["StartInterval"] as? Int, 60)
+        XCTAssertEqual(dict["WatchPaths"] as? [String], ["/tmp/a"])
+    }
+
+    func test_formIncompatibility_allowsMultipleTriggerTypes() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.okmulti</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>StartInterval</key><integer>10</integer>
+            <key>WatchPaths</key><array><string>/tmp/x</string></array>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.okmulti.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let dict = try svc.readDictionary(from: url)
+        XCTAssertNil(svc.formIncompatibilityReason(for: dict))
+    }
+
+    func test_formIncompatibility_multipleWatchPaths() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.multipath</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>WatchPaths</key>
+            <array><string>/tmp/a</string><string>/tmp/b</string></array>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.multipath.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let dict = try svc.readDictionary(from: url)
+        let reason = svc.formIncompatibilityReason(for: dict)
+        XCTAssertNotNil(reason)
+        XCTAssertTrue(reason?.contains("WatchPaths") == true || reason?.contains("路径") == true)
+    }
+
+    func test_triggerSummaryLines_order() {
+        let item = LaunchItem(
+            label: "com.test.summary",
+            plistURL: URL(fileURLWithPath: "/tmp/x.plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            calendarIntervals: [.init(weekday: nil, hour: 8, minute: 0)],
+            startInterval: 300,
+            watchPaths: ["/tmp/w"],
+            runAtLoad: true,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            isLoaded: false,
+            pid: nil,
+            lastExitCode: nil
+        )
+        let lines = item.triggerSummaryLines
+        XCTAssertEqual(lines.count, 4)
+        XCTAssertTrue(lines[0].contains("08:00"))
+        XCTAssertTrue(lines[1].contains("300"))
+        XCTAssertTrue(lines[2].contains("/tmp/w"))
+        XCTAssertEqual(lines[3], String(localized: "加载时运行"))
+    }
 }
 
 // MARK: - AgentStore Pending Tests

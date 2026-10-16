@@ -53,13 +53,8 @@ struct PlistService {
         if let keepAlive = dict["KeepAlive"], keepAlive is Bool == false {
             return String(localized: "KeepAlive 使用了表单不支持的格式，请使用 XML 模式编辑。")
         }
-        let triggers = [
-            dict["StartCalendarInterval"] != nil,
-            dict["StartInterval"] != nil,
-            dict["WatchPaths"] != nil,
-        ].filter { $0 }.count
-        if triggers > 1 {
-            return String(localized: "存在多个触发器，请使用 XML 模式编辑。")
+        if let wp = dict["WatchPaths"] as? [Any], wp.count > 1 {
+            return String(localized: "WatchPaths 包含多条路径，请使用 XML 模式编辑。")
         }
         return nil
     }
@@ -108,23 +103,10 @@ struct PlistService {
             program = prog
         }
 
-        var calendarIntervals: [LaunchItem.CalendarInterval] = []
-        var startInterval: Int?
-        var watchPaths: [String] = []
-
-        if let ci = dict["StartCalendarInterval"] as? [String: Int] {
-            calendarIntervals = [
-                LaunchItem.CalendarInterval(
-                    weekday: ci["Weekday"],
-                    hour: ci["Hour"],
-                    minute: ci["Minute"] ?? 0
-                )
-            ]
-        } else if let si = dict["StartInterval"] as? Int {
-            startInterval = si
-        } else if let wp = dict["WatchPaths"] as? [String] {
-            watchPaths = wp
-        }
+        let calendarIntervals = parseCalendarIntervals(from: dict["StartCalendarInterval"])
+        let startInterval = dict["StartInterval"] as? Int
+            ?? (dict["StartInterval"] as? NSNumber)?.intValue
+        let watchPaths = dict["WatchPaths"] as? [String] ?? []
 
         return LaunchItem(
             label: label, plistURL: url, scope: scope,
@@ -150,6 +132,46 @@ struct PlistService {
             }
         }
         return result
+    }
+
+    func parseCalendarIntervals(from value: Any?) -> [LaunchItem.CalendarInterval] {
+        if let dict = value as? [String: Any] {
+            return [calendarInterval(from: dict)].compactMap { $0 }
+        }
+        if let dict = value as? [String: Int] {
+            return [
+                LaunchItem.CalendarInterval(
+                    weekday: dict["Weekday"],
+                    hour: dict["Hour"],
+                    minute: dict["Minute"] ?? 0
+                )
+            ]
+        }
+        if let array = value as? [Any] {
+            return array.compactMap { el -> LaunchItem.CalendarInterval? in
+                if let d = el as? [String: Any] { return calendarInterval(from: d) }
+                if let d = el as? [String: Int] {
+                    return LaunchItem.CalendarInterval(
+                        weekday: d["Weekday"], hour: d["Hour"], minute: d["Minute"] ?? 0
+                    )
+                }
+                return nil
+            }
+        }
+        return []
+    }
+
+    private func calendarInterval(from dict: [String: Any]) -> LaunchItem.CalendarInterval? {
+        func intVal(_ any: Any?) -> Int? {
+            if let i = any as? Int { return i }
+            if let n = any as? NSNumber { return n.intValue }
+            return nil
+        }
+        return LaunchItem.CalendarInterval(
+            weekday: intVal(dict["Weekday"]),
+            hour: intVal(dict["Hour"]),
+            minute: intVal(dict["Minute"]) ?? 0
+        )
     }
 
     func toDictionary(_ item: LaunchItem) -> [String: Any] {

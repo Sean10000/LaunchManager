@@ -389,23 +389,10 @@ struct EditAgentSheet: View {
             return nil
         }
 
-        var calendarIntervals: [LaunchItem.CalendarInterval] = []
-        var startInterval: Int?
-        var watchPaths: [String] = []
-
-        if let ci = dict["StartCalendarInterval"] as? [String: Int] {
-            calendarIntervals = [
-                LaunchItem.CalendarInterval(
-                    weekday: ci["Weekday"],
-                    hour: ci["Hour"],
-                    minute: ci["Minute"] ?? 0
-                )
-            ]
-        } else if let si = dict["StartInterval"] as? Int {
-            startInterval = si
-        } else if let wp = dict["WatchPaths"] as? [String] {
-            watchPaths = wp
-        }
+        let calendarIntervals = plistService.parseCalendarIntervals(from: dict["StartCalendarInterval"])
+        let startInterval = dict["StartInterval"] as? Int
+            ?? (dict["StartInterval"] as? NSNumber)?.intValue
+        let watchPaths = dict["WatchPaths"] as? [String] ?? []
 
         let scope = existingItem?.scope ?? defaultScope
         let plistURL = existingItem?.plistURL ?? scope.directoryURL.appendingPathComponent("\(label).plist")
