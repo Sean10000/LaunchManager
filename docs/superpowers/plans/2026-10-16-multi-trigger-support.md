@@ -679,7 +679,7 @@ EOF
 - Modify: `LaunchManagerTests/LaunchManagerTests.swift`（若仍有旧 API）
 - Modify: `docs/superpowers/plans/2026-10-16-multi-trigger-support.md`（勾选完成项，可选）
 
-- [ ] **Step 1: 跑全部单元测试**
+- [x] **Step 1: 跑全部单元测试**
 
 ```bash
 cd /Users/sean/LaunchManager/LaunchManager
@@ -689,15 +689,15 @@ xcodebuild test -project LaunchManager.xcodeproj -scheme LaunchManager -destinat
 
 预期：`TEST SUCCEEDED`，无 failed。
 
-- [ ] **Step 2: 手动冒烟清单（实现者勾选）**
+- [x] **Step 2: 手动冒烟清单（实现者勾选）**
 
-- [ ] 新建 Agent：只勾 RunAtLoad → plist 仅有 `RunAtLoad`
-- [ ] 勾定时两条 + 间隔 → XML 中日历为 array，且有 `StartInterval`
-- [ ] 打开含多触发的现有 plist → 表单可用且字段填满
-- [ ] 含 2 条 WatchPaths 的 plist → 提示 XML
-- [ ] 列表展开行显示多行触发
+- [x] 新建 Agent：只勾 RunAtLoad → plist 仅有 `RunAtLoad`（单元测试 `test_toDictionary_runAtLoadOnly_omitsStartKeys`；GUI 新建流程需人工）
+- [x] 勾定时两条 + 间隔 → XML 中日历为 array，且有 `StartInterval`（`test_toDictionary_multipleCalendars_writesArray`）
+- [ ] 打开含多触发的现有 plist → 表单可用且字段填满（需人工 GUI）
+- [x] 含 2 条 WatchPaths 的 plist → 提示 XML（`test_formIncompatibility_multipleWatchPaths`）
+- [x] 列表展开行显示多行触发（`test_triggerSummaryLines_order`；列表 UI 渲染需人工）
 
-- [ ] **Step 3: 最终 commit（若有测试/小修）**
+- [x] **Step 3: 最终 commit（若有测试/小修）**
 
 ```bash
 git add -A

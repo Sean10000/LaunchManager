@@ -472,6 +472,32 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertEqual(dict["WatchPaths"] as? [String], ["/tmp/a"])
     }
 
+    func test_toDictionary_runAtLoadOnly_omitsStartKeys() {
+        let item = LaunchItem(
+            label: "com.test.runatload",
+            plistURL: tmpDir.appendingPathComponent("com.test.runatload.plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            calendarIntervals: [],
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: true,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            isLoaded: false,
+            pid: nil,
+            lastExitCode: nil
+        )
+        let dict = svc.toDictionary(item)
+        XCTAssertEqual(dict["RunAtLoad"] as? Bool, true)
+        XCTAssertNil(dict["StartCalendarInterval"])
+        XCTAssertNil(dict["StartInterval"])
+        XCTAssertNil(dict["WatchPaths"])
+    }
+
     func test_formIncompatibility_allowsMultipleTriggerTypes() throws {
         let plist = """
         <?xml version="1.0" encoding="UTF-8"?>
