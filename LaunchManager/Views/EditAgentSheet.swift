@@ -201,7 +201,21 @@ struct EditAgentSheet: View {
                             TextField("时", value: $row.hour, format: .number).frame(width: 44)
                             Text(":")
                             TextField("分", value: $row.minute, format: .number).frame(width: 44)
+                            if calendarRows.count > 1 {
+                                Button {
+                                    calendarRows.removeAll { $0.id == row.id }
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.borderless)
+                            }
                         }
+                    }
+                    Button {
+                        calendarRows.append(CalendarFormRow())
+                    } label: {
+                        Label("添加时段", systemImage: "plus")
                     }
                 }
 
