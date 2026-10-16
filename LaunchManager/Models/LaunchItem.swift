@@ -98,9 +98,23 @@ struct LaunchItem: Identifiable, Hashable {
     /// 列表/详情用的触发摘要行（固定顺序）。
     var triggerSummaryLines: [String] {
         var lines: [String] = []
+        let weekdayNames = [
+            "",
+            String(localized: "周一"),
+            String(localized: "周二"),
+            String(localized: "周三"),
+            String(localized: "周四"),
+            String(localized: "周五"),
+            String(localized: "周六"),
+            String(localized: "周日"),
+        ]
         for ci in calendarIntervals {
-            let day = ci.weekday.map { String(localized: "周\($0)") }
-                ?? String(localized: "每天")
+            let day: String
+            if let w = ci.weekday, (1...7).contains(w) {
+                day = weekdayNames[w]
+            } else {
+                day = String(localized: "每天")
+            }
             let h = ci.hour.map { String(format: "%02d", $0) } ?? "**"
             lines.append("\(day) \(h):\(String(format: "%02d", ci.minute))")
         }
