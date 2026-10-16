@@ -108,30 +108,28 @@ struct PlistService {
             program = prog
         }
 
-        var triggerType: LaunchItem.TriggerType = .atLoad
-        var calendarInterval: LaunchItem.CalendarInterval?
+        var calendarIntervals: [LaunchItem.CalendarInterval] = []
         var startInterval: Int?
         var watchPaths: [String] = []
 
         if let ci = dict["StartCalendarInterval"] as? [String: Int] {
-            triggerType = .calendar
-            calendarInterval = LaunchItem.CalendarInterval(
-                weekday: ci["Weekday"],
-                hour: ci["Hour"],
-                minute: ci["Minute"] ?? 0
-            )
+            calendarIntervals = [
+                LaunchItem.CalendarInterval(
+                    weekday: ci["Weekday"],
+                    hour: ci["Hour"],
+                    minute: ci["Minute"] ?? 0
+                )
+            ]
         } else if let si = dict["StartInterval"] as? Int {
-            triggerType = .interval
             startInterval = si
         } else if let wp = dict["WatchPaths"] as? [String] {
-            triggerType = .watchPath
             watchPaths = wp
         }
 
         return LaunchItem(
             label: label, plistURL: url, scope: scope,
             program: program, programArguments: programArguments,
-            triggerType: triggerType, calendarInterval: calendarInterval,
+            calendarIntervals: calendarIntervals,
             startInterval: startInterval, watchPaths: watchPaths,
             runAtLoad: dict["RunAtLoad"] as? Bool ?? false,
             keepAlive: dict["KeepAlive"] as? Bool ?? false,
@@ -161,21 +159,21 @@ struct PlistService {
         } else {
             dict["ProgramArguments"] = [item.program] + item.programArguments
         }
-        switch item.triggerType {
-        case .calendar:
-            if let ci = item.calendarInterval {
+        if item.calendarIntervals.count == 1, let ci = item.calendarIntervals.first {
+            var d: [String: Int] = ["Minute": ci.minute]
+            if let w = ci.weekday { d["Weekday"] = w }
+            if let h = ci.hour { d["Hour"] = h }
+            dict["StartCalendarInterval"] = d
+        } else if item.calendarIntervals.count >= 2 {
+            dict["StartCalendarInterval"] = item.calendarIntervals.map { ci -> [String: Int] in
                 var d: [String: Int] = ["Minute": ci.minute]
                 if let w = ci.weekday { d["Weekday"] = w }
-                if let h = ci.hour    { d["Hour"] = h }
-                dict["StartCalendarInterval"] = d
+                if let h = ci.hour { d["Hour"] = h }
+                return d
             }
-        case .interval:
-            if let si = item.startInterval { dict["StartInterval"] = si }
-        case .watchPath:
-            if !item.watchPaths.isEmpty { dict["WatchPaths"] = item.watchPaths }
-        case .atLoad:
-            break
         }
+        if let si = item.startInterval { dict["StartInterval"] = si }
+        if !item.watchPaths.isEmpty { dict["WatchPaths"] = item.watchPaths }
         if item.runAtLoad  { dict["RunAtLoad"]  = true }
         if item.keepAlive  { dict["KeepAlive"]  = true }
         if let o = item.standardOutPath   { dict["StandardOutPath"]   = o }

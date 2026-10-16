@@ -261,21 +261,6 @@ struct AgentRowView: View {
     }
 
     private var triggerDescription: String {
-        switch item.triggerType {
-        case .calendar:
-            guard let ci = item.calendarInterval else {
-                return String(localized: "定时")
-            }
-            let day = ci.weekday.map { String(localized: "周\($0)") }
-                    ?? String(localized: "每天")
-            let h = ci.hour.map { String(format: "%02d", $0) } ?? "**"
-            return "\(day) \(h):\(String(format: "%02d", ci.minute))"
-        case .interval:
-            return String(localized: "每 \(item.startInterval ?? 0) 秒")
-        case .atLoad:
-            return String(localized: "登录时")
-        case .watchPath:
-            return String(localized: "监视路径：\(item.watchPaths.first ?? "")")
-        }
+        item.triggerSummaryLines.joined(separator: "\n")
     }
 }

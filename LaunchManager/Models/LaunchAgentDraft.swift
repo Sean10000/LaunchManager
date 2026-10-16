@@ -8,7 +8,6 @@ struct LaunchAgentDraft: Equatable, Identifiable {
     var workingDirectory: String?
     var runAtLoad: Bool
     var keepAlive: Bool
-    var triggerType: LaunchItem.TriggerType
 
     static func from(service: Service) -> LaunchAgentDraft? {
         guard service.runtimeGroup == .instance, service.killAllowed else { return nil }
@@ -33,8 +32,7 @@ struct LaunchAgentDraft: Equatable, Identifiable {
             programArguments: programArguments,
             workingDirectory: service.workingDirectory ?? service.processDirectory,
             runAtLoad: true,
-            keepAlive: false,
-            triggerType: .atLoad
+            keepAlive: false
         )
     }
 }

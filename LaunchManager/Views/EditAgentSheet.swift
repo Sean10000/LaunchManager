@@ -12,11 +12,11 @@ struct EditAgentSheet: View {
     @State private var program: String
     @State private var argumentsText: String
     @State private var workingDirectory: String
-    @State private var triggerType: LaunchItem.TriggerType
-    @State private var weekday: Int?
-    @State private var hour: Int
-    @State private var minute: Int
+    @State private var useCalendar: Bool
+    @State private var calendarRows: [CalendarFormRow]
+    @State private var useInterval: Bool
     @State private var startInterval: Int
+    @State private var useWatchPath: Bool
     @State private var watchPath: String
     @State private var runAtLoad: Bool
     @State private var keepAlive: Bool
@@ -49,11 +49,12 @@ struct EditAgentSheet: View {
         _program = State(initialValue: d?.program ?? i?.program ?? "")
         _argumentsText = State(initialValue: d?.programArguments.joined(separator: "\n") ?? i?.programArguments.joined(separator: "\n") ?? "")
         _workingDirectory = State(initialValue: d?.workingDirectory ?? i?.workingDirectory ?? "")
-        _triggerType = State(initialValue: d?.triggerType ?? i?.triggerType ?? .atLoad)
-        _weekday = State(initialValue: i?.calendarInterval?.weekday)
-        _hour = State(initialValue: i?.calendarInterval?.hour ?? 8)
-        _minute = State(initialValue: i?.calendarInterval?.minute ?? 0)
+        let sourceIntervals = i?.calendarIntervals ?? []
+        _useCalendar = State(initialValue: !sourceIntervals.isEmpty)
+        _calendarRows = State(initialValue: sourceIntervals.map { CalendarFormRow(from: $0) })
+        _useInterval = State(initialValue: i?.startInterval != nil)
         _startInterval = State(initialValue: i?.startInterval ?? 60)
+        _useWatchPath = State(initialValue: !(i?.watchPaths.isEmpty ?? true))
         _watchPath = State(initialValue: i?.watchPaths.first ?? "")
         _runAtLoad = State(initialValue: d?.runAtLoad ?? i?.runAtLoad ?? false)
         _keepAlive = State(initialValue: d?.keepAlive ?? i?.keepAlive ?? false)
@@ -176,41 +177,46 @@ struct EditAgentSheet: View {
             }
 
             Section("触发方式") {
-                Picker("类型", selection: $triggerType) {
-                    ForEach(LaunchItem.TriggerType.allCases, id: \.self) {
-                        Text($0.localizedName).tag($0)
+                Toggle("定时", isOn: $useCalendar)
+                    .onChange(of: useCalendar) { _, on in
+                        if on, calendarRows.isEmpty {
+                            calendarRows = [CalendarFormRow()]
+                        }
+                        if !on { calendarRows = [] }
+                    }
+                if useCalendar {
+                    ForEach($calendarRows) { $row in
+                        HStack {
+                            Text("星期")
+                            Picker("", selection: $row.weekday) {
+                                Text("每天").tag(Int?.none)
+                                ForEach(1...7, id: \.self) { d in
+                                    Text(["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"][d])
+                                        .tag(Int?.some(d))
+                                }
+                            }
+                            .frame(width: 80)
+                            Spacer()
+                            Text("时间")
+                            TextField("时", value: $row.hour, format: .number).frame(width: 44)
+                            Text(":")
+                            TextField("分", value: $row.minute, format: .number).frame(width: 44)
+                        }
                     }
                 }
-                .pickerStyle(.segmented)
 
-                switch triggerType {
-                case .calendar:
-                    HStack {
-                        Text("星期")
-                        Picker("", selection: $weekday) {
-                            Text("每天").tag(Int?.none)
-                            ForEach(1...7, id: \.self) { d in
-                                Text(["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"][d])
-                                    .tag(Int?.some(d))
-                            }
-                        }
-                        .frame(width: 80)
-                        Spacer()
-                        Text("时间")
-                        TextField("时", value: $hour, format: .number).frame(width: 44)
-                        Text(":")
-                        TextField("分", value: $minute, format: .number).frame(width: 44)
-                    }
-                case .interval:
+                Toggle("间隔", isOn: $useInterval)
+                if useInterval {
                     HStack {
                         Text("每隔")
                         TextField("秒", value: $startInterval, format: .number).frame(width: 80)
                         Text("秒执行一次")
                     }
-                case .watchPath:
+                }
+
+                Toggle("监视路径", isOn: $useWatchPath)
+                if useWatchPath {
                     TextField("监视路径", text: $watchPath)
-                case .atLoad:
-                    Text("登录或加载时执行一次").foregroundStyle(.secondary)
                 }
             }
 
@@ -383,23 +389,21 @@ struct EditAgentSheet: View {
             return nil
         }
 
-        var triggerType: LaunchItem.TriggerType = .atLoad
-        var calendarInterval: LaunchItem.CalendarInterval?
+        var calendarIntervals: [LaunchItem.CalendarInterval] = []
         var startInterval: Int?
         var watchPaths: [String] = []
 
         if let ci = dict["StartCalendarInterval"] as? [String: Int] {
-            triggerType = .calendar
-            calendarInterval = LaunchItem.CalendarInterval(
-                weekday: ci["Weekday"],
-                hour: ci["Hour"],
-                minute: ci["Minute"] ?? 0
-            )
+            calendarIntervals = [
+                LaunchItem.CalendarInterval(
+                    weekday: ci["Weekday"],
+                    hour: ci["Hour"],
+                    minute: ci["Minute"] ?? 0
+                )
+            ]
         } else if let si = dict["StartInterval"] as? Int {
-            triggerType = .interval
             startInterval = si
         } else if let wp = dict["WatchPaths"] as? [String] {
-            triggerType = .watchPath
             watchPaths = wp
         }
 
@@ -412,8 +416,7 @@ struct EditAgentSheet: View {
             scope: scope,
             program: program,
             programArguments: programArguments,
-            triggerType: triggerType,
-            calendarInterval: calendarInterval,
+            calendarIntervals: calendarIntervals,
             startInterval: startInterval,
             watchPaths: watchPaths,
             runAtLoad: dict["RunAtLoad"] as? Bool ?? false,
@@ -434,11 +437,11 @@ struct EditAgentSheet: View {
         program = item.program
         argumentsText = item.programArguments.joined(separator: "\n")
         workingDirectory = item.workingDirectory ?? ""
-        triggerType = item.triggerType
-        weekday = item.calendarInterval?.weekday
-        hour = item.calendarInterval?.hour ?? 8
-        minute = item.calendarInterval?.minute ?? 0
+        useCalendar = !item.calendarIntervals.isEmpty
+        calendarRows = item.calendarIntervals.map { CalendarFormRow(from: $0) }
+        useInterval = item.startInterval != nil
         startInterval = item.startInterval ?? 60
+        useWatchPath = !item.watchPaths.isEmpty
         watchPath = item.watchPaths.first ?? ""
         runAtLoad = item.runAtLoad
         keepAlive = item.keepAlive
@@ -468,12 +471,11 @@ struct EditAgentSheet: View {
             scope: scope,
             program: program,
             programArguments: args,
-            triggerType: triggerType,
-            calendarInterval: triggerType == .calendar
-                ? LaunchItem.CalendarInterval(weekday: weekday, hour: hour, minute: minute)
-                : nil,
-            startInterval: triggerType == .interval ? startInterval : nil,
-            watchPaths: triggerType == .watchPath ? [watchPath] : [],
+            calendarIntervals: useCalendar ? calendarRows.map(\.asInterval) : [],
+            startInterval: useInterval ? startInterval : nil,
+            watchPaths: useWatchPath
+                ? (watchPath.trimmingCharacters(in: .whitespaces).isEmpty ? [] : [watchPath])
+                : [],
             runAtLoad: runAtLoad,
             keepAlive: keepAlive,
             standardOutPath: stdoutPath.isEmpty ? nil : stdoutPath,
@@ -529,5 +531,36 @@ private struct EnvVarRow: Identifiable {
     init(key: String = "", value: String = "") {
         self.key = key
         self.value = value
+    }
+}
+
+private struct CalendarFormRow: Identifiable, Equatable {
+    let id: UUID
+    var weekday: Int?
+    var hour: Int
+    var minute: Int
+
+    init(
+        id: UUID = UUID(),
+        weekday: Int? = nil,
+        hour: Int = 8,
+        minute: Int = 0
+    ) {
+        self.id = id
+        self.weekday = weekday
+        self.hour = hour
+        self.minute = minute
+    }
+
+    init(from interval: LaunchItem.CalendarInterval) {
+        self.init(
+            weekday: interval.weekday,
+            hour: interval.hour ?? 8,
+            minute: interval.minute
+        )
+    }
+
+    var asInterval: LaunchItem.CalendarInterval {
+        LaunchItem.CalendarInterval(weekday: weekday, hour: hour, minute: minute)
     }
 }

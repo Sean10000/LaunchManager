@@ -90,10 +90,10 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertEqual(item?.label, "com.test.calendar")
         XCTAssertEqual(item?.program, "/usr/bin/open")
         XCTAssertEqual(item?.programArguments, ["-a", "Syncthing"])
-        XCTAssertEqual(item?.triggerType, .calendar)
-        XCTAssertEqual(item?.calendarInterval?.hour, 8)
-        XCTAssertEqual(item?.calendarInterval?.minute, 0)
-        XCTAssertNil(item?.calendarInterval?.weekday)
+        XCTAssertEqual(item?.calendarIntervals.count, 1)
+        XCTAssertEqual(item?.calendarIntervals.first?.hour, 8)
+        XCTAssertEqual(item?.calendarIntervals.first?.minute, 0)
+        XCTAssertNil(item?.calendarIntervals.first?.weekday)
     }
 
     func test_parsePlist_intervalTrigger() throws {
@@ -110,7 +110,7 @@ final class PlistServiceTests: XCTestCase {
         try plist.write(to: url, atomically: true, encoding: .utf8)
 
         let item = svc.parsePlist(at: url, scope: .userAgent)
-        XCTAssertEqual(item?.triggerType, .interval)
+        XCTAssertEqual(item?.calendarIntervals.count, 0)
         XCTAssertEqual(item?.startInterval, 300)
         XCTAssertEqual(item?.program, "/usr/local/bin/mytool")
     }
@@ -138,8 +138,7 @@ final class PlistServiceTests: XCTestCase {
             scope: .userAgent,
             program: "/bin/echo",
             programArguments: [],
-            triggerType: .atLoad,
-            calendarInterval: nil,
+            calendarIntervals: [],
             startInterval: nil,
             watchPaths: [],
             runAtLoad: true,
@@ -193,8 +192,7 @@ final class PlistServiceTests: XCTestCase {
             scope: .userAgent,
             program: "/bin/echo",
             programArguments: [],
-            triggerType: .atLoad,
-            calendarInterval: nil,
+            calendarIntervals: [],
             startInterval: nil,
             watchPaths: [],
             runAtLoad: false,
@@ -217,8 +215,7 @@ final class PlistServiceTests: XCTestCase {
             scope: .userAgent,
             program: "/bin/echo",
             programArguments: [],
-            triggerType: .atLoad,
-            calendarInterval: nil,
+            calendarIntervals: [],
             startInterval: nil,
             watchPaths: [],
             runAtLoad: true,
@@ -243,8 +240,7 @@ final class PlistServiceTests: XCTestCase {
             scope: .userAgent,
             program: "/bin/echo",
             programArguments: ["hello"],
-            triggerType: .calendar,
-            calendarInterval: LaunchItem.CalendarInterval(weekday: nil, hour: 9, minute: 30),
+            calendarIntervals: [LaunchItem.CalendarInterval(weekday: nil, hour: 9, minute: 30)],
             startInterval: nil,
             watchPaths: [],
             runAtLoad: true,
@@ -262,9 +258,9 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertEqual(parsed?.label, original.label)
         XCTAssertEqual(parsed?.program, original.program)
         XCTAssertEqual(parsed?.programArguments, original.programArguments)
-        XCTAssertEqual(parsed?.triggerType, original.triggerType)
-        XCTAssertEqual(parsed?.calendarInterval?.hour, 9)
-        XCTAssertEqual(parsed?.calendarInterval?.minute, 30)
+        XCTAssertEqual(parsed?.calendarIntervals.count, 1)
+        XCTAssertEqual(parsed?.calendarIntervals.first?.hour, 9)
+        XCTAssertEqual(parsed?.calendarIntervals.first?.minute, 30)
         XCTAssertEqual(parsed?.runAtLoad, true)
         XCTAssertEqual(parsed?.standardOutPath, "/tmp/out.log")
     }
@@ -430,8 +426,7 @@ final class AgentStorePendingTests: XCTestCase {
             scope: .userAgent,
             program: "/bin/echo",
             programArguments: [],
-            triggerType: .atLoad,
-            calendarInterval: nil,
+            calendarIntervals: [],
             startInterval: nil,
             watchPaths: [],
             runAtLoad: true,
@@ -636,7 +631,6 @@ final class LaunchAgentDraftTests: XCTestCase {
         XCTAssertEqual(draft?.label, "dev.3000.next-dev")
         XCTAssertTrue(draft?.runAtLoad == true)
         XCTAssertFalse(draft?.keepAlive == true)
-        XCTAssertEqual(draft?.triggerType, .atLoad)
     }
 
     private func makeService(
@@ -1353,8 +1347,7 @@ final class BrewManagedSupportTests: XCTestCase {
             scope: .userAgent,
             program: "/opt/homebrew/bin/cloudflared",
             programArguments: [],
-            triggerType: .atLoad,
-            calendarInterval: nil,
+            calendarIntervals: [],
             startInterval: nil,
             watchPaths: [],
             runAtLoad: true,

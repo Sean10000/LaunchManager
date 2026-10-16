@@ -8,8 +8,7 @@ struct LaunchItem: Identifiable, Hashable {
     var scope: Scope
     var program: String
     var programArguments: [String]
-    var triggerType: TriggerType
-    var calendarInterval: CalendarInterval?
+    var calendarIntervals: [CalendarInterval]
     var startInterval: Int?
     var watchPaths: [String]
     var runAtLoad: Bool
@@ -90,25 +89,33 @@ struct LaunchItem: Identifiable, Hashable {
         var requiresPrivilege: Bool { self != .userAgent }
     }
 
-    enum TriggerType: String, CaseIterable, Hashable {
-        case calendar  = "calendar"
-        case interval  = "interval"
-        case atLoad    = "atLoad"
-        case watchPath = "watchPath"
-
-        var localizedName: LocalizedStringKey {
-            switch self {
-            case .calendar:  return "定时"
-            case .interval:  return "间隔"
-            case .atLoad:    return "登录时"
-            case .watchPath: return "监视路径"
-            }
-        }
-    }
-
     struct CalendarInterval: Hashable {
         var weekday: Int?
         var hour: Int?
         var minute: Int
+    }
+
+    /// 列表/详情用的触发摘要行（固定顺序）。
+    var triggerSummaryLines: [String] {
+        var lines: [String] = []
+        for ci in calendarIntervals {
+            let day = ci.weekday.map { String(localized: "周\($0)") }
+                ?? String(localized: "每天")
+            let h = ci.hour.map { String(format: "%02d", $0) } ?? "**"
+            lines.append("\(day) \(h):\(String(format: "%02d", ci.minute))")
+        }
+        if let si = startInterval {
+            lines.append(String(localized: "每 \(si) 秒"))
+        }
+        for path in watchPaths {
+            lines.append(String(localized: "监视路径：\(path)"))
+        }
+        if runAtLoad {
+            lines.append(String(localized: "加载时运行"))
+        }
+        if lines.isEmpty {
+            lines.append(String(localized: "无自动触发"))
+        }
+        return lines
     }
 }
