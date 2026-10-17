@@ -200,7 +200,8 @@ struct EditAgentSheet: View {
                                     }
                                 }
                                 .labelsHidden()
-                                .frame(minWidth: 140)
+                                .pickerStyle(.menu)
+                                .fixedSize(horizontal: true, vertical: false)
                             }
                             HStack(alignment: .bottom, spacing: 6) {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -255,6 +256,7 @@ struct EditAgentSheet: View {
                 if useInterval {
                     HStack(spacing: 8) {
                         Text("每隔")
+                            .fixedSize(horizontal: true, vertical: false)
                         TextField("数量", value: $intervalAmount, format: .number)
                             .textFieldStyle(.roundedBorder)
                             .frame(width: 72)
@@ -266,7 +268,8 @@ struct EditAgentSheet: View {
                             }
                         }
                         .labelsHidden()
-                        .frame(minWidth: 100)
+                        .pickerStyle(.menu)
+                        .fixedSize(horizontal: true, vertical: false)
                     }
                 }
 
@@ -571,7 +574,10 @@ private enum EditorMode: String, CaseIterable {
 private enum IntervalUnit: Int, CaseIterable, Identifiable, Hashable {
     case seconds = 1
     case minutes = 60
-    case hours = 3600
+    case hours = 3_600
+    case days = 86_400
+    /// Approximate calendar month for StartInterval (30 days).
+    case months = 2_592_000
 
     var id: Int { rawValue }
     var seconds: Int { rawValue }
@@ -581,17 +587,16 @@ private enum IntervalUnit: Int, CaseIterable, Identifiable, Hashable {
         case .seconds: return "秒"
         case .minutes: return "分钟"
         case .hours: return "小时"
+        case .days: return "天"
+        case .months: return "月"
         }
     }
 
     /// Prefer the largest unit that divides evenly (300 → 5 minutes).
     static func split(seconds: Int) -> (amount: Int, unit: IntervalUnit) {
         let value = max(seconds, 1)
-        if value % Self.hours.seconds == 0 {
-            return (value / Self.hours.seconds, .hours)
-        }
-        if value % Self.minutes.seconds == 0 {
-            return (value / Self.minutes.seconds, .minutes)
+        for unit in [Self.months, .days, .hours, .minutes] where value % unit.seconds == 0 {
+            return (value / unit.seconds, unit)
         }
         return (value, .seconds)
     }

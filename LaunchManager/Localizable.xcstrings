@@ -1999,7 +1999,17 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Month"
+            "value": "Months"
+          }
+        }
+      }
+    },
+    "天": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Days"
           }
         }
       }
