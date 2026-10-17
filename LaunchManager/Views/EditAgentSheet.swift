@@ -202,19 +202,33 @@ struct EditAgentSheet: View {
                                 .labelsHidden()
                                 .frame(minWidth: 140)
                             }
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("时间").font(.caption).foregroundStyle(.secondary)
-                                HStack(spacing: 6) {
-                                    TextField("时", value: $row.hour, format: .number)
-                                        .textFieldStyle(.roundedBorder)
-                                        .frame(width: 56)
-                                        .multilineTextAlignment(.center)
-                                    Text(":")
+                            HStack(alignment: .bottom, spacing: 6) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("时")
+                                        .font(.caption)
                                         .foregroundStyle(.secondary)
-                                    TextField("分", value: $row.minute, format: .number)
+                                        .lineLimit(1)
+                                        .fixedSize(horizontal: true, vertical: false)
+                                    TextField("", value: $row.hour, format: .number)
                                         .textFieldStyle(.roundedBorder)
-                                        .frame(width: 56)
+                                        .frame(width: 52)
                                         .multilineTextAlignment(.center)
+                                        .lineLimit(1)
+                                }
+                                Text(":")
+                                    .foregroundStyle(.secondary)
+                                    .padding(.bottom, 6)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("分")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                        .fixedSize(horizontal: true, vertical: false)
+                                    TextField("", value: $row.minute, format: .number)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(width: 52)
+                                        .multilineTextAlignment(.center)
+                                        .lineLimit(1)
                                 }
                             }
                             Spacer(minLength: 0)
@@ -245,6 +259,7 @@ struct EditAgentSheet: View {
                             .textFieldStyle(.roundedBorder)
                             .frame(width: 72)
                             .multilineTextAlignment(.trailing)
+                            .lineLimit(1)
                         Picker("", selection: $intervalUnit) {
                             ForEach(IntervalUnit.allCases) { unit in
                                 Text(unit.localizedName).tag(unit)
