@@ -757,7 +757,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Minute"
+            "value": "Minutes"
           }
         }
       }
@@ -1269,7 +1269,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hour"
+            "value": "Hours"
           }
         }
       }
@@ -2557,6 +2557,56 @@
         }
       }
     },
+    "添加时段": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Schedule"
+          }
+        }
+      }
+    },
+    "加载时运行": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run at Load"
+          }
+        }
+      }
+    },
+    "无自动触发": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No automatic trigger"
+          }
+        }
+      }
+    },
+    "数量": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amount"
+          }
+        }
+      }
+    },
+    "WatchPaths 包含多条路径，请使用 XML 模式编辑。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WatchPaths has multiple paths. Please edit in XML mode."
+          }
+        }
+      }
+    },
     "清空日志": {
       "localizations": {
         "en": {
@@ -2854,7 +2904,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sec"
+            "value": "Seconds"
           }
         }
       }

@@ -15,7 +15,8 @@ struct EditAgentSheet: View {
     @State private var useCalendar: Bool
     @State private var calendarRows: [CalendarFormRow]
     @State private var useInterval: Bool
-    @State private var startInterval: Int
+    @State private var intervalAmount: Int
+    @State private var intervalUnit: IntervalUnit
     @State private var useWatchPath: Bool
     @State private var watchPath: String
     @State private var runAtLoad: Bool
@@ -53,7 +54,9 @@ struct EditAgentSheet: View {
         _useCalendar = State(initialValue: !sourceIntervals.isEmpty)
         _calendarRows = State(initialValue: sourceIntervals.map { CalendarFormRow(from: $0) })
         _useInterval = State(initialValue: i?.startInterval != nil)
-        _startInterval = State(initialValue: i?.startInterval ?? 60)
+        let split = IntervalUnit.split(seconds: i?.startInterval ?? 60)
+        _intervalAmount = State(initialValue: split.amount)
+        _intervalUnit = State(initialValue: split.unit)
         _useWatchPath = State(initialValue: !(i?.watchPaths.isEmpty ?? true))
         _watchPath = State(initialValue: i?.watchPaths.first ?? "")
         _runAtLoad = State(initialValue: d?.runAtLoad ?? i?.runAtLoad ?? false)
@@ -186,21 +189,35 @@ struct EditAgentSheet: View {
                     }
                 if useCalendar {
                     ForEach($calendarRows) { $row in
-                        HStack {
-                            Text("星期")
-                            Picker("", selection: $row.weekday) {
-                                Text("每天").tag(Int?.none)
-                                ForEach(1...7, id: \.self) { d in
-                                    Text(["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"][d])
-                                        .tag(Int?.some(d))
+                        HStack(alignment: .center, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("频率").font(.caption).foregroundStyle(.secondary)
+                                Picker("", selection: $row.weekday) {
+                                    Text("每天").tag(Int?.none)
+                                    ForEach(1...7, id: \.self) { d in
+                                        Text(["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"][d])
+                                            .tag(Int?.some(d))
+                                    }
+                                }
+                                .labelsHidden()
+                                .frame(minWidth: 140)
+                            }
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("时间").font(.caption).foregroundStyle(.secondary)
+                                HStack(spacing: 6) {
+                                    TextField("时", value: $row.hour, format: .number)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(width: 56)
+                                        .multilineTextAlignment(.center)
+                                    Text(":")
+                                        .foregroundStyle(.secondary)
+                                    TextField("分", value: $row.minute, format: .number)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(width: 56)
+                                        .multilineTextAlignment(.center)
                                 }
                             }
-                            .frame(width: 80)
-                            Spacer()
-                            Text("时间")
-                            TextField("时", value: $row.hour, format: .number).frame(width: 44)
-                            Text(":")
-                            TextField("分", value: $row.minute, format: .number).frame(width: 44)
+                            Spacer(minLength: 0)
                             if calendarRows.count > 1 {
                                 Button {
                                     calendarRows.removeAll { $0.id == row.id }
@@ -209,6 +226,7 @@ struct EditAgentSheet: View {
                                         .foregroundStyle(.secondary)
                                 }
                                 .buttonStyle(.borderless)
+                                .padding(.top, 16)
                             }
                         }
                     }
@@ -221,10 +239,19 @@ struct EditAgentSheet: View {
 
                 Toggle("间隔", isOn: $useInterval)
                 if useInterval {
-                    HStack {
+                    HStack(spacing: 8) {
                         Text("每隔")
-                        TextField("秒", value: $startInterval, format: .number).frame(width: 80)
-                        Text("秒执行一次")
+                        TextField("数量", value: $intervalAmount, format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 72)
+                            .multilineTextAlignment(.trailing)
+                        Picker("", selection: $intervalUnit) {
+                            ForEach(IntervalUnit.allCases) { unit in
+                                Text(unit.localizedName).tag(unit)
+                            }
+                        }
+                        .labelsHidden()
+                        .frame(minWidth: 100)
                     }
                 }
 
@@ -441,7 +468,9 @@ struct EditAgentSheet: View {
         useCalendar = !item.calendarIntervals.isEmpty
         calendarRows = item.calendarIntervals.map { CalendarFormRow(from: $0) }
         useInterval = item.startInterval != nil
-        startInterval = item.startInterval ?? 60
+        let split = IntervalUnit.split(seconds: item.startInterval ?? 60)
+        intervalAmount = split.amount
+        intervalUnit = split.unit
         useWatchPath = !item.watchPaths.isEmpty
         watchPath = item.watchPaths.first ?? ""
         runAtLoad = item.runAtLoad
@@ -473,7 +502,7 @@ struct EditAgentSheet: View {
             program: program,
             programArguments: args,
             calendarIntervals: useCalendar ? calendarRows.map(\.asInterval) : [],
-            startInterval: useInterval ? startInterval : nil,
+            startInterval: useInterval ? max(1, intervalAmount) * intervalUnit.seconds : nil,
             watchPaths: useWatchPath
                 ? (watchPath.trimmingCharacters(in: .whitespaces).isEmpty ? [] : [watchPath])
                 : [],
@@ -522,6 +551,35 @@ struct EditAgentSheet: View {
 private enum EditorMode: String, CaseIterable {
     case form
     case xml
+}
+
+private enum IntervalUnit: Int, CaseIterable, Identifiable, Hashable {
+    case seconds = 1
+    case minutes = 60
+    case hours = 3600
+
+    var id: Int { rawValue }
+    var seconds: Int { rawValue }
+
+    var localizedName: LocalizedStringKey {
+        switch self {
+        case .seconds: return "秒"
+        case .minutes: return "分钟"
+        case .hours: return "小时"
+        }
+    }
+
+    /// Prefer the largest unit that divides evenly (300 → 5 minutes).
+    static func split(seconds: Int) -> (amount: Int, unit: IntervalUnit) {
+        let value = max(seconds, 1)
+        if value % Self.hours.seconds == 0 {
+            return (value / Self.hours.seconds, .hours)
+        }
+        if value % Self.minutes.seconds == 0 {
+            return (value / Self.minutes.seconds, .minutes)
+        }
+        return (value, .seconds)
+    }
 }
 
 private struct EnvVarRow: Identifiable {
