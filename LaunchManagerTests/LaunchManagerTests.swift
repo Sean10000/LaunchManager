@@ -498,6 +498,61 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertNil(dict["WatchPaths"])
     }
 
+    func test_toDictionary_naturalMonth_writesCalendarDay() {
+        let item = LaunchItem(
+            label: "com.test.month",
+            plistURL: tmpDir.appendingPathComponent("com.test.month.plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            calendarIntervals: [
+                .init(weekday: nil, hour: 9, minute: 30, day: 15, month: nil)
+            ],
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: false,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            isLoaded: false,
+            pid: nil,
+            lastExitCode: nil
+        )
+        let dict = svc.toDictionary(item)
+        let cal = dict["StartCalendarInterval"] as? [String: Int]
+        XCTAssertEqual(cal?["Day"], 15)
+        XCTAssertEqual(cal?["Hour"], 9)
+        XCTAssertEqual(cal?["Minute"], 30)
+        XCTAssertNil(cal?["Month"])
+        XCTAssertNil(dict["StartInterval"])
+    }
+
+    func test_parsePlist_naturalMonth_calendarDay() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.monthparse</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>StartCalendarInterval</key>
+            <dict>
+                <key>Day</key><integer>1</integer>
+                <key>Hour</key><integer>8</integer>
+                <key>Minute</key><integer>0</integer>
+            </dict>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.monthparse.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let item = svc.parsePlist(at: url, scope: .userAgent)
+        XCTAssertEqual(item?.calendarIntervals.count, 1)
+        XCTAssertEqual(item?.calendarIntervals.first?.day, 1)
+        XCTAssertEqual(item?.calendarIntervals.first?.hour, 8)
+        XCTAssertNil(item?.calendarIntervals.first?.month)
+        XCTAssertNil(item?.startInterval)
+    }
+
     func test_formIncompatibility_allowsMultipleTriggerTypes() throws {
         let plist = """
         <?xml version="1.0" encoding="UTF-8"?>

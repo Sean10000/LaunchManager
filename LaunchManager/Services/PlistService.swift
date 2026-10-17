@@ -143,7 +143,9 @@ struct PlistService {
                 LaunchItem.CalendarInterval(
                     weekday: dict["Weekday"],
                     hour: dict["Hour"],
-                    minute: dict["Minute"] ?? 0
+                    minute: dict["Minute"] ?? 0,
+                    day: dict["Day"],
+                    month: dict["Month"]
                 )
             ]
         }
@@ -152,7 +154,11 @@ struct PlistService {
                 if let d = el as? [String: Any] { return calendarInterval(from: d) }
                 if let d = el as? [String: Int] {
                     return LaunchItem.CalendarInterval(
-                        weekday: d["Weekday"], hour: d["Hour"], minute: d["Minute"] ?? 0
+                        weekday: d["Weekday"],
+                        hour: d["Hour"],
+                        minute: d["Minute"] ?? 0,
+                        day: d["Day"],
+                        month: d["Month"]
                     )
                 }
                 return nil
@@ -170,8 +176,19 @@ struct PlistService {
         return LaunchItem.CalendarInterval(
             weekday: intVal(dict["Weekday"]),
             hour: intVal(dict["Hour"]),
-            minute: intVal(dict["Minute"]) ?? 0
+            minute: intVal(dict["Minute"]) ?? 0,
+            day: intVal(dict["Day"]),
+            month: intVal(dict["Month"])
         )
+    }
+
+    private func calendarDictionary(from ci: LaunchItem.CalendarInterval) -> [String: Int] {
+        var d: [String: Int] = ["Minute": ci.minute]
+        if let w = ci.weekday { d["Weekday"] = w }
+        if let h = ci.hour { d["Hour"] = h }
+        if let day = ci.day { d["Day"] = day }
+        if let month = ci.month { d["Month"] = month }
+        return d
     }
 
     func toDictionary(_ item: LaunchItem) -> [String: Any] {
@@ -182,17 +199,9 @@ struct PlistService {
             dict["ProgramArguments"] = [item.program] + item.programArguments
         }
         if item.calendarIntervals.count == 1, let ci = item.calendarIntervals.first {
-            var d: [String: Int] = ["Minute": ci.minute]
-            if let w = ci.weekday { d["Weekday"] = w }
-            if let h = ci.hour { d["Hour"] = h }
-            dict["StartCalendarInterval"] = d
+            dict["StartCalendarInterval"] = calendarDictionary(from: ci)
         } else if item.calendarIntervals.count >= 2 {
-            dict["StartCalendarInterval"] = item.calendarIntervals.map { ci -> [String: Int] in
-                var d: [String: Int] = ["Minute": ci.minute]
-                if let w = ci.weekday { d["Weekday"] = w }
-                if let h = ci.hour { d["Hour"] = h }
-                return d
-            }
+            dict["StartCalendarInterval"] = item.calendarIntervals.map { calendarDictionary(from: $0) }
         }
         if let si = item.startInterval { dict["StartInterval"] = si }
         if !item.watchPaths.isEmpty { dict["WatchPaths"] = item.watchPaths }

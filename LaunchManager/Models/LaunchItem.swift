@@ -93,6 +93,22 @@ struct LaunchItem: Identifiable, Hashable {
         var weekday: Int?
         var hour: Int?
         var minute: Int
+        var day: Int?
+        var month: Int?
+
+        init(
+            weekday: Int? = nil,
+            hour: Int? = nil,
+            minute: Int = 0,
+            day: Int? = nil,
+            month: Int? = nil
+        ) {
+            self.weekday = weekday
+            self.hour = hour
+            self.minute = minute
+            self.day = day
+            self.month = month
+        }
     }
 
     /// 列表/详情用的触发摘要行（固定顺序）。
@@ -109,14 +125,35 @@ struct LaunchItem: Identifiable, Hashable {
             String(localized: "周日"),
         ]
         for ci in calendarIntervals {
-            let day: String
-            if let w = ci.weekday, (1...7).contains(w) {
-                day = weekdayNames[w]
-            } else {
-                day = String(localized: "每天")
-            }
             let h = ci.hour.map { String(format: "%02d", $0) } ?? "**"
-            lines.append("\(day) \(h):\(String(format: "%02d", ci.minute))")
+            let m = String(format: "%02d", ci.minute)
+            if let day = ci.day {
+                if let month = ci.month {
+                    lines.append(
+                        String(
+                            format: String(localized: "每年 %lld 月 %lld 日 %@:%@"),
+                            locale: .current,
+                            month, day, h, m
+                        )
+                    )
+                } else {
+                    lines.append(
+                        String(
+                            format: String(localized: "每月 %@ 日 %@:%@"),
+                            locale: .current,
+                            String(day), h, m
+                        )
+                    )
+                }
+            } else {
+                let dayLabel: String
+                if let w = ci.weekday, (1...7).contains(w) {
+                    dayLabel = weekdayNames[w]
+                } else {
+                    dayLabel = String(localized: "每天")
+                }
+                lines.append("\(dayLabel) \(h):\(m)")
+            }
         }
         if let si = startInterval {
             lines.append(String(localized: "每 \(si) 秒"))

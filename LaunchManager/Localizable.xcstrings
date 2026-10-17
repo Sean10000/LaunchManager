@@ -2420,6 +2420,36 @@
         }
       }
     },
+    "每月第": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "on day"
+          }
+        }
+      }
+    },
+    "按自然月日期触发（不是固定 30 天）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uses calendar months (not a fixed 30-day interval)"
+          }
+        }
+      }
+    },
+    "每年 %lld 月 %lld 日 %@:%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every year on %1$lld/%2$lld at %3$@:%4$@"
+          }
+        }
+      }
+    },
     "每月 %@ 日 %@:%@": {
       "localizations": {
         "zh-Hans": {

@@ -17,6 +17,9 @@ struct EditAgentSheet: View {
     @State private var useInterval: Bool
     @State private var intervalAmount: Int
     @State private var intervalUnit: IntervalUnit
+    @State private var intervalMonthDay: Int
+    @State private var intervalMonthHour: Int
+    @State private var intervalMonthMinute: Int
     @State private var useWatchPath: Bool
     @State private var watchPath: String
     @State private var runAtLoad: Bool
@@ -51,12 +54,21 @@ struct EditAgentSheet: View {
         _argumentsText = State(initialValue: d?.programArguments.joined(separator: "\n") ?? i?.programArguments.joined(separator: "\n") ?? "")
         _workingDirectory = State(initialValue: d?.workingDirectory ?? i?.workingDirectory ?? "")
         let sourceIntervals = i?.calendarIntervals ?? []
-        _useCalendar = State(initialValue: !sourceIntervals.isEmpty)
-        _calendarRows = State(initialValue: sourceIntervals.map { CalendarFormRow(from: $0) })
-        _useInterval = State(initialValue: i?.startInterval != nil)
+        let monthly = IntervalUnit.detectMonthlyInterval(sourceIntervals)
         let split = IntervalUnit.split(seconds: i?.startInterval ?? 60)
-        _intervalAmount = State(initialValue: split.amount)
-        _intervalUnit = State(initialValue: split.unit)
+        let useMonthlyInterval = monthly != nil && i?.startInterval == nil
+        _useCalendar = State(initialValue: useMonthlyInterval
+            ? !(monthly?.remainder.isEmpty ?? true)
+            : !sourceIntervals.isEmpty)
+        _calendarRows = State(initialValue: useMonthlyInterval
+            ? (monthly?.remainder.map { CalendarFormRow(from: $0) } ?? [])
+            : sourceIntervals.map { CalendarFormRow(from: $0) })
+        _useInterval = State(initialValue: useMonthlyInterval || i?.startInterval != nil)
+        _intervalAmount = State(initialValue: useMonthlyInterval ? (monthly?.every ?? 1) : split.amount)
+        _intervalUnit = State(initialValue: useMonthlyInterval ? .months : split.unit)
+        _intervalMonthDay = State(initialValue: monthly?.day ?? 1)
+        _intervalMonthHour = State(initialValue: monthly?.hour ?? 0)
+        _intervalMonthMinute = State(initialValue: monthly?.minute ?? 0)
         _useWatchPath = State(initialValue: !(i?.watchPaths.isEmpty ?? true))
         _watchPath = State(initialValue: i?.watchPaths.first ?? "")
         _runAtLoad = State(initialValue: d?.runAtLoad ?? i?.runAtLoad ?? false)
@@ -271,6 +283,34 @@ struct EditAgentSheet: View {
                         .pickerStyle(.menu)
                         .fixedSize(horizontal: true, vertical: false)
                     }
+                    if intervalUnit == .months {
+                        HStack(spacing: 8) {
+                            Text("每月第")
+                                .fixedSize(horizontal: true, vertical: false)
+                            TextField("日", value: $intervalMonthDay, format: .number)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 52)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(1)
+                            Text("日")
+                                .fixedSize(horizontal: true, vertical: false)
+                            TextField("", value: $intervalMonthHour, format: .number)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 52)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(1)
+                            Text(":")
+                                .foregroundStyle(.secondary)
+                            TextField("", value: $intervalMonthMinute, format: .number)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 52)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(1)
+                        }
+                        Text("按自然月日期触发（不是固定 30 天）")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Toggle("监视路径", isOn: $useWatchPath)
@@ -483,12 +523,24 @@ struct EditAgentSheet: View {
         program = item.program
         argumentsText = item.programArguments.joined(separator: "\n")
         workingDirectory = item.workingDirectory ?? ""
-        useCalendar = !item.calendarIntervals.isEmpty
-        calendarRows = item.calendarIntervals.map { CalendarFormRow(from: $0) }
-        useInterval = item.startInterval != nil
-        let split = IntervalUnit.split(seconds: item.startInterval ?? 60)
-        intervalAmount = split.amount
-        intervalUnit = split.unit
+        let monthly = IntervalUnit.detectMonthlyInterval(item.calendarIntervals)
+        if let monthly, item.startInterval == nil {
+            useCalendar = !monthly.remainder.isEmpty
+            calendarRows = monthly.remainder.map { CalendarFormRow(from: $0) }
+            useInterval = true
+            intervalAmount = monthly.every
+            intervalUnit = .months
+            intervalMonthDay = monthly.day
+            intervalMonthHour = monthly.hour
+            intervalMonthMinute = monthly.minute
+        } else {
+            useCalendar = !item.calendarIntervals.isEmpty
+            calendarRows = item.calendarIntervals.map { CalendarFormRow(from: $0) }
+            useInterval = item.startInterval != nil
+            let split = IntervalUnit.split(seconds: item.startInterval ?? 60)
+            intervalAmount = split.amount
+            intervalUnit = split.unit
+        }
         useWatchPath = !item.watchPaths.isEmpty
         watchPath = item.watchPaths.first ?? ""
         runAtLoad = item.runAtLoad
@@ -513,14 +565,29 @@ struct EditAgentSheet: View {
         let plistURL = existingItem?.plistURL ??
             scope.directoryURL.appendingPathComponent("\(label).plist")
 
+        var calendars = useCalendar ? calendarRows.map(\.asInterval) : []
+        var start: Int?
+        if useInterval {
+            if intervalUnit == .months {
+                calendars.append(contentsOf: IntervalUnit.monthlyIntervals(
+                    every: intervalAmount,
+                    day: intervalMonthDay,
+                    hour: intervalMonthHour,
+                    minute: intervalMonthMinute
+                ))
+            } else if let mult = intervalUnit.secondsMultiplier {
+                start = max(1, intervalAmount) * mult
+            }
+        }
+
         return LaunchItem(
             label: label,
             plistURL: plistURL,
             scope: scope,
             program: program,
             programArguments: args,
-            calendarIntervals: useCalendar ? calendarRows.map(\.asInterval) : [],
-            startInterval: useInterval ? max(1, intervalAmount) * intervalUnit.seconds : nil,
+            calendarIntervals: calendars,
+            startInterval: start,
             watchPaths: useWatchPath
                 ? (watchPath.trimmingCharacters(in: .whitespaces).isEmpty ? [] : [watchPath])
                 : [],
@@ -571,16 +638,25 @@ private enum EditorMode: String, CaseIterable {
     case xml
 }
 
-private enum IntervalUnit: Int, CaseIterable, Identifiable, Hashable {
-    case seconds = 1
-    case minutes = 60
-    case hours = 3_600
-    case days = 86_400
-    /// Approximate calendar month for StartInterval (30 days).
-    case months = 2_592_000
+private enum IntervalUnit: String, CaseIterable, Identifiable, Hashable {
+    case seconds
+    case minutes
+    case hours
+    case days
+    /// Natural calendar months via StartCalendarInterval (not fixed StartInterval seconds).
+    case months
 
-    var id: Int { rawValue }
-    var seconds: Int { rawValue }
+    var id: String { rawValue }
+
+    var secondsMultiplier: Int? {
+        switch self {
+        case .seconds: return 1
+        case .minutes: return 60
+        case .hours: return 3_600
+        case .days: return 86_400
+        case .months: return nil
+        }
+    }
 
     var localizedName: LocalizedStringKey {
         switch self {
@@ -592,13 +668,70 @@ private enum IntervalUnit: Int, CaseIterable, Identifiable, Hashable {
         }
     }
 
-    /// Prefer the largest unit that divides evenly (300 → 5 minutes).
+    /// Prefer the largest fixed unit that divides evenly (300 → 5 minutes).
     static func split(seconds: Int) -> (amount: Int, unit: IntervalUnit) {
         let value = max(seconds, 1)
-        for unit in [Self.months, .days, .hours, .minutes] where value % unit.seconds == 0 {
-            return (value / unit.seconds, unit)
+        for unit: IntervalUnit in [.days, .hours, .minutes] {
+            if let mult = unit.secondsMultiplier, value % mult == 0 {
+                return (value / mult, unit)
+            }
         }
         return (value, .seconds)
+    }
+
+    static func monthlyIntervals(
+        every n: Int,
+        day: Int,
+        hour: Int,
+        minute: Int
+    ) -> [LaunchItem.CalendarInterval] {
+        let step = min(max(n, 1), 12)
+        let dom = min(max(day, 1), 31)
+        let h = min(max(hour, 0), 23)
+        let m = min(max(minute, 0), 59)
+        if step == 1 {
+            // Omit Month → launchd fires every calendar month on this day.
+            return [LaunchItem.CalendarInterval(hour: h, minute: m, day: dom)]
+        }
+        return stride(from: 1, through: 12, by: step).map { month in
+            LaunchItem.CalendarInterval(hour: h, minute: m, day: dom, month: month)
+        }
+    }
+
+    static func detectMonthlyInterval(
+        _ intervals: [LaunchItem.CalendarInterval]
+    ) -> (every: Int, day: Int, hour: Int, minute: Int, remainder: [LaunchItem.CalendarInterval])? {
+        var monthly: [LaunchItem.CalendarInterval] = []
+        var remainder: [LaunchItem.CalendarInterval] = []
+        for ci in intervals {
+            if ci.day != nil, ci.weekday == nil {
+                monthly.append(ci)
+            } else {
+                remainder.append(ci)
+            }
+        }
+        guard !monthly.isEmpty else { return nil }
+
+        let day = monthly[0].day!
+        let hour = monthly[0].hour ?? 0
+        let minute = monthly[0].minute
+        guard monthly.allSatisfy({
+            $0.day == day && ($0.hour ?? 0) == hour && $0.minute == minute
+        }) else { return nil }
+
+        if monthly.count == 1, monthly[0].month == nil {
+            return (1, day, hour, minute, remainder)
+        }
+
+        let months = monthly.compactMap(\.month).sorted()
+        guard months.count == monthly.count, let first = months.first, first == 1, months.count >= 2 else {
+            return nil
+        }
+        let step = months[1] - months[0]
+        guard step >= 1 else { return nil }
+        let expected = Array(stride(from: 1, through: 12, by: step))
+        guard months == expected else { return nil }
+        return (step, day, hour, minute, remainder)
     }
 }
 
