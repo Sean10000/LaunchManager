@@ -17,9 +17,6 @@ struct EditAgentSheet: View {
     @State private var useInterval: Bool
     @State private var intervalAmount: Int
     @State private var intervalUnit: IntervalUnit
-    @State private var intervalMonthDay: Int
-    @State private var intervalMonthHour: Int
-    @State private var intervalMonthMinute: Int
     @State private var useWatchPath: Bool
     @State private var watchPath: String
     @State private var runAtLoad: Bool
@@ -54,21 +51,13 @@ struct EditAgentSheet: View {
         _argumentsText = State(initialValue: d?.programArguments.joined(separator: "\n") ?? i?.programArguments.joined(separator: "\n") ?? "")
         _workingDirectory = State(initialValue: d?.workingDirectory ?? i?.workingDirectory ?? "")
         let sourceIntervals = i?.calendarIntervals ?? []
-        let monthly = IntervalUnit.detectMonthlyInterval(sourceIntervals)
+        let calendarFormRows = CalendarFormRow.rows(from: sourceIntervals)
         let split = IntervalUnit.split(seconds: i?.startInterval ?? 60)
-        let useMonthlyInterval = monthly != nil && i?.startInterval == nil
-        _useCalendar = State(initialValue: useMonthlyInterval
-            ? !(monthly?.remainder.isEmpty ?? true)
-            : !sourceIntervals.isEmpty)
-        _calendarRows = State(initialValue: useMonthlyInterval
-            ? (monthly?.remainder.map { CalendarFormRow(from: $0) } ?? [])
-            : sourceIntervals.map { CalendarFormRow(from: $0) })
-        _useInterval = State(initialValue: useMonthlyInterval || i?.startInterval != nil)
-        _intervalAmount = State(initialValue: useMonthlyInterval ? (monthly?.every ?? 1) : split.amount)
-        _intervalUnit = State(initialValue: useMonthlyInterval ? .months : split.unit)
-        _intervalMonthDay = State(initialValue: monthly?.day ?? 1)
-        _intervalMonthHour = State(initialValue: monthly?.hour ?? 0)
-        _intervalMonthMinute = State(initialValue: monthly?.minute ?? 0)
+        _useCalendar = State(initialValue: !calendarFormRows.isEmpty)
+        _calendarRows = State(initialValue: calendarFormRows)
+        _useInterval = State(initialValue: i?.startInterval != nil)
+        _intervalAmount = State(initialValue: split.amount)
+        _intervalUnit = State(initialValue: split.unit)
         _useWatchPath = State(initialValue: !(i?.watchPaths.isEmpty ?? true))
         _watchPath = State(initialValue: i?.watchPaths.first ?? "")
         _runAtLoad = State(initialValue: d?.runAtLoad ?? i?.runAtLoad ?? false)
@@ -201,59 +190,90 @@ struct EditAgentSheet: View {
                     }
                 if useCalendar {
                     ForEach($calendarRows) { $row in
-                        HStack(alignment: .center, spacing: 12) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("频率").font(.caption).foregroundStyle(.secondary)
-                                Picker("", selection: $row.weekday) {
-                                    Text("每天").tag(Int?.none)
-                                    ForEach(1...7, id: \.self) { d in
-                                        Text(["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"][d])
-                                            .tag(Int?.some(d))
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(alignment: .center, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("频率").font(.caption).foregroundStyle(.secondary)
+                                    Picker("", selection: $row.frequency) {
+                                        Text("每天").tag(CalendarFrequency.daily)
+                                        ForEach(1...7, id: \.self) { d in
+                                            Text(["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"][d])
+                                                .tag(CalendarFrequency.weekday(d))
+                                        }
+                                        Text("每月").tag(CalendarFrequency.monthly)
+                                    }
+                                    .labelsHidden()
+                                    .pickerStyle(.menu)
+                                    .fixedSize(horizontal: true, vertical: false)
+                                }
+                                if row.frequency == .monthly {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("日").font(.caption).foregroundStyle(.secondary)
+                                        TextField("", value: $row.monthDay, format: .number)
+                                            .textFieldStyle(.roundedBorder)
+                                            .frame(width: 52)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(1)
+                                    }
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("每隔月数").font(.caption).foregroundStyle(.secondary)
+                                        TextField("", value: $row.monthStep, format: .number)
+                                            .textFieldStyle(.roundedBorder)
+                                            .frame(width: 52)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(1)
                                     }
                                 }
-                                .labelsHidden()
-                                .pickerStyle(.menu)
-                                .fixedSize(horizontal: true, vertical: false)
-                            }
-                            HStack(alignment: .bottom, spacing: 6) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("时")
-                                        .font(.caption)
+                                HStack(alignment: .bottom, spacing: 6) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("时")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(1)
+                                            .fixedSize(horizontal: true, vertical: false)
+                                        TextField("", value: $row.hour, format: .number)
+                                            .textFieldStyle(.roundedBorder)
+                                            .frame(width: 52)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(1)
+                                    }
+                                    Text(":")
                                         .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                        .fixedSize(horizontal: true, vertical: false)
-                                    TextField("", value: $row.hour, format: .number)
-                                        .textFieldStyle(.roundedBorder)
-                                        .frame(width: 52)
-                                        .multilineTextAlignment(.center)
-                                        .lineLimit(1)
+                                        .padding(.bottom, 6)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("分")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(1)
+                                            .fixedSize(horizontal: true, vertical: false)
+                                        TextField("", value: $row.minute, format: .number)
+                                            .textFieldStyle(.roundedBorder)
+                                            .frame(width: 52)
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(1)
+                                    }
                                 }
-                                Text(":")
+                                Spacer(minLength: 0)
+                                if calendarRows.count > 1 {
+                                    Button {
+                                        calendarRows.removeAll { $0.id == row.id }
+                                    } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .buttonStyle(.borderless)
+                                }
+                            }
+                            if row.frequency == .monthly {
+                                Text(row.monthStep <= 1
+                                    ? String(localized: "按自然月：每月这一天触发")
+                                    : String(
+                                        format: String(localized: "按自然月：每 %lld 个月的这一天触发"),
+                                        locale: .current,
+                                        Int64(max(row.monthStep, 1))
+                                    ))
+                                    .font(.caption)
                                     .foregroundStyle(.secondary)
-                                    .padding(.bottom, 6)
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("分")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                        .fixedSize(horizontal: true, vertical: false)
-                                    TextField("", value: $row.minute, format: .number)
-                                        .textFieldStyle(.roundedBorder)
-                                        .frame(width: 52)
-                                        .multilineTextAlignment(.center)
-                                        .lineLimit(1)
-                                }
-                            }
-                            Spacer(minLength: 0)
-                            if calendarRows.count > 1 {
-                                Button {
-                                    calendarRows.removeAll { $0.id == row.id }
-                                } label: {
-                                    Image(systemName: "minus.circle.fill")
-                                        .foregroundStyle(.secondary)
-                                }
-                                .buttonStyle(.borderless)
-                                .padding(.top, 16)
                             }
                         }
                     }
@@ -283,34 +303,9 @@ struct EditAgentSheet: View {
                         .pickerStyle(.menu)
                         .fixedSize(horizontal: true, vertical: false)
                     }
-                    if intervalUnit == .months {
-                        HStack(spacing: 8) {
-                            Text("每月第")
-                                .fixedSize(horizontal: true, vertical: false)
-                            TextField("日", value: $intervalMonthDay, format: .number)
-                                .textFieldStyle(.roundedBorder)
-                                .frame(width: 52)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(1)
-                            Text("日")
-                                .fixedSize(horizontal: true, vertical: false)
-                            TextField("", value: $intervalMonthHour, format: .number)
-                                .textFieldStyle(.roundedBorder)
-                                .frame(width: 52)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(1)
-                            Text(":")
-                                .foregroundStyle(.secondary)
-                            TextField("", value: $intervalMonthMinute, format: .number)
-                                .textFieldStyle(.roundedBorder)
-                                .frame(width: 52)
-                                .multilineTextAlignment(.center)
-                                .lineLimit(1)
-                        }
-                        Text("按自然月日期触发（不是固定 30 天）")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                    Text("按固定时长重复，与自然月无关")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 Toggle("监视路径", isOn: $useWatchPath)
@@ -523,24 +518,12 @@ struct EditAgentSheet: View {
         program = item.program
         argumentsText = item.programArguments.joined(separator: "\n")
         workingDirectory = item.workingDirectory ?? ""
-        let monthly = IntervalUnit.detectMonthlyInterval(item.calendarIntervals)
-        if let monthly, item.startInterval == nil {
-            useCalendar = !monthly.remainder.isEmpty
-            calendarRows = monthly.remainder.map { CalendarFormRow(from: $0) }
-            useInterval = true
-            intervalAmount = monthly.every
-            intervalUnit = .months
-            intervalMonthDay = monthly.day
-            intervalMonthHour = monthly.hour
-            intervalMonthMinute = monthly.minute
-        } else {
-            useCalendar = !item.calendarIntervals.isEmpty
-            calendarRows = item.calendarIntervals.map { CalendarFormRow(from: $0) }
-            useInterval = item.startInterval != nil
-            let split = IntervalUnit.split(seconds: item.startInterval ?? 60)
-            intervalAmount = split.amount
-            intervalUnit = split.unit
-        }
+        calendarRows = CalendarFormRow.rows(from: item.calendarIntervals)
+        useCalendar = !calendarRows.isEmpty
+        useInterval = item.startInterval != nil
+        let split = IntervalUnit.split(seconds: item.startInterval ?? 60)
+        intervalAmount = split.amount
+        intervalUnit = split.unit
         useWatchPath = !item.watchPaths.isEmpty
         watchPath = item.watchPaths.first ?? ""
         runAtLoad = item.runAtLoad
@@ -565,20 +548,10 @@ struct EditAgentSheet: View {
         let plistURL = existingItem?.plistURL ??
             scope.directoryURL.appendingPathComponent("\(label).plist")
 
-        var calendars = useCalendar ? calendarRows.map(\.asInterval) : []
-        var start: Int?
-        if useInterval {
-            if intervalUnit == .months {
-                calendars.append(contentsOf: IntervalUnit.monthlyIntervals(
-                    every: intervalAmount,
-                    day: intervalMonthDay,
-                    hour: intervalMonthHour,
-                    minute: intervalMonthMinute
-                ))
-            } else if let mult = intervalUnit.secondsMultiplier {
-                start = max(1, intervalAmount) * mult
-            }
-        }
+        let calendars = useCalendar ? calendarRows.flatMap(\.asIntervals) : []
+        let start: Int? = useInterval
+            ? max(1, intervalAmount) * intervalUnit.secondsMultiplier
+            : nil
 
         return LaunchItem(
             label: label,
@@ -643,18 +616,15 @@ private enum IntervalUnit: String, CaseIterable, Identifiable, Hashable {
     case minutes
     case hours
     case days
-    /// Natural calendar months via StartCalendarInterval (not fixed StartInterval seconds).
-    case months
 
     var id: String { rawValue }
 
-    var secondsMultiplier: Int? {
+    var secondsMultiplier: Int {
         switch self {
         case .seconds: return 1
         case .minutes: return 60
         case .hours: return 3_600
         case .days: return 86_400
-        case .months: return nil
         }
     }
 
@@ -664,22 +634,119 @@ private enum IntervalUnit: String, CaseIterable, Identifiable, Hashable {
         case .minutes: return "分钟"
         case .hours: return "小时"
         case .days: return "天"
-        case .months: return "月"
         }
     }
 
     /// Prefer the largest fixed unit that divides evenly (300 → 5 minutes).
     static func split(seconds: Int) -> (amount: Int, unit: IntervalUnit) {
         let value = max(seconds, 1)
-        for unit: IntervalUnit in [.days, .hours, .minutes] {
-            if let mult = unit.secondsMultiplier, value % mult == 0 {
-                return (value / mult, unit)
-            }
+        for unit: IntervalUnit in [.days, .hours, .minutes] where value % unit.secondsMultiplier == 0 {
+            return (value / unit.secondsMultiplier, unit)
         }
         return (value, .seconds)
     }
+}
 
-    static func monthlyIntervals(
+private enum CalendarFrequency: Hashable {
+    case daily
+    case weekday(Int)
+    case monthly
+}
+
+private struct EnvVarRow: Identifiable {
+    let id = UUID()
+    var key: String
+    var value: String
+
+    init(key: String = "", value: String = "") {
+        self.key = key
+        self.value = value
+    }
+}
+
+private struct CalendarFormRow: Identifiable, Equatable {
+    let id: UUID
+    var frequency: CalendarFrequency
+    var monthDay: Int
+    var monthStep: Int
+    var hour: Int
+    var minute: Int
+
+    init(
+        id: UUID = UUID(),
+        frequency: CalendarFrequency = .daily,
+        monthDay: Int = 1,
+        monthStep: Int = 1,
+        hour: Int = 8,
+        minute: Int = 0
+    ) {
+        self.id = id
+        self.frequency = frequency
+        self.monthDay = monthDay
+        self.monthStep = monthStep
+        self.hour = hour
+        self.minute = minute
+    }
+
+    init(from interval: LaunchItem.CalendarInterval) {
+        if let day = interval.day, interval.weekday == nil {
+            self.init(
+                frequency: .monthly,
+                monthDay: day,
+                monthStep: 1,
+                hour: interval.hour ?? 8,
+                minute: interval.minute
+            )
+        } else if let weekday = interval.weekday {
+            self.init(
+                frequency: .weekday(weekday),
+                hour: interval.hour ?? 8,
+                minute: interval.minute
+            )
+        } else {
+            self.init(
+                frequency: .daily,
+                hour: interval.hour ?? 8,
+                minute: interval.minute
+            )
+        }
+    }
+
+    static func rows(from intervals: [LaunchItem.CalendarInterval]) -> [CalendarFormRow] {
+        if let monthly = detectMonthlyGroup(intervals) {
+            var rows = monthly.remainder.map { CalendarFormRow(from: $0) }
+            rows.insert(
+                CalendarFormRow(
+                    frequency: .monthly,
+                    monthDay: monthly.day,
+                    monthStep: monthly.every,
+                    hour: monthly.hour,
+                    minute: monthly.minute
+                ),
+                at: 0
+            )
+            return rows
+        }
+        return intervals.map { CalendarFormRow(from: $0) }
+    }
+
+    var asIntervals: [LaunchItem.CalendarInterval] {
+        switch frequency {
+        case .daily:
+            return [LaunchItem.CalendarInterval(hour: hour, minute: minute)]
+        case .weekday(let day):
+            return [LaunchItem.CalendarInterval(weekday: day, hour: hour, minute: minute)]
+        case .monthly:
+            return Self.monthlyIntervals(
+                every: monthStep,
+                day: monthDay,
+                hour: hour,
+                minute: minute
+            )
+        }
+    }
+
+    private static func monthlyIntervals(
         every n: Int,
         day: Int,
         hour: Int,
@@ -690,7 +757,6 @@ private enum IntervalUnit: String, CaseIterable, Identifiable, Hashable {
         let h = min(max(hour, 0), 23)
         let m = min(max(minute, 0), 59)
         if step == 1 {
-            // Omit Month → launchd fires every calendar month on this day.
             return [LaunchItem.CalendarInterval(hour: h, minute: m, day: dom)]
         }
         return stride(from: 1, through: 12, by: step).map { month in
@@ -698,7 +764,7 @@ private enum IntervalUnit: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
-    static func detectMonthlyInterval(
+    private static func detectMonthlyGroup(
         _ intervals: [LaunchItem.CalendarInterval]
     ) -> (every: Int, day: Int, hour: Int, minute: Int, remainder: [LaunchItem.CalendarInterval])? {
         var monthly: [LaunchItem.CalendarInterval] = []
@@ -732,47 +798,5 @@ private enum IntervalUnit: String, CaseIterable, Identifiable, Hashable {
         let expected = Array(stride(from: 1, through: 12, by: step))
         guard months == expected else { return nil }
         return (step, day, hour, minute, remainder)
-    }
-}
-
-private struct EnvVarRow: Identifiable {
-    let id = UUID()
-    var key: String
-    var value: String
-
-    init(key: String = "", value: String = "") {
-        self.key = key
-        self.value = value
-    }
-}
-
-private struct CalendarFormRow: Identifiable, Equatable {
-    let id: UUID
-    var weekday: Int?
-    var hour: Int
-    var minute: Int
-
-    init(
-        id: UUID = UUID(),
-        weekday: Int? = nil,
-        hour: Int = 8,
-        minute: Int = 0
-    ) {
-        self.id = id
-        self.weekday = weekday
-        self.hour = hour
-        self.minute = minute
-    }
-
-    init(from interval: LaunchItem.CalendarInterval) {
-        self.init(
-            weekday: interval.weekday,
-            hour: interval.hour ?? 8,
-            minute: interval.minute
-        )
-    }
-
-    var asInterval: LaunchItem.CalendarInterval {
-        LaunchItem.CalendarInterval(weekday: weekday, hour: hour, minute: minute)
     }
 }

@@ -2430,12 +2430,42 @@
         }
       }
     },
-    "按自然月日期触发（不是固定 30 天）": {
+    "按自然月：每月这一天触发": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uses calendar months (not a fixed 30-day interval)"
+            "value": "Natural month: fires on this day every month"
+          }
+        }
+      }
+    },
+    "按自然月：每 %lld 个月的这一天触发": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Natural month: fires on this day every %lld months"
+          }
+        }
+      }
+    },
+    "每隔月数": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every N months"
+          }
+        }
+      }
+    },
+    "按固定时长重复，与自然月无关": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repeats on a fixed duration, not calendar months"
           }
         }
       }
