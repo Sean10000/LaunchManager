@@ -624,7 +624,7 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertTrue(lines[0].hasPrefix(String(localized: "每天")))
         XCTAssertTrue(lines[1].contains("300"))
         XCTAssertTrue(lines[2].contains("/tmp/w"))
-        XCTAssertEqual(lines[3], String(localized: "加载时运行"))
+        XCTAssertEqual(lines[3], String(localized: "加载时运行一次"))
     }
 
     func test_parsePlist_hourOnly_minuteNil_summaryCustom() throws {

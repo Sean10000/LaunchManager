@@ -136,7 +136,7 @@ struct LaunchItem: Identifiable, Hashable {
         }
 
         if runAtLoad {
-            lines.append(String(localized: "加载时运行"))
+            lines.append(String(localized: "加载时运行一次"))
         }
 
         if lines.isEmpty {

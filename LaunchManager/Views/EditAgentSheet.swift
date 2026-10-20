@@ -27,6 +27,7 @@ struct EditAgentSheet: View {
     @State private var showAddRule = false
     @State private var pendingDeleteRuleID: UUID?
     @State private var showDiskChangedAlert = false
+    @State private var showRunAtLoadSaveConfirm = false
 
     private let plistService = PlistService()
 
@@ -110,7 +111,7 @@ struct EditAgentSheet: View {
                 Button("取消") { dismiss() }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button("保存") { saveItem() }
+                Button("保存") { requestSave() }
                     .disabled(!canSave)
             }
         }
@@ -121,6 +122,16 @@ struct EditAgentSheet: View {
             Button("确定") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+        .confirmationDialog(
+            String(localized: "保存将重新加载任务，可能立即运行。"),
+            isPresented: $showRunAtLoadSaveConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("保存", role: .destructive) { saveItem() }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("保存将重新加载任务，可能立即运行。")
         }
         .alert("文件已更改", isPresented: $showDiskChangedAlert) {
             Button("重新加载") { reloadSessionFromDisk() }
@@ -219,9 +230,12 @@ struct EditAgentSheet: View {
             }
 
             Section("触发方式") {
-                Text("以下触发规则独立生效，任一规则触发时均可启动任务。")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("以下触发规则独立生效，任一规则触发时均可启动任务。")
+                    Text("顺序仅用于展示，不表示优先级或执行次序。")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
 
                 ForEach(rules) { rule in
                     ruleEditor(for: rule)
@@ -250,7 +264,12 @@ struct EditAgentSheet: View {
             }
 
             Section("选项") {
-                Toggle("加载时自动运行", isOn: $runAtLoad)
+                Toggle("加载任务时运行一次", isOn: $runAtLoad)
+                if runAtLoadSaveWarningVisible {
+                    Text("保存将重新加载任务，可能立即运行。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 Toggle("保持存活（崩溃后自动重启）", isOn: $keepAlive)
             }
 
@@ -393,6 +412,9 @@ struct EditAgentSheet: View {
                     }
                 ))
                 .textFieldStyle(.roundedBorder)
+                Text("监视指定路径的变化。可能遗漏事件；触发不代表文件已写入完成。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
 
             case .customCalendar(let summary, let isMalformed):
                 if isMalformed {
@@ -595,6 +617,9 @@ struct EditAgentSheet: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            Text("任务休眠或仍在运行时可能错过触发；间隔计时与日历规则互不重置。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -961,6 +986,28 @@ struct EditAgentSheet: View {
             xmlError = nil
         case .failure(let err):
             xmlError = err.localizedDescription
+        }
+    }
+
+    private var saveWouldWritePlist: Bool {
+        guard editorMode == .form else { return true }
+        if let session {
+            let current = currentRootDictionary()
+            return !NSDictionary(dictionary: current).isEqual(to: session.openedRoot)
+        }
+        return true
+    }
+
+    /// Shown when saving would rewrite a loaded job’s plist while RunAtLoad is enabled.
+    private var runAtLoadSaveWarningVisible: Bool {
+        runAtLoad && existingItem?.isLoaded == true && saveWouldWritePlist
+    }
+
+    private func requestSave() {
+        if runAtLoadSaveWarningVisible {
+            showRunAtLoadSaveConfirm = true
+        } else {
+            saveItem()
         }
     }
 

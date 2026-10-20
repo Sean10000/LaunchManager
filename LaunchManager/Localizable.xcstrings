@@ -2637,12 +2637,62 @@
         }
       }
     },
-    "加载时运行": {
+    "加载时运行一次": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Run at Load"
+            "value": "Run once at load"
+          }
+        }
+      }
+    },
+    "加载任务时运行一次": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Run once when the job is loaded"
+          }
+        }
+      }
+    },
+    "顺序仅用于展示，不表示优先级或执行次序。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order is for display only; it does not imply priority or execution order."
+          }
+        }
+      }
+    },
+    "任务休眠或仍在运行时可能错过触发；间隔计时与日历规则互不重置。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Triggers may be missed while the system sleeps or the job is still running; the interval timer does not reset with calendar rules."
+          }
+        }
+      }
+    },
+    "监视指定路径的变化。可能遗漏事件；触发不代表文件已写入完成。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch changes at the specified paths. Events may be missed; a trigger does not mean the file has finished writing."
+          }
+        }
+      }
+    },
+    "保存将重新加载任务，可能立即运行。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving will reload the job, which may run it immediately."
           }
         }
       }
