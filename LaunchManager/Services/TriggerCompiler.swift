@@ -82,4 +82,168 @@ enum TriggerCompiler {
             watchPathsKeyPresent: watchPathsKeyPresent
         )
     }
+
+    // MARK: - Projection
+
+    static func presentKeys(_ entry: CalendarEntry) -> Set<String> {
+        Set(entry.raw.keys)
+    }
+
+    static func isPresetCandidate(_ entry: CalendarEntry) -> Bool {
+        entry.diagnostics.isEmpty && presentKeys(entry).isSubset(of: knownCalendarKeys)
+    }
+
+    static func summary(for entry: CalendarEntry) -> String {
+        knownCalendarKeys.sorted().compactMap { key -> String? in
+            guard let v = entry.raw[key] else { return nil }
+            return "\(key)=\(v)"
+        }.joined(separator: " ")
+    }
+
+    static func classifySingleton(_ entry: CalendarEntry) -> TriggerRuleKind {
+        guard isPresetCandidate(entry) else {
+            return .customCalendar(
+                summary: summary(for: entry),
+                isMalformed: !entry.diagnostics.isEmpty
+            )
+        }
+
+        let keys = presentKeys(entry)
+        if keys == Set(["Hour", "Minute"]) {
+            return .daily(hour: entry.hour!, minute: entry.minute!)
+        }
+        if keys == Set(["Weekday", "Hour", "Minute"]) {
+            return .weekly(weekdays: [entry.weekday!], hour: entry.hour!, minute: entry.minute!)
+        }
+        if keys == Set(["Day", "Hour", "Minute"]) {
+            return .monthly(day: entry.day!, hour: entry.hour!, minute: entry.minute!, months: nil)
+        }
+        if keys == Set(["Month", "Day", "Hour", "Minute"]) {
+            return .yearly(
+                month: entry.month!,
+                day: entry.day!,
+                hour: entry.hour!,
+                minute: entry.minute!
+            )
+        }
+        // Day+Weekday together (or any other valid non-preset set) → custom, never a preset
+        return .customCalendar(summary: summary(for: entry), isMalformed: false)
+    }
+
+    static func project(_ native: NativeTriggers) -> [TriggerRule] {
+        var rules: [TriggerRule] = []
+        var consumed: Set<UUID> = []
+        let entries = native.calendarEntries
+
+        for entry in entries {
+            if consumed.contains(entry.sessionId) { continue }
+
+            let keys = presentKeys(entry)
+
+            // Weekly merge: same Hour+Minute, only Weekday differs
+            if isPresetCandidate(entry),
+               keys == Set(["Weekday", "Hour", "Minute"]),
+               let hour = entry.hour,
+               let minute = entry.minute,
+               let weekday = entry.weekday
+            {
+                var weekdays: [Int] = [weekday]
+                var refs: [SourceRef] = [.calendarEntry(entry.sessionId)]
+                consumed.insert(entry.sessionId)
+
+                for other in entries {
+                    if consumed.contains(other.sessionId) { continue }
+                    guard isPresetCandidate(other),
+                          presentKeys(other) == Set(["Weekday", "Hour", "Minute"]),
+                          other.hour == hour,
+                          other.minute == minute,
+                          let wd = other.weekday
+                    else { continue }
+                    weekdays.append(wd)
+                    refs.append(.calendarEntry(other.sessionId))
+                    consumed.insert(other.sessionId)
+                }
+
+                rules.append(TriggerRule(
+                    id: UUID(),
+                    kind: .weekly(weekdays: weekdays, hour: hour, minute: minute),
+                    sourceRefs: refs,
+                    isModified: false
+                ))
+                continue
+            }
+
+            // Month merge: same Day+Hour+Minute, only Month differs → monthly(months:)
+            // Single Month+Day+Hour+Minute stays yearly. Never strip months when count == 12.
+            if isPresetCandidate(entry),
+               keys == Set(["Month", "Day", "Hour", "Minute"]),
+               let month = entry.month,
+               let day = entry.day,
+               let hour = entry.hour,
+               let minute = entry.minute
+            {
+                var months: Set<Int> = [month]
+                var refs: [SourceRef] = [.calendarEntry(entry.sessionId)]
+                consumed.insert(entry.sessionId)
+
+                for other in entries {
+                    if consumed.contains(other.sessionId) { continue }
+                    guard isPresetCandidate(other),
+                          presentKeys(other) == Set(["Month", "Day", "Hour", "Minute"]),
+                          other.day == day,
+                          other.hour == hour,
+                          other.minute == minute,
+                          let m = other.month
+                    else { continue }
+                    months.insert(m)
+                    refs.append(.calendarEntry(other.sessionId))
+                    consumed.insert(other.sessionId)
+                }
+
+                let kind: TriggerRuleKind
+                if refs.count == 1 {
+                    kind = .yearly(month: month, day: day, hour: hour, minute: minute)
+                } else {
+                    kind = .monthly(day: day, hour: hour, minute: minute, months: months)
+                }
+
+                rules.append(TriggerRule(
+                    id: UUID(),
+                    kind: kind,
+                    sourceRefs: refs,
+                    isModified: false
+                ))
+                continue
+            }
+
+            consumed.insert(entry.sessionId)
+            rules.append(TriggerRule(
+                id: UUID(),
+                kind: classifySingleton(entry),
+                sourceRefs: [.calendarEntry(entry.sessionId)],
+                isModified: false
+            ))
+        }
+
+        if let seconds = native.startInterval {
+            rules.append(TriggerRule(
+                id: UUID(),
+                kind: .interval(seconds: seconds),
+                sourceRefs: [.startInterval],
+                isModified: false
+            ))
+        }
+
+        for path in native.watchPaths {
+            let pathId = UUID()
+            rules.append(TriggerRule(
+                id: UUID(),
+                kind: .watchPath(path),
+                sourceRefs: [.watchPath(pathId)],
+                isModified: false
+            ))
+        }
+
+        return rules
+    }
 }
