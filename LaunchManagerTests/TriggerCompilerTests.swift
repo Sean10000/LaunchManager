@@ -94,7 +94,13 @@ final class TriggerCompilerTests: XCTestCase {
         let rules = TriggerCompiler.project(native)
         let weekly = rules.first { if case .weekly = $0.kind { return true }; return false }
         XCTAssertNotNil(weekly)
-        XCTAssertEqual(weekly?.sourceRefs.count, 2)
+        XCTAssertEqual(
+            weekly?.sourceRefs,
+            [
+                .calendarEntry(native.calendarEntries[0].sessionId),
+                .calendarEntry(native.calendarEntries[2].sessionId),
+            ]
+        )
         XCTAssertTrue(rules.contains { if case .daily = $0.kind { return true }; return false })
         // First-occurrence stable: weekly (from index 0) before daily (index 1)
         XCTAssertEqual(rules.count, 2)
@@ -106,6 +112,81 @@ final class TriggerCompilerTests: XCTestCase {
         XCTAssertEqual(minute, 0)
         guard case .daily = rules[1].kind else {
             return XCTFail("expected daily second")
+        }
+    }
+
+    func test_project_mergesMonths_keepsSourceRefs() {
+        let intervals: [[String: Any]] = [
+            ["Month": 1, "Day": 15, "Hour": 9, "Minute": 0],
+            ["Month": 6, "Day": 15, "Hour": 9, "Minute": 0],
+            ["Month": 12, "Day": 15, "Hour": 9, "Minute": 0],
+        ]
+        let native = TriggerCompiler.parseNative(from: [
+            "StartCalendarInterval": intervals
+        ])
+        let rules = TriggerCompiler.project(native)
+        XCTAssertEqual(rules.count, 1)
+        guard case .monthly(let day, let hour, let minute, let months) = rules[0].kind else {
+            return XCTFail("expected monthly")
+        }
+        XCTAssertEqual(day, 15)
+        XCTAssertEqual(hour, 9)
+        XCTAssertEqual(minute, 0)
+        XCTAssertEqual(months, Set([1, 6, 12]))
+        XCTAssertEqual(rules[0].sourceRefs.count, 3)
+        XCTAssertEqual(
+            rules[0].sourceRefs,
+            native.calendarEntries.map { SourceRef.calendarEntry($0.sessionId) }
+        )
+    }
+
+    func test_project_mergesAllTwelveMonths_keepsMonthsSet() {
+        let intervals: [[String: Any]] = (1...12).map { month in
+            ["Month": month, "Day": 1, "Hour": 8, "Minute": 30]
+        }
+        let native = TriggerCompiler.parseNative(from: [
+            "StartCalendarInterval": intervals
+        ])
+        let rules = TriggerCompiler.project(native)
+        XCTAssertEqual(rules.count, 1)
+        guard case .monthly(_, _, _, let months) = rules[0].kind else {
+            return XCTFail("expected monthly")
+        }
+        XCTAssertNotNil(months)
+        XCTAssertEqual(months, Set(1...12))
+        XCTAssertEqual(rules[0].sourceRefs.count, 12)
+    }
+
+    func test_project_intervalAndWatchPaths() {
+        let native = TriggerCompiler.parseNative(from: [
+            "StartInterval": 3600,
+            "WatchPaths": ["/tmp/a", "/tmp/b"],
+        ])
+        let rules = TriggerCompiler.project(native)
+        XCTAssertEqual(rules.count, 3)
+
+        guard case .interval(let seconds) = rules[0].kind else {
+            return XCTFail("expected interval first")
+        }
+        XCTAssertEqual(seconds, 3600)
+        XCTAssertEqual(rules[0].sourceRefs, [.startInterval])
+
+        guard case .watchPath(let path0) = rules[1].kind else {
+            return XCTFail("expected watchPath")
+        }
+        XCTAssertEqual(path0, "/tmp/a")
+        XCTAssertEqual(rules[1].sourceRefs.count, 1)
+        guard case .watchPath = rules[1].sourceRefs[0] else {
+            return XCTFail("expected .watchPath sourceRef")
+        }
+
+        guard case .watchPath(let path1) = rules[2].kind else {
+            return XCTFail("expected watchPath")
+        }
+        XCTAssertEqual(path1, "/tmp/b")
+        XCTAssertEqual(rules[2].sourceRefs.count, 1)
+        guard case .watchPath = rules[2].sourceRefs[0] else {
+            return XCTFail("expected .watchPath sourceRef")
         }
     }
 
