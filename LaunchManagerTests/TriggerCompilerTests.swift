@@ -238,4 +238,185 @@ final class TriggerCompilerTests: XCTestCase {
         }
         XCTAssertTrue(malformed)
     }
+
+    // MARK: - compile + apply
+
+    func test_compileDaily_writesOnlyHourMinute() {
+        let dicts = TriggerCompiler.compileCalendarDicts(
+            kind: .daily(hour: 9, minute: 30)
+        )
+        XCTAssertEqual(dicts.count, 1)
+        XCTAssertEqual(dicts[0] as NSDictionary, ["Hour": 9, "Minute": 30] as NSDictionary)
+    }
+
+    func test_applyChange_unmodifiedKeepsRaw() {
+        var root: [String: Any] = [
+            "Label": "t",
+            "StartCalendarInterval": ["Hour": 9], // missing Minute — custom
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        let rules = TriggerCompiler.project(native)
+        // no modifications
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        XCTAssertEqual((out["StartCalendarInterval"] as? [String: Any])?["Hour"] as? Int, 9)
+        XCTAssertNil((out["StartCalendarInterval"] as? [String: Any])?["Minute"])
+        // single-dict shape preserved
+        XCTAssertTrue(out["StartCalendarInterval"] is [String: Any])
+        XCTAssertEqual(out["Label"] as? String, "t")
+    }
+
+    func test_applyChange_editMergedWeek_onlyTouchesRefs() {
+        // Build array [Mon 9:00, daily 18:00, Tue 9:00]; edit weekly time to 10:00;
+        // assert middle daily unchanged; A/C become Hour 10.
+        let intervals: [[String: Any]] = [
+            ["Weekday": 1, "Hour": 9, "Minute": 0], // Mon
+            ["Hour": 18, "Minute": 0],
+            ["Weekday": 2, "Hour": 9, "Minute": 0], // Tue
+        ]
+        let root: [String: Any] = ["StartCalendarInterval": intervals]
+        let native = TriggerCompiler.parseNative(from: root)
+        var rules = TriggerCompiler.project(native)
+        guard let weeklyIdx = rules.firstIndex(where: {
+            if case .weekly = $0.kind { return true }
+            return false
+        }) else {
+            return XCTFail("expected weekly rule")
+        }
+        guard case .weekly(let weekdays, _, let minute) = rules[weeklyIdx].kind else {
+            return XCTFail("expected weekly")
+        }
+        rules[weeklyIdx].kind = .weekly(weekdays: weekdays, hour: 10, minute: minute)
+        rules[weeklyIdx].isModified = true
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        guard let array = out["StartCalendarInterval"] as? [[String: Any]] else {
+            return XCTFail("expected calendar array")
+        }
+        XCTAssertEqual(array.count, 3)
+        // Order preserved: week entries around daily
+        XCTAssertEqual(array[0]["Weekday"] as? Int, 1)
+        XCTAssertEqual(array[0]["Hour"] as? Int, 10)
+        XCTAssertEqual(array[0]["Minute"] as? Int, 0)
+        XCTAssertEqual(array[1]["Hour"] as? Int, 18)
+        XCTAssertNil(array[1]["Weekday"])
+        XCTAssertEqual(array[1]["Minute"] as? Int, 0)
+        XCTAssertEqual(array[2]["Weekday"] as? Int, 2)
+        XCTAssertEqual(array[2]["Hour"] as? Int, 10)
+        XCTAssertEqual(array[2]["Minute"] as? Int, 0)
+    }
+
+    func test_applyChange_deletingRuleRemovesRefs() {
+        let intervals: [[String: Any]] = [
+            ["Weekday": 1, "Hour": 9, "Minute": 0],
+            ["Hour": 18, "Minute": 0],
+            ["Weekday": 2, "Hour": 9, "Minute": 0],
+        ]
+        let root: [String: Any] = ["Label": "t", "StartCalendarInterval": intervals]
+        let native = TriggerCompiler.parseNative(from: root)
+        var rules = TriggerCompiler.project(native)
+        rules.removeAll { if case .weekly = $0.kind { return true }; return false }
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        guard let array = out["StartCalendarInterval"] as? [[String: Any]] else {
+            return XCTFail("expected calendar array")
+        }
+        XCTAssertEqual(array.count, 1)
+        XCTAssertEqual(array[0]["Hour"] as? Int, 18)
+        XCTAssertNil(array[0]["Weekday"])
+        XCTAssertEqual(out["Label"] as? String, "t")
+    }
+
+    func test_applyChange_newDailyAppends() {
+        let root: [String: Any] = [
+            "StartCalendarInterval": ["Hour": 9, "Minute": 0] as [String: Any],
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        var rules = TriggerCompiler.project(native)
+        rules.append(TriggerRule(
+            id: UUID(),
+            kind: .daily(hour: 12, minute: 30),
+            sourceRefs: [],
+            isModified: true
+        ))
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        guard let array = out["StartCalendarInterval"] as? [[String: Any]] else {
+            return XCTFail("expected calendar array after append")
+        }
+        XCTAssertEqual(array.count, 2)
+        XCTAssertEqual(array[0] as NSDictionary, ["Hour": 9, "Minute": 0] as NSDictionary)
+        XCTAssertEqual(array[1] as NSDictionary, ["Hour": 12, "Minute": 30] as NSDictionary)
+    }
+
+    func test_applyChange_unmodifiedSingleDictShapePreserved() {
+        let root: [String: Any] = [
+            "StartCalendarInterval": ["Hour": 9, "Minute": 0] as [String: Any],
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        let rules = TriggerCompiler.project(native)
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        XCTAssertTrue(out["StartCalendarInterval"] is [String: Any])
+        XCTAssertFalse(out["StartCalendarInterval"] is [[String: Any]])
+        XCTAssertEqual(
+            out["StartCalendarInterval"] as? NSDictionary,
+            ["Hour": 9, "Minute": 0] as NSDictionary
+        )
+    }
+
+    func test_applyChange_touchedAndCountGreaterThanOneWritesArray() {
+        let root: [String: Any] = [
+            "StartCalendarInterval": ["Hour": 9, "Minute": 0] as [String: Any],
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        var rules = TriggerCompiler.project(native)
+        guard case .daily(_, let minute) = rules[0].kind else {
+            return XCTFail("expected daily")
+        }
+        rules[0].kind = .daily(hour: 10, minute: minute)
+        rules[0].isModified = true
+        rules.append(TriggerRule(
+            id: UUID(),
+            kind: .daily(hour: 15, minute: 0),
+            sourceRefs: [],
+            isModified: true
+        ))
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        guard let array = out["StartCalendarInterval"] as? [[String: Any]] else {
+            return XCTFail("expected calendar array")
+        }
+        XCTAssertEqual(array.count, 2)
+        XCTAssertEqual(array[0]["Hour"] as? Int, 10)
+        XCTAssertEqual(array[1]["Hour"] as? Int, 15)
+    }
 }

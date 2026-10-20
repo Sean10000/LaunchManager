@@ -259,4 +259,187 @@ enum TriggerCompiler {
 
         return rules
     }
+
+    // MARK: - Compile + apply
+
+    static func compileCalendarDicts(kind: TriggerRuleKind) -> [[String: Any]] {
+        switch kind {
+        case .daily(let h, let m):
+            return [["Hour": h, "Minute": m]]
+        case .weekly(let days, let h, let m):
+            return days.sorted().map { ["Weekday": $0, "Hour": h, "Minute": m] }
+        case .monthly(let day, let h, let m, let months):
+            if let months, !months.isEmpty {
+                return months.sorted().map {
+                    ["Month": $0, "Day": day, "Hour": h, "Minute": m]
+                }
+            }
+            return [["Day": day, "Hour": h, "Minute": m]]
+        case .yearly(let month, let day, let h, let m):
+            return [["Month": month, "Day": day, "Hour": h, "Minute": m]]
+        default:
+            return []
+        }
+    }
+
+    /// Rebuild StartCalendarInterval / StartInterval / WatchPaths from rules + native.
+    /// Unmodified calendar rules copy `raw` from referenced entries in original relative order.
+    /// Modified preset rules replace their refs with compiled dicts (extras after the last ref).
+    static func applyTriggers(
+        to root: [String: Any],
+        native: NativeTriggers,
+        rules: [TriggerRule],
+        pathIdsInOrder: [UUID]
+    ) -> [String: Any] {
+        var result = root
+
+        let entryById: [UUID: CalendarEntry] = Dictionary(
+            uniqueKeysWithValues: native.calendarEntries.map { ($0.sessionId, $0) }
+        )
+
+        var ruleByCalendarSessionId: [UUID: TriggerRule] = [:]
+        var referencedSessionIds: Set<UUID> = []
+        for rule in rules {
+            for ref in rule.sourceRefs {
+                guard case .calendarEntry(let id) = ref else { continue }
+                referencedSessionIds.insert(id)
+                ruleByCalendarSessionId[id] = rule
+            }
+        }
+
+        // Precompute ordered native calendar refs per rule (original encounter order).
+        var nativeRefsByRuleId: [UUID: [UUID]] = [:]
+        for entry in native.calendarEntries {
+            guard let rule = ruleByCalendarSessionId[entry.sessionId] else { continue }
+            nativeRefsByRuleId[rule.id, default: []].append(entry.sessionId)
+        }
+
+        var compiledIndexByRuleId: [UUID: Int] = [:]
+        var calendarDicts: [[String: Any]] = []
+        var calendarTouched = false
+
+        for entry in native.calendarEntries {
+            guard referencedSessionIds.contains(entry.sessionId) else {
+                calendarTouched = true // deleted
+                continue
+            }
+            guard let rule = ruleByCalendarSessionId[entry.sessionId] else { continue }
+
+            // Custom: always keep raw (v1 has no custom editor); modified flag does not rewrite.
+            if case .customCalendar = rule.kind {
+                calendarDicts.append(entry.raw)
+                continue
+            }
+
+            if rule.isModified {
+                calendarTouched = true
+                let compiled = compileCalendarDicts(kind: rule.kind)
+                if compiled.isEmpty {
+                    calendarDicts.append(entry.raw)
+                    continue
+                }
+
+                let idx = compiledIndexByRuleId[rule.id, default: 0]
+                if idx < compiled.count {
+                    calendarDicts.append(compiled[idx])
+                    compiledIndexByRuleId[rule.id] = idx + 1
+                }
+
+                // After the last native ref of this rule, append any extra compiled dicts
+                // (new weekdays / months).
+                let refs = nativeRefsByRuleId[rule.id] ?? []
+                if entry.sessionId == refs.last {
+                    let start = compiledIndexByRuleId[rule.id, default: 0]
+                    if start < compiled.count {
+                        calendarDicts.append(contentsOf: compiled[start...])
+                        compiledIndexByRuleId[rule.id] = compiled.count
+                    }
+                }
+            } else {
+                calendarDicts.append(entry.raw)
+            }
+        }
+
+        // Brand-new calendar rules: empty sourceRefs or no refs present in native.
+        for rule in rules {
+            switch rule.kind {
+            case .interval, .watchPath, .customCalendar:
+                continue
+            default:
+                break
+            }
+            let calendarRefs = rule.sourceRefs.compactMap { ref -> UUID? in
+                if case .calendarEntry(let id) = ref { return id }
+                return nil
+            }
+            let hasExistingNativeRef = calendarRefs.contains { entryById[$0] != nil }
+            if hasExistingNativeRef { continue }
+
+            let compiled = compileCalendarDicts(kind: rule.kind)
+            guard !compiled.isEmpty else { continue }
+            calendarTouched = true
+            calendarDicts.append(contentsOf: compiled)
+        }
+
+        // Write StartCalendarInterval shape.
+        if calendarDicts.isEmpty {
+            if native.calendarKeyPresent {
+                result["StartCalendarInterval"] = [[String: Any]]()
+            } else {
+                result.removeValue(forKey: "StartCalendarInterval")
+            }
+        } else if calendarDicts.count == 1, !native.calendarIsArray, !calendarTouched {
+            result["StartCalendarInterval"] = calendarDicts[0]
+        } else {
+            result["StartCalendarInterval"] = calendarDicts
+        }
+
+        // Interval
+        let intervalRule = rules.first { if case .interval = $0.kind { return true }; return false }
+        if let intervalRule, case .interval(let seconds) = intervalRule.kind {
+            if !intervalRule.isModified,
+               native.startInterval == seconds,
+               result["StartInterval"] != nil
+            {
+                // Leave key as-is (don't rewrite).
+            } else {
+                result["StartInterval"] = seconds
+            }
+        } else if native.startInterval != nil || result["StartInterval"] != nil {
+            result.removeValue(forKey: "StartInterval")
+        }
+
+        // WatchPaths: rewrite only when dirty or path set/order changed.
+        var newWatchPaths: [String] = []
+        if pathIdsInOrder.isEmpty {
+            for rule in rules {
+                guard case .watchPath(let path) = rule.kind else { continue }
+                newWatchPaths.append(path)
+            }
+        } else {
+            for pathId in pathIdsInOrder {
+                guard let rule = rules.first(where: {
+                    $0.sourceRefs.contains(.watchPath(pathId))
+                }),
+                case .watchPath(let path) = rule.kind
+                else { continue }
+                newWatchPaths.append(path)
+            }
+        }
+
+        let watchDirty = rules.contains {
+            if case .watchPath = $0.kind { return $0.isModified }
+            return false
+        }
+        if watchDirty || newWatchPaths != native.watchPaths {
+            if newWatchPaths.isEmpty {
+                result.removeValue(forKey: "WatchPaths")
+            } else {
+                result["WatchPaths"] = newWatchPaths
+            }
+        }
+        // else leave key untouched (preserve missing vs [])
+
+        return result
+    }
 }
