@@ -21,7 +21,7 @@ LaunchManager 将分散的 LaunchAgents 和 LaunchDaemons 汇集到一个可视�
 
 **官网：** [launchmanager.dev](https://www.launchmanager.dev) · **帮助：** [Help](https://www.launchmanager.dev/help) · **模板：** [launchmanager.dev/templates](https://www.launchmanager.dev/templates)
 
-![Version](https://img.shields.io/badge/version-1.6.4-blue) ![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green)
+![Version](https://img.shields.io/badge/version-1.8.0-blue) ![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ![LaunchManager 主界面](assets/home-page.png)
 

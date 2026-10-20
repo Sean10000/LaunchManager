@@ -8,6 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
+### Added
+- **Trigger rule editor** — add daily, weekly, monthly, yearly, interval, and WatchPaths rules in one list; multiple rules can apply independently.
+- **Native-preserving save** — form edits apply as a change set on the existing plist so unknown keys and custom calendar entries are kept when possible.
+- **Chinese README** — `README.zh-CN.md` with language switcher links.
+
+### Changed
+- **Multi-trigger model** — calendar, interval, and WatchPaths can coexist; form no longer forces XML solely because multiple trigger keys or WatchPaths are present.
+- **RunAtLoad copy** — option labeled **登录时运行**, with a short note that manual reload also runs the job.
+- **Add-rule UI** — uses a menu so all rule types are visible on macOS (confirmation dialogs were truncating options).
+- **README positioning** — “AI creates the jobs. You stay in control.”; design docs and local agent tooling removed from the published repo.
+
+### Fixed
+- Unparseable `StartCalendarInterval` / `StartInterval` values are not silently dropped on form save.
+- XML ↔ form sync no longer breaks external-change detection for existing plists.
+
 ## [1.7.1] - 2026-07-30
 
 ### Fixed
