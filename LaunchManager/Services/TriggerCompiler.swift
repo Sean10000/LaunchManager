@@ -45,17 +45,24 @@ enum TriggerCompiler {
         var entries: [CalendarEntry] = []
         var calendarKeyPresent = false
         var calendarIsArray = false
+        var calendarRawValue: Any?
+        var calendarOrphans: [(offset: Int, value: Any)] = []
         if let value = root["StartCalendarInterval"] {
             calendarKeyPresent = true
+            calendarRawValue = value
             if let dict = value as? [String: Any] {
                 entries = [parseEntry(dict)]
             } else if let array = value as? [Any] {
                 calendarIsArray = true
-                entries = array.compactMap { el in
-                    guard let d = el as? [String: Any] else { return nil }
-                    return parseEntry(d)
+                for (offset, el) in array.enumerated() {
+                    if let d = el as? [String: Any] {
+                        entries.append(parseEntry(d))
+                    } else {
+                        calendarOrphans.append((offset: offset, value: el))
+                    }
                 }
             }
+            // else: invalid type — raw preserved, entries stay empty
         }
 
         var startInterval: Int?
@@ -79,7 +86,9 @@ enum TriggerCompiler {
             watchPaths: watchPaths,
             calendarKeyPresent: calendarKeyPresent,
             calendarIsArray: calendarIsArray,
-            watchPathsKeyPresent: watchPathsKeyPresent
+            watchPathsKeyPresent: watchPathsKeyPresent,
+            calendarRawValue: calendarRawValue,
+            calendarOrphans: calendarOrphans
         )
     }
 
@@ -381,16 +390,31 @@ enum TriggerCompiler {
         }
 
         // Write StartCalendarInterval shape: single dict when count==1 and original was not array.
+        // Unparseable / orphan-only values must not be silently replaced with [].
         if calendarDicts.isEmpty {
-            if native.calendarKeyPresent {
+            if native.calendarEntries.isEmpty, native.calendarKeyPresent {
+                // Invalid type or orphan-only (no parseable dicts) — leave key untouched.
+            } else if !native.calendarOrphans.isEmpty {
+                result["StartCalendarInterval"] = Self.interleaveCalendarOrphans(
+                    dicts: [],
+                    entryCount: native.calendarEntries.count,
+                    orphans: native.calendarOrphans
+                )
+            } else if native.calendarKeyPresent {
                 result["StartCalendarInterval"] = [[String: Any]]()
             } else {
                 result.removeValue(forKey: "StartCalendarInterval")
             }
-        } else if calendarDicts.count == 1, !native.calendarIsArray {
+        } else if native.calendarOrphans.isEmpty, calendarDicts.count == 1, !native.calendarIsArray {
             result["StartCalendarInterval"] = calendarDicts[0]
-        } else {
+        } else if native.calendarOrphans.isEmpty {
             result["StartCalendarInterval"] = calendarDicts
+        } else {
+            result["StartCalendarInterval"] = Self.interleaveCalendarOrphans(
+                dicts: calendarDicts,
+                entryCount: native.calendarEntries.count,
+                orphans: native.calendarOrphans
+            )
         }
 
         // Interval
@@ -404,6 +428,8 @@ enum TriggerCompiler {
             } else {
                 result["StartInterval"] = seconds
             }
+        } else if native.startIntervalIssue != nil {
+            // Unparseable StartInterval — leave key untouched (do not remove).
         } else if native.startInterval != nil || result["StartInterval"] != nil {
             result.removeValue(forKey: "StartInterval")
         }
@@ -459,5 +485,39 @@ enum TriggerCompiler {
         default:
             return remaining.isEmpty ? nil : 0
         }
+    }
+
+    /// Rebuild a calendar array preserving non-dict orphans at their original offsets.
+    /// When `dicts.count == entryCount` (typical unmodified apply), walk original indices
+    /// so orphans stay between the correct neighbors. Otherwise insert by offset into
+    /// the rebuilt dict list (extras / deletions).
+    private static func interleaveCalendarOrphans(
+        dicts: [[String: Any]],
+        entryCount: Int,
+        orphans: [(offset: Int, value: Any)]
+    ) -> [Any] {
+        let orphanByOffset = Dictionary(uniqueKeysWithValues: orphans.map { ($0.offset, $0.value) })
+        let originalLength = entryCount + orphans.count
+
+        if dicts.isEmpty || dicts.count == entryCount {
+            var result: [Any] = []
+            var dictIndex = 0
+            for index in 0..<originalLength {
+                if let orphan = orphanByOffset[index] {
+                    result.append(orphan)
+                } else if dictIndex < dicts.count {
+                    result.append(dicts[dictIndex])
+                    dictIndex += 1
+                }
+                // else: entry deleted — skip slot, keep later orphans
+            }
+            return result
+        }
+
+        var merged: [Any] = dicts
+        for orphan in orphans.sorted(by: { $0.offset > $1.offset }) {
+            merged.insert(orphan.value, at: min(orphan.offset, merged.count))
+        }
+        return merged
     }
 }

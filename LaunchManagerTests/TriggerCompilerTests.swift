@@ -636,4 +636,89 @@ final class TriggerCompilerTests: XCTestCase {
             }
         }
     }
+
+    // MARK: - Preserve unparseable trigger values
+
+    func test_applyTriggers_invalidStartInterval_string_preserved() {
+        let root: [String: Any] = [
+            "Label": "t",
+            "StartInterval": "bad",
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        XCTAssertNil(native.startInterval)
+        XCTAssertNotNil(native.startIntervalIssue)
+        let rules = TriggerCompiler.project(native)
+        XCTAssertFalse(rules.contains { if case .interval = $0.kind { return true }; return false })
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        XCTAssertEqual(out["StartInterval"] as? String, "bad")
+        XCTAssertEqual(out["Label"] as? String, "t")
+    }
+
+    func test_applyTriggers_calendarArray_nonDictOrphan_preserved() {
+        let intervals: [Any] = [
+            ["Weekday": 1, "Hour": 9, "Minute": 0] as [String: Any],
+            "oops",
+            ["Hour": 8, "Minute": 0] as [String: Any],
+        ]
+        let root: [String: Any] = ["StartCalendarInterval": intervals]
+        let native = TriggerCompiler.parseNative(from: root)
+        XCTAssertEqual(native.calendarEntries.count, 2)
+        XCTAssertEqual(native.calendarOrphans.count, 1)
+        XCTAssertEqual(native.calendarOrphans[0].offset, 1)
+        XCTAssertEqual(native.calendarOrphans[0].value as? String, "oops")
+
+        let rules = TriggerCompiler.project(native)
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        guard let array = out["StartCalendarInterval"] as? [Any] else {
+            return XCTFail("expected calendar array")
+        }
+        XCTAssertEqual(array.count, 3)
+        XCTAssertEqual(array[1] as? String, "oops")
+        XCTAssertEqual(
+            array[0] as? NSDictionary,
+            ["Weekday": 1, "Hour": 9, "Minute": 0] as NSDictionary
+        )
+        XCTAssertEqual(
+            array[2] as? NSDictionary,
+            ["Hour": 8, "Minute": 0] as NSDictionary
+        )
+    }
+
+    func test_applyTriggers_invalidCalendarType_string_preserved() {
+        let root: [String: Any] = [
+            "Label": "t",
+            "StartCalendarInterval": "nope",
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        XCTAssertTrue(native.calendarKeyPresent)
+        XCTAssertTrue(native.calendarEntries.isEmpty)
+        XCTAssertEqual(native.calendarRawValue as? String, "nope")
+        let rules = TriggerCompiler.project(native)
+        XCTAssertFalse(rules.contains {
+            switch $0.kind {
+            case .interval, .watchPath: return false
+            default: return true
+            }
+        })
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        XCTAssertEqual(out["StartCalendarInterval"] as? String, "nope")
+        XCTAssertEqual(out["Label"] as? String, "t")
+    }
 }

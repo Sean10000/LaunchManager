@@ -37,6 +37,44 @@ struct NativeTriggers: Equatable {
     var calendarKeyPresent: Bool
     var calendarIsArray: Bool
     var watchPathsKeyPresent: Bool
+    /// Exact `StartCalendarInterval` value from root when the key is present.
+    var calendarRawValue: Any?
+    /// Non-dict elements in a `StartCalendarInterval` array, with original offsets.
+    var calendarOrphans: [(offset: Int, value: Any)]
+
+    static func == (lhs: NativeTriggers, rhs: NativeTriggers) -> Bool {
+        lhs.calendarEntries == rhs.calendarEntries
+            && lhs.startInterval == rhs.startInterval
+            && lhs.startIntervalIssue == rhs.startIntervalIssue
+            && lhs.watchPaths == rhs.watchPaths
+            && lhs.calendarKeyPresent == rhs.calendarKeyPresent
+            && lhs.calendarIsArray == rhs.calendarIsArray
+            && lhs.watchPathsKeyPresent == rhs.watchPathsKeyPresent
+            && isEqualAnyOptional(lhs.calendarRawValue, rhs.calendarRawValue)
+            && lhs.calendarOrphans.count == rhs.calendarOrphans.count
+            && zip(lhs.calendarOrphans, rhs.calendarOrphans).allSatisfy {
+                $0.offset == $1.offset && isEqualAny($0.value, $1.value)
+            }
+    }
+}
+
+private func isEqualAnyOptional(_ lhs: Any?, _ rhs: Any?) -> Bool {
+    switch (lhs, rhs) {
+    case (nil, nil): return true
+    case (nil, _), (_, nil): return false
+    case let (l?, r?): return isEqualAny(l, r)
+    }
+}
+
+private func isEqualAny(_ lhs: Any, _ rhs: Any) -> Bool {
+    if let l = lhs as? [String: Any], let r = rhs as? [String: Any] {
+        return NSDictionary(dictionary: l).isEqual(to: r)
+    }
+    if let l = lhs as? [Any], let r = rhs as? [Any] {
+        guard l.count == r.count else { return false }
+        return zip(l, r).allSatisfy { isEqualAny($0, $1) }
+    }
+    return (lhs as AnyObject).isEqual(rhs)
 }
 
 enum SourceRef: Hashable {
