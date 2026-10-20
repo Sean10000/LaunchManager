@@ -260,7 +260,10 @@ struct EditAgentSheet: View {
             }
 
             Section("选项") {
-                Toggle("加载任务时运行一次", isOn: $runAtLoad)
+                Toggle("登录时运行", isOn: $runAtLoad)
+                Text("登录并加载此任务时运行一次；手动重新加载也会运行。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 if runAtLoadSaveWarningVisible {
                     Text("保存将重新加载任务，可能立即运行。")
                         .font(.caption)

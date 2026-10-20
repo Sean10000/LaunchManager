@@ -2637,22 +2637,22 @@
         }
       }
     },
-    "加载时运行一次": {
+    "登录时运行": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Run once at load"
+            "value": "Run at login"
           }
         }
       }
     },
-    "加载任务时运行一次": {
+    "登录并加载此任务时运行一次；手动重新加载也会运行。": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Run once when the job is loaded"
+            "value": "Runs once when this job is loaded at login; also runs if you reload it manually."
           }
         }
       }
