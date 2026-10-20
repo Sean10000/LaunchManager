@@ -24,7 +24,6 @@ struct EditAgentSheet: View {
     @State private var xmlError: String?
     @State private var formDisabledReason: String?
     @State private var errorMessage: String?
-    @State private var showAddRule = false
     @State private var pendingDeleteRuleID: UUID?
     @State private var showDiskChangedAlert = false
     @State private var showRunAtLoadSaveConfirm = false
@@ -139,16 +138,6 @@ struct EditAgentSheet: View {
         } message: {
             Text("磁盘上的文件已被外部修改。重新加载将丢弃当前未保存的更改。")
         }
-        .confirmationDialog("添加规则", isPresented: $showAddRule, titleVisibility: .visible) {
-            Button("每日") { addRule(.daily(hour: 8, minute: 0)) }
-            Button("每周") { addRule(.weekly(weekdays: [1], hour: 8, minute: 0)) }
-            Button("每月") { addRule(.monthly(day: 1, hour: 8, minute: 0, months: nil)) }
-            Button("每年") { addRule(.yearly(month: 1, day: 1, hour: 8, minute: 0)) }
-            Button("时间间隔") { addRule(.interval(seconds: 60)) }
-                .disabled(hasIntervalRule)
-            Button("监视路径") { addWatchPathRule() }
-            Button("取消", role: .cancel) {}
-        }
         .confirmationDialog(
             "删除整组",
             isPresented: Binding(
@@ -241,8 +230,15 @@ struct EditAgentSheet: View {
                     ruleEditor(for: rule)
                 }
 
-                Button {
-                    showAddRule = true
+                // Menu (not confirmationDialog): macOS dialogs truncate after ~3 buttons.
+                Menu {
+                    Button("每日") { addRule(.daily(hour: 8, minute: 0)) }
+                    Button("每周") { addRule(.weekly(weekdays: [1], hour: 8, minute: 0)) }
+                    Button("每月") { addRule(.monthly(day: 1, hour: 8, minute: 0, months: nil)) }
+                    Button("每年") { addRule(.yearly(month: 1, day: 1, hour: 8, minute: 0)) }
+                    Button("时间间隔") { addRule(.interval(seconds: 60)) }
+                        .disabled(hasIntervalRule)
+                    Button("监视路径") { addWatchPathRule() }
                 } label: {
                     Label("添加规则", systemImage: "plus")
                 }
