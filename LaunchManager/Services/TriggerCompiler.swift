@@ -314,14 +314,13 @@ enum TriggerCompiler {
             nativeRefsByRuleId[rule.id, default: []].append(entry.sessionId)
         }
 
-        var compiledIndexByRuleId: [UUID: Int] = [:]
+        // Remaining compiled dicts per modified rule; matched by Weekday/Month, not index.
+        var remainingCompiledByRuleId: [UUID: [[String: Any]]] = [:]
         var calendarDicts: [[String: Any]] = []
-        var calendarTouched = false
 
         for entry in native.calendarEntries {
             guard referencedSessionIds.contains(entry.sessionId) else {
-                calendarTouched = true // deleted
-                continue
+                continue // deleted
             }
             guard let rule = ruleByCalendarSessionId[entry.sessionId] else { continue }
 
@@ -332,28 +331,29 @@ enum TriggerCompiler {
             }
 
             if rule.isModified {
-                calendarTouched = true
-                let compiled = compileCalendarDicts(kind: rule.kind)
-                if compiled.isEmpty {
-                    calendarDicts.append(entry.raw)
-                    continue
+                if remainingCompiledByRuleId[rule.id] == nil {
+                    remainingCompiledByRuleId[rule.id] = compileCalendarDicts(kind: rule.kind)
+                }
+                var remaining = remainingCompiledByRuleId[rule.id] ?? []
+                if remaining.isEmpty {
+                    // No compiled output (or all slots already taken) — skip this ref.
+                    remainingCompiledByRuleId[rule.id] = remaining
+                } else if let matchIndex = Self.indexOfCompiledMatch(
+                    remaining: remaining, kind: rule.kind, entry: entry
+                ) {
+                    calendarDicts.append(remaining.remove(at: matchIndex))
+                    remainingCompiledByRuleId[rule.id] = remaining
+                } else {
+                    // Native weekday/month removed from the edited kind — drop this slot.
+                    remainingCompiledByRuleId[rule.id] = remaining
                 }
 
-                let idx = compiledIndexByRuleId[rule.id, default: 0]
-                if idx < compiled.count {
-                    calendarDicts.append(compiled[idx])
-                    compiledIndexByRuleId[rule.id] = idx + 1
-                }
-
-                // After the last native ref of this rule, append any extra compiled dicts
-                // (new weekdays / months).
+                // After the last native ref of this rule, append extras (new weekdays/months).
                 let refs = nativeRefsByRuleId[rule.id] ?? []
                 if entry.sessionId == refs.last {
-                    let start = compiledIndexByRuleId[rule.id, default: 0]
-                    if start < compiled.count {
-                        calendarDicts.append(contentsOf: compiled[start...])
-                        compiledIndexByRuleId[rule.id] = compiled.count
-                    }
+                    let extras = remainingCompiledByRuleId[rule.id] ?? []
+                    calendarDicts.append(contentsOf: extras)
+                    remainingCompiledByRuleId[rule.id] = []
                 }
             } else {
                 calendarDicts.append(entry.raw)
@@ -377,18 +377,17 @@ enum TriggerCompiler {
 
             let compiled = compileCalendarDicts(kind: rule.kind)
             guard !compiled.isEmpty else { continue }
-            calendarTouched = true
             calendarDicts.append(contentsOf: compiled)
         }
 
-        // Write StartCalendarInterval shape.
+        // Write StartCalendarInterval shape: single dict when count==1 and original was not array.
         if calendarDicts.isEmpty {
             if native.calendarKeyPresent {
                 result["StartCalendarInterval"] = [[String: Any]]()
             } else {
                 result.removeValue(forKey: "StartCalendarInterval")
             }
-        } else if calendarDicts.count == 1, !native.calendarIsArray, !calendarTouched {
+        } else if calendarDicts.count == 1, !native.calendarIsArray {
             result["StartCalendarInterval"] = calendarDicts[0]
         } else {
             result["StartCalendarInterval"] = calendarDicts
@@ -441,5 +440,24 @@ enum TriggerCompiler {
         // else leave key untouched (preserve missing vs [])
 
         return result
+    }
+
+    /// Match a compiled slot to a native entry by Weekday (weekly) or Month (monthly-with-months).
+    /// Other kinds take the first remaining compiled dict.
+    private static func indexOfCompiledMatch(
+        remaining: [[String: Any]],
+        kind: TriggerRuleKind,
+        entry: CalendarEntry
+    ) -> Int? {
+        switch kind {
+        case .weekly:
+            guard let weekday = entry.weekday else { return remaining.isEmpty ? nil : 0 }
+            return remaining.firstIndex { ($0["Weekday"] as? Int) == weekday }
+        case .monthly(_, _, _, let months) where months != nil && !(months?.isEmpty ?? true):
+            guard let month = entry.month else { return remaining.isEmpty ? nil : 0 }
+            return remaining.firstIndex { ($0["Month"] as? Int) == month }
+        default:
+            return remaining.isEmpty ? nil : 0
+        }
     }
 }

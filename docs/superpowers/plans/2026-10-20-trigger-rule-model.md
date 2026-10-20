@@ -516,10 +516,10 @@ Exact algorithm for calendar rebuild:
 
 1. Map `sessionId → CalendarEntry` from `native.calendarEntries`.
 2. Walk original entries in order; skip those whose sessionId is in a **deleted** rule’s sourceRefs.
-3. When hitting the first sourceRef of a **modified** rule, emit compiled dicts for that rule once; skip other refs of that rule when encountered later.
+3. When hitting a sourceRef of a **modified** rule: replace that slot with the compiled dict matching the native entry’s Weekday (weekly) or Month (monthly-with-months); other kinds take the next remaining compiled dict. After the last ref of that rule, insert any extra compiled dicts (new weekdays/months not matched to a native ref). Drop native refs whose weekday/month was removed from the edited kind.
 4. When hitting an **unmodified** ref, emit `entry.raw`.
 5. Append brand-new rules (empty sourceRefs or refs not in native) at end.
-6. Write shape: if key was absent and no calendar rules remain → omit key; if unmodified and still single dict shape → keep single dict; if touched and count ≥ 1 → prefer array when count ≠ 1 or original was array.
+6. Write shape: if key was absent and no calendar rules remain → omit key; if `count == 1` and original was single dict → keep single dict (even when touched); use array when `count != 1` or original was array.
 
 - [ ] **Step 4: Tests PASS**
 
