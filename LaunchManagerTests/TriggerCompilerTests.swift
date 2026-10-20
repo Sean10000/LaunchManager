@@ -498,4 +498,142 @@ final class TriggerCompilerTests: XCTestCase {
         XCTAssertNil(out["WatchPaths"])
         XCTAssertEqual(out["Label"] as? String, "t")
     }
+
+    // MARK: - Regression (Task 9)
+
+    func test_roundTrip_unmodifiedRules_calendarLogicallyEqual() {
+        let intervals: [[String: Any]] = [
+            ["Hour": 8], // hour-only custom — must not invent Minute
+            ["Weekday": 1, "Hour": 9, "Minute": 0],
+            ["Month": 2, "Day": 29, "Hour": 10, "Minute": 0],
+            ["Day": 31, "Hour": 11, "Minute": 0],
+        ]
+        let root: [String: Any] = [
+            "Label": "t",
+            "StartCalendarInterval": intervals,
+            "StartInterval": 600,
+            "WatchPaths": ["/tmp/a", "/tmp/b"],
+            "QueueDirectories": ["/tmp/q"],
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        let rules = TriggerCompiler.project(native)
+        XCTAssertFalse(rules.contains(where: \.isModified))
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        XCTAssertTrue(
+            NSDictionary(dictionary: out).isEqual(to: root),
+            "unmodified applyTriggers must be a logical no-op on the root"
+        )
+    }
+
+    func test_applyChange_partialEdit_preservesQueueDirectories() {
+        let root: [String: Any] = [
+            "Label": "t",
+            "StartCalendarInterval": ["Hour": 9, "Minute": 0] as [String: Any],
+            "WatchPaths": ["/tmp/a"],
+            "QueueDirectories": ["/tmp/q"],
+            "StartOnMount": true,
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        var rules = TriggerCompiler.project(native)
+        guard case .daily(_, let minute) = rules[0].kind else {
+            return XCTFail("expected daily")
+        }
+        rules[0].kind = .daily(hour: 14, minute: minute)
+        rules[0].isModified = true
+
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        XCTAssertEqual(
+            out["StartCalendarInterval"] as? NSDictionary,
+            ["Hour": 14, "Minute": 0] as NSDictionary
+        )
+        XCTAssertEqual(out["QueueDirectories"] as? [String], ["/tmp/q"])
+        XCTAssertEqual(out["StartOnMount"] as? Bool, true)
+        XCTAssertEqual(out["WatchPaths"] as? [String], ["/tmp/a"])
+        XCTAssertEqual(out["Label"] as? String, "t")
+    }
+
+    func test_compile_day31_and_feb29_unchanged() {
+        let monthly = TriggerCompiler.compileCalendarDicts(
+            kind: .monthly(day: 31, hour: 8, minute: 0, months: nil)
+        )
+        XCTAssertEqual(monthly.count, 1)
+        XCTAssertEqual(monthly[0]["Day"] as? Int, 31)
+        XCTAssertEqual(monthly[0]["Hour"] as? Int, 8)
+        XCTAssertEqual(monthly[0]["Minute"] as? Int, 0)
+        XCTAssertNil(monthly[0]["Month"])
+
+        let yearly = TriggerCompiler.compileCalendarDicts(
+            kind: .yearly(month: 2, day: 29, hour: 9, minute: 30)
+        )
+        XCTAssertEqual(yearly.count, 1)
+        XCTAssertEqual(
+            yearly[0] as NSDictionary,
+            ["Month": 2, "Day": 29, "Hour": 9, "Minute": 30] as NSDictionary
+        )
+
+        // Unmodified apply also keeps Day 31 / Feb 29 raw intact.
+        let root: [String: Any] = [
+            "StartCalendarInterval": [
+                ["Day": 31, "Hour": 8, "Minute": 0],
+                ["Month": 2, "Day": 29, "Hour": 9, "Minute": 30],
+            ] as [[String: Any]],
+        ]
+        let native = TriggerCompiler.parseNative(from: root)
+        let rules = TriggerCompiler.project(native)
+        let out = TriggerCompiler.applyTriggers(
+            to: root,
+            native: native,
+            rules: rules,
+            pathIdsInOrder: []
+        )
+        guard let array = out["StartCalendarInterval"] as? [[String: Any]] else {
+            return XCTFail("expected calendar array")
+        }
+        XCTAssertEqual(array[0]["Day"] as? Int, 31)
+        XCTAssertEqual(array[1]["Month"] as? Int, 2)
+        XCTAssertEqual(array[1]["Day"] as? Int, 29)
+    }
+
+    func test_dayPlusWeekday_staysCustom_presetsNeverGenerateBoth() {
+        let interval: [String: Any] = [
+            "Day": 15, "Weekday": 3, "Hour": 9, "Minute": 0,
+        ]
+        let native = TriggerCompiler.parseNative(from: [
+            "StartCalendarInterval": interval,
+        ])
+        let rules = TriggerCompiler.project(native)
+        guard case .customCalendar(_, let malformed) = rules[0].kind else {
+            return XCTFail("Day+Weekday must project as custom")
+        }
+        XCTAssertFalse(malformed)
+
+        let presets: [TriggerRuleKind] = [
+            .daily(hour: 9, minute: 0),
+            .weekly(weekdays: [1, 3, 5], hour: 9, minute: 0),
+            .monthly(day: 15, hour: 9, minute: 0, months: nil),
+            .monthly(day: 15, hour: 9, minute: 0, months: Set([1, 6])),
+            .yearly(month: 3, day: 15, hour: 9, minute: 0),
+        ]
+        for kind in presets {
+            for dict in TriggerCompiler.compileCalendarDicts(kind: kind) {
+                let hasDay = dict["Day"] != nil
+                let hasWeekday = dict["Weekday"] != nil
+                XCTAssertFalse(
+                    hasDay && hasWeekday,
+                    "preset \(kind) must not emit Day+Weekday: \(dict)"
+                )
+            }
+        }
+    }
 }

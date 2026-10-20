@@ -1,5 +1,7 @@
 # Design: 多触发器支持（解析、表单、列表）
 
+> **Note:** Schedule/form UX for triggers superseded by [`2026-10-20-trigger-rule-model-design.md`](./2026-10-20-trigger-rule-model-design.md); multi-trigger coexistence still in force.
+
 **日期:** 2026-10-16  
 **状态:** 已批准  
 **范围:** v1 — 多类型触发并存 + 多条日历间隔 + 表单多选 + 列表多行展示

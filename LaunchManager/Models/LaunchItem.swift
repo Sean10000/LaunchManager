@@ -179,18 +179,11 @@ struct LaunchItem: Identifiable, Hashable {
         case .watchPath(let path):
             return String(localized: "监视路径：\(path)")
         case .customCalendar(let summary, let isMalformed):
+            // Compose from short catalog keys so EN/zh lookups stay consistent.
             if isMalformed {
-                return String(
-                    format: String(localized: "配置异常：%@"),
-                    locale: .current,
-                    summary
-                )
+                return "\(String(localized: "配置异常"))：\(summary)"
             }
-            return String(
-                format: String(localized: "自定义日历：%@"),
-                locale: .current,
-                summary
-            )
+            return "\(String(localized: "自定义日历"))：\(summary)"
         }
     }
 

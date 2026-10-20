@@ -677,6 +677,41 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertTrue(lines[0].contains("2"))
         XCTAssertTrue(lines[0].contains("其它启动条件"))
     }
+
+    /// Parse → project → applyTriggers (unmodified) → saveRoot should be a no-op on disk.
+    func test_roundTrip_unmodifiedTriggers_saveRootNoOp() throws {
+        let url = tmpDir.appendingPathComponent("com.test.roundtrip-triggers.plist")
+        let root: [String: Any] = [
+            "Label": "com.test.roundtrip-triggers",
+            "Program": "/bin/echo",
+            "StartCalendarInterval": [
+                ["Hour": 8] as [String: Any],
+                ["Day": 31, "Hour": 11, "Minute": 0] as [String: Any],
+                ["Month": 2, "Day": 29, "Hour": 10, "Minute": 0] as [String: Any],
+            ],
+            "WatchPaths": ["/tmp/a", "/tmp/b"],
+            "QueueDirectories": ["/tmp/q"],
+        ]
+        try svc.saveRoot(root, to: url, scope: .userAgent, privilege: PrivilegeService(), openedRoot: nil)
+
+        var session = try TriggerDocumentSession(url: url)
+        XCTAssertFalse(session.triggersDirty)
+        session.applyTriggerRulesToRoot()
+        XCTAssertFalse(session.rootLogicallyChanged)
+        XCTAssertEqual(session.root["QueueDirectories"] as? [String], ["/tmp/q"])
+
+        let attrsBefore = try FileManager.default.attributesOfItem(atPath: url.path)
+        let mtimeBefore = attrsBefore[.modificationDate] as? Date
+        try svc.saveRoot(
+            session.root,
+            to: url,
+            scope: .userAgent,
+            privilege: PrivilegeService(),
+            openedRoot: session.openedRoot
+        )
+        let attrsAfter = try FileManager.default.attributesOfItem(atPath: url.path)
+        XCTAssertEqual(attrsAfter[.modificationDate] as? Date, mtimeBefore)
+    }
 }
 
 // MARK: - AgentStore Pending Tests
