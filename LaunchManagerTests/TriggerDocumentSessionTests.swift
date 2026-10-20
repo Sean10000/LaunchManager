@@ -132,4 +132,36 @@ final class TriggerDocumentSessionTests: XCTestCase {
         ))
         XCTAssertTrue(session.triggersDirty)
     }
+
+    func test_replacingRootPreservingDiskBaseline_keepsFileChangedOnDiskFalse() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("lm-session-\(UUID().uuidString).plist")
+        let root: [String: Any] = [
+            "Label": "a.b",
+            "Program": "/bin/echo",
+            "StartCalendarInterval": ["Hour": 9, "Minute": 0],
+        ]
+        try PropertyListSerialization.data(fromPropertyList: root, format: .xml, options: 0)
+            .write(to: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        var session = try TriggerDocumentSession(url: url)
+        XCTAssertFalse(try session.fileChangedOnDisk())
+        XCTAssertFalse(session.rootLogicallyChanged)
+
+        var modified = root
+        modified["RunAtLoad"] = true
+        modified["StartCalendarInterval"] = ["Hour": 10, "Minute": 30]
+        try session.replacingRootPreservingDiskBaseline(modified)
+
+        // Disk bytes unchanged → external-change check must stay false.
+        XCTAssertFalse(try session.fileChangedOnDisk())
+        // Working root differs from original disk snapshot.
+        XCTAssertTrue(session.rootLogicallyChanged)
+        XCTAssertEqual(session.root["RunAtLoad"] as? Bool, true)
+        let interval = session.root["StartCalendarInterval"] as? [String: Any]
+        XCTAssertEqual(interval?["Hour"] as? Int, 10)
+        // openedRoot baseline unchanged (still original disk content).
+        XCTAssertNil(session.openedRoot["RunAtLoad"])
+    }
 }

@@ -411,6 +411,11 @@ struct EditAgentSheet: View {
                 Text("请使用 XML 模式编辑此规则。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Button("在 XML 中编辑") {
+                    loadXmlFromCurrentState()
+                    editorMode = .xml
+                }
+                .buttonStyle(.link)
             }
         }
         .padding(.vertical, 4)
@@ -770,22 +775,57 @@ struct EditAgentSheet: View {
     }
 
     private func adoptRules(from dict: [String: Any]) {
-        let url = existingItem?.plistURL
-        if let adopted = try? TriggerDocumentSession(root: dict, url: url) {
+        // Existing edit session: never re-init from in-memory bytes (would corrupt disk hash).
+        if var existing = session {
+            do {
+                try existing.replacingRootPreservingDiskBaseline(dict)
+                session = existing
+                rules = existing.rules
+                pathIdsInOrder = existing.pathIdsInOrder
+            } catch {
+                applyProjectedRulesOnly(from: dict)
+            }
+            return
+        }
+
+        // Existing item without session: open from disk first to capture hash, then adopt.
+        if let item = existingItem {
+            if var opened = try? TriggerDocumentSession(url: item.plistURL) {
+                do {
+                    try opened.replacingRootPreservingDiskBaseline(dict)
+                    session = opened
+                    rules = opened.rules
+                    pathIdsInOrder = opened.pathIdsInOrder
+                } catch {
+                    session = opened
+                    applyProjectedRulesOnly(from: dict)
+                }
+                return
+            }
+            applyProjectedRulesOnly(from: dict)
+            return
+        }
+
+        // New agent only — no on-disk baseline.
+        if let adopted = try? TriggerDocumentSession(root: dict, url: nil) {
             session = adopted
             rules = adopted.rules
             pathIdsInOrder = adopted.pathIdsInOrder
         } else {
-            let native = TriggerCompiler.parseNative(from: dict)
-            let projected = TriggerCompiler.project(native)
-            rules = projected
-            pathIdsInOrder = projected.flatMap { rule in
-                rule.sourceRefs.compactMap { ref -> UUID? in
-                    if case .watchPath(let id) = ref { return id }
-                    return nil
-                }
-            }
+            applyProjectedRulesOnly(from: dict)
             session = nil
+        }
+    }
+
+    private func applyProjectedRulesOnly(from dict: [String: Any]) {
+        let native = TriggerCompiler.parseNative(from: dict)
+        let projected = TriggerCompiler.project(native)
+        rules = projected
+        pathIdsInOrder = projected.flatMap { rule in
+            rule.sourceRefs.compactMap { ref -> UUID? in
+                if case .watchPath(let id) = ref { return id }
+                return nil
+            }
         }
     }
 
@@ -945,7 +985,15 @@ struct EditAgentSheet: View {
         }
 
         do {
-            if var working = session {
+            if let existing = existingItem {
+                // Existing agents always target the original plist URL — never a rebuilt path.
+                var working: TriggerDocumentSession
+                if let s = session {
+                    working = s
+                } else {
+                    working = try TriggerDocumentSession(url: existing.plistURL)
+                    session = working
+                }
                 if try working.fileChangedOnDisk() {
                     showDiskChangedAlert = true
                     return
@@ -954,16 +1002,27 @@ struct EditAgentSheet: View {
                 working.rules = rules
                 working.pathIdsInOrder = pathIdsInOrder
                 working.applyTriggerRulesToRoot()
-                let url = existingItem?.plistURL
-                    ?? scope.directoryURL.appendingPathComponent("\(label).plist")
+                try store.saveRoot(
+                    working.root,
+                    to: existing.plistURL,
+                    scope: existing.scope,
+                    openedRoot: working.openedRoot
+                )
+            } else if var working = session {
+                // New agent that already has an in-memory session (e.g. after XML sync).
+                applyManagedFields(to: &working.root)
+                working.rules = rules
+                working.pathIdsInOrder = pathIdsInOrder
+                working.applyTriggerRulesToRoot()
+                let url = scope.directoryURL.appendingPathComponent("\(label).plist")
                 try store.saveRoot(
                     working.root,
                     to: url,
                     scope: scope,
-                    openedRoot: working.openedRoot
+                    openedRoot: nil
                 )
             } else {
-                // New agent: build root + apply triggers from empty native.
+                // Brand-new agent: build root + apply triggers from empty native.
                 var root = buildRootFromFormFields()
                 let emptyNative = TriggerCompiler.parseNative(from: [:])
                 root = TriggerCompiler.applyTriggers(

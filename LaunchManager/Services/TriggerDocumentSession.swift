@@ -4,10 +4,12 @@ import Foundation
 struct TriggerDocumentSession {
     let url: URL?
     var root: [String: Any]
-    /// Snapshot of root at open / sync time; used by `saveRoot` no-op detection.
+    /// Snapshot of root at original disk open (or in-memory init). Used by `saveRoot` no-op detection.
+    /// Not updated by XML→form sync — that preserves the disk baseline.
     let openedRoot: [String: Any]
+    /// Hash of on-disk bytes at first open. Never recomputed from in-memory plist.
     private let openedContentHash: Data
-    private let openedStableKeys: [RuleStableKey]
+    private var openedStableKeys: [RuleStableKey]
 
     var native: NativeTriggers
     var rules: [TriggerRule]
@@ -23,7 +25,8 @@ struct TriggerDocumentSession {
         try self.init(root: parsed, url: url, contentHash: Self.hash(data))
     }
 
-    /// In-memory session from a root dictionary (new agents after first build, or XML→form sync).
+    /// In-memory session from a root dictionary (new agents). Do not use for existing files
+    /// after XML sync — use `replacingRootPreservingDiskBaseline` instead.
     init(root: [String: Any], url: URL?) throws {
         let data = try PropertyListSerialization.data(
             fromPropertyList: root, format: .binary, options: 0
@@ -41,23 +44,32 @@ struct TriggerDocumentSession {
         let projected = TriggerCompiler.project(parsedNative)
         self.rules = projected
         self.openedStableKeys = projected.map(Self.stableKey)
-        self.pathIdsInOrder = projected.flatMap { rule in
-            rule.sourceRefs.compactMap { ref -> UUID? in
-                if case .watchPath(let id) = ref { return id }
-                return nil
-            }
-        }
+        self.pathIdsInOrder = Self.pathIds(from: projected)
+    }
+
+    /// Replace working root and re-project rules after XML→form sync.
+    /// Preserves `openedContentHash` and `openedRoot` from the original disk open so
+    /// `fileChangedOnDisk()` and `saveRoot` baselines stay correct.
+    mutating func replacingRootPreservingDiskBaseline(_ newRoot: [String: Any]) throws {
+        let copy = try Self.deepCopy(newRoot)
+        self.root = copy
+        let parsedNative = TriggerCompiler.parseNative(from: copy)
+        self.native = parsedNative
+        let projected = TriggerCompiler.project(parsedNative)
+        self.rules = projected
+        self.openedStableKeys = projected.map(Self.stableKey)
+        self.pathIdsInOrder = Self.pathIds(from: projected)
     }
 
     /// True when any rule is marked modified, or the structural rule set
-    /// (kind + sourceRefs) differs from the open-time projection (add/delete/reorder).
+    /// (kind + sourceRefs) differs from the open-time / last-sync projection.
     var triggersDirty: Bool {
         rules.contains(where: \.isModified)
             || rules.map(Self.stableKey) != openedStableKeys
     }
 
-    /// True when `root` differs logically from the snapshot taken at open
-    /// (in-place form edits or applied trigger writes).
+    /// True when `root` differs logically from the original open baseline
+    /// (`openedRoot` — disk open or in-memory init, not refreshed on XML sync).
     var rootLogicallyChanged: Bool {
         !NSDictionary(dictionary: root).isEqual(to: openedRoot)
     }
@@ -91,6 +103,15 @@ struct TriggerDocumentSession {
 
     private static func stableKey(_ rule: TriggerRule) -> RuleStableKey {
         RuleStableKey(kind: rule.kind, sourceRefs: rule.sourceRefs)
+    }
+
+    private static func pathIds(from rules: [TriggerRule]) -> [UUID] {
+        rules.flatMap { rule in
+            rule.sourceRefs.compactMap { ref -> UUID? in
+                if case .watchPath(let id) = ref { return id }
+                return nil
+            }
+        }
     }
 
     private static func deepCopy(_ dict: [String: Any]) throws -> [String: Any] {

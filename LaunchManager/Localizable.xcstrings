@@ -3803,6 +3803,16 @@
           }
         }
       }
+    },
+    "在 XML 中编辑": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit in XML"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
