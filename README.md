@@ -1,49 +1,44 @@
 # LaunchManager
 
-A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create, edit, and control your system's scheduled tasks from a clean native UI.
+**AI creates the jobs. You stay in control.**
+
+A native macOS app for visually managing launchd tasks, background services, and the automation you build with AI.
+
+AI assistants can write scripts, generate launchd `.plist` files, and help set up scheduled tasks in minutes. As those automations accumulate, you need a clear view of what they run, when they run, and how to manage them.
+
+LaunchManager brings your LaunchAgents and LaunchDaemons into one native interface—so you can inspect what AI created, adjust its configuration, check logs, and decide what stays active.
+
+- **Bring AI-generated jobs into view.** Import a `.plist` file or paste XML from your AI assistant.
+- **Understand and edit your automation.** Browse jobs in one place and edit them with a form or XML editor.
+- **Control what runs.** Load, unload, start, and stop jobs, with logs available when something goes wrong.
+- **Keep automation running independently.** Tasks run through macOS launchd, even after you close LaunchManager.
+
+Free and open source. Built with Swift and SwiftUI.
 
 **Website:** [launchmanager.dev](https://www.launchmanager.dev) · **Docs:** [Help](https://www.launchmanager.dev/help) · **Templates:** [launchmanager.dev/templates](https://www.launchmanager.dev/templates)
 
 ![Version](https://img.shields.io/badge/version-1.6.4-blue) ![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green)
 
-## Star History
-
-<a href="https://www.star-history.com/?repos=Sean10000%2FLaunchManager&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&legend=top-left" />
- </picture>
-</a>
+![LaunchManager main window](assets/home-en.png)
 
 ## Features
 
-### Launch Agents
+### Core workflow
 
-- **Browse** all LaunchAgents and LaunchDaemons across User, System Agent, and System Daemon scopes in one unified list with collapsible scope groups
-- **Search** across all scopes from a single search field
-- **Create & edit** plist jobs with a **Form** or **XML** editor — combine calendar, interval, and WatchPaths triggers; extra plist keys are preserved
-- **Import plist** — bring external `.plist` files into user/global Agent or LaunchDaemon directories
-- **Clone job** — duplicate an existing agent with a new Label
-- **Paste XML** — create a new job from clipboard XML
-- **Control** jobs: load, unload, start, stop
-- **View logs** — both file-based stdout/stderr logs and system log (via `log show`)
-- **Handle invalid plists** — empty or malformed plist files are shown inline with an option to delete them
-- **Privilege escalation** for system-level operations (prompts for admin password when needed)
-- **Agent templates** — quick link to curated examples on [launchmanager.dev/templates](https://www.launchmanager.dev/templates)
+- **Import / Paste** — bring in a `.plist` or paste XML (including output from an AI assistant)
+- **Browse & edit** — one list for User Agents, System Agents, and LaunchDaemons; edit with **Form** or **XML** (extra keys preserved)
+- **Run control** — load, unload, start, and stop jobs; privilege escalation when system scope needs it
+- **Logs** — file-based stdout/stderr and system log (`log show`) when something fails
 
-### Services
+### Also included
 
-- Discover **host TCP listeners only** (Next.js, Redis, Docker containers published on Mac, etc.)
-- Group by Docker vs local instance; collapse/expand sections when many services are listed
-- Stop processes or containers safely; rename entries and open URLs
-- **Create Launch Agent** from a running local service (prefills command and working directory)
-
-### Other
-
-- **Login Items guide** — explains the difference between launchd and macOS Login Items, with a shortcut to System Settings
-- **Auto-update check** — once per day, compares to GitHub Releases; manual **Check for Updates** in About
-- **Bilingual UI** — English and Chinese (follows system language)
+- Search across all scopes; clone a job with a new Label
+- Multi-trigger editing: calendar, interval, and WatchPaths in one job
+- Invalid plists shown inline with an option to delete
+- **Services** — host TCP listeners and Docker ports published on your Mac; create a Launch Agent from a running service
+- **Login Items guide** — how launchd differs from macOS Login Items
+- Bilingual UI (English / Chinese); auto-update check via GitHub Releases
+- Templates: [launchmanager.dev/templates](https://www.launchmanager.dev/templates)
 
 ## Requirements
 
@@ -75,57 +70,38 @@ open LaunchManager.xcodeproj
 
 Build and run with Xcode (`⌘R`).
 
-## Releasing
-
-1. Add bullets under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) as you develop.
-2. Run `./scripts/release.sh patch` (or `minor`, `major`, or an explicit `X.Y.Z`).
-3. GitHub Actions builds the universal DMG, creates the GitHub Release, and updates the Homebrew tap.
-
-Local test build only (no publish):
-
-```bash
-./scripts/build-dmg.sh   # → build/LaunchManager.dmg
-```
-
-Version numbers live in [Version.xcconfig](Version.xcconfig) only — do not edit `project.pbxproj` by hand.
-
-**CI secret:** set `HOMEBREW_TAP_TOKEN` in repo Settings → Secrets (PAT with push access to `Sean10000/homebrew-tap`).
-
 ## Usage
 
-1. Select a section from the sidebar: **Launch Agents**, **Login Items**, or **Services**
-2. On **Launch Agents**, use the **New** menu to pick scope (user / global Agent or LaunchDaemon), or **Import** / **Paste XML** from the toolbar
-3. Click **+** or edit an existing job; switch between **Form** and **XML** tabs in the editor
-4. Use row actions to **load / start / stop**; expand a row (chevron) for details and logs
-5. Right-click or use the row menu to **clone** an agent
-6. On **Services**, refresh the list, rename entries, open URLs, stop processes/containers, or **create a Launch Agent** from a running service
+1. Select **Launch Agents**, **Login Items**, or **Services** in the sidebar
+2. **Import** a `.plist` or **Paste XML** (or create a new job from the **New** menu)
+3. Edit with **Form** or **XML**; save and use row actions to **load / start / stop**
+4. Expand a row for details and logs; clone from the row menu when needed
+5. On **Services**, manage local listeners or create a Launch Agent from a running process
 
 ## Services
 
-The **Services** sidebar scans **TCP ports listening on your Mac** (`lsof -iTCP -sTCP:LISTEN`). It is a local dev-environment view, not a network-wide service discovery tool.
+The **Services** sidebar scans **TCP ports listening on your Mac** (`lsof -iTCP -sTCP:LISTEN`). It is a local dev-environment view, not network-wide discovery.
 
 ### What it shows
 
 - TCP services **listening on the host** (Next.js, Redis, PostgreSQL, etc.)
-- **Docker / Colima** containers whose ports are **published on the Mac** (resolved via `docker ps`)
+- **Docker / Colima** containers whose ports are **published on the Mac**
 
 ### What it does not show
 
-- **Outbound connections only** (`ESTABLISHED` where your Mac is the client)
-- Services running **inside a VM, NAS, or another machine** on the LAN (unless their port is forwarded so the Mac is listening locally)
-- **UDP** listeners (TCP only in current release)
+- Outbound-only connections (`ESTABLISHED` where your Mac is the client)
+- Services only listening inside a VM/NAS/other machine (unless forwarded to the Mac)
+- UDP listeners
 
 ### Quick check
 
 ```bash
-# Will appear in Services only if the Mac is LISTENing on this port
+# Appears in Services only if the Mac is LISTENing on this port
 lsof -iTCP:5666 -sTCP:LISTEN -nP
 
-# Matches any socket involving port 5666 (including remote VM / outbound client)
+# Any socket involving port 5666 (including remote / outbound)
 lsof -i :5666
 ```
-
-**Example:** A NAS on a VMware VM at `192.168.95.x:5666` — your Mac may only have an outbound `ESTABLISHED` connection to that address. The NAS is not listening on the Mac, so it is **excluded by design**.
 
 ## Comparison with Paid Alternatives
 
@@ -148,7 +124,23 @@ lsof -i :5666
 | **macOS requirement** | 14 Sonoma+ | 11 Big Sur+ | 14 Sonoma+ | — |
 
 > LaunchManager is ideal if you want a **free, native, open-source** tool for everyday launchd management and local dev service discovery.
-> For power users needing an AI assistant or advanced XML tooling (syntax highlighting, diff), [LaunchControl](https://www.soma-zone.com/LaunchControl/) remains the most feature-complete paid option.
+> For power users needing an in-app AI assistant or advanced XML tooling (syntax highlighting, diff), [LaunchControl](https://www.soma-zone.com/LaunchControl/) remains the most feature-complete paid option.
+
+## Releasing
+
+1. Add bullets under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) as you develop.
+2. Run `./scripts/release.sh patch` (or `minor`, `major`, or an explicit `X.Y.Z`).
+3. GitHub Actions builds the universal DMG, creates the GitHub Release, and updates the Homebrew tap.
+
+Local test build only (no publish):
+
+```bash
+./scripts/build-dmg.sh   # → build/LaunchManager.dmg
+```
+
+Version numbers live in [Version.xcconfig](Version.xcconfig) only — do not edit `project.pbxproj` by hand.
+
+**CI secret:** set `HOMEBREW_TAP_TOKEN` in repo Settings → Secrets (PAT with push access to `Sean10000/homebrew-tap`).
 
 ## Project Structure
 
@@ -159,6 +151,16 @@ LaunchManager/
 ├── Store/           # AgentStore, ServiceStore, …
 └── Views/           # SwiftUI (AgentList, ServicesList, EditAgentSheet, …)
 ```
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=Sean10000%2FLaunchManager&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sean10000/LaunchManager&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ## License
 
