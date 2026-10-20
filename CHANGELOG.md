@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
+## [1.8.0] - 2026-10-20
+
+
 ### Added
 - **Trigger rule editor** — add daily, weekly, monthly, yearly, interval, and WatchPaths rules in one list; multiple rules can apply independently.
 - **Native-preserving save** — form edits apply as a change set on the existing plist so unknown keys and custom calendar entries are kept when possible.
