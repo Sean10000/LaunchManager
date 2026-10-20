@@ -612,30 +612,70 @@ final class PlistServiceTests: XCTestCase {
     }
 
     func test_triggerSummaryLines_order() {
-        let item = LaunchItem(
-            label: "com.test.summary",
-            plistURL: URL(fileURLWithPath: "/tmp/x.plist"),
-            scope: .userAgent,
-            program: "/bin/echo",
-            programArguments: [],
-            calendarIntervals: [.init(weekday: nil, hour: 8, minute: 0)],
-            startInterval: 300,
-            watchPaths: ["/tmp/w"],
-            runAtLoad: true,
-            keepAlive: false,
-            standardOutPath: nil,
-            standardErrorPath: nil,
-            workingDirectory: nil,
-            isLoaded: false,
-            pid: nil,
-            lastExitCode: nil
-        )
-        let lines = item.triggerSummaryLines
+        let dict: [String: Any] = [
+            "StartCalendarInterval": ["Hour": 8, "Minute": 0] as [String: Any],
+            "StartInterval": 300,
+            "WatchPaths": ["/tmp/w"],
+            "RunAtLoad": true,
+        ]
+        let lines = LaunchItem.summaryLines(from: dict, runAtLoad: true)
         XCTAssertEqual(lines.count, 4)
         XCTAssertTrue(lines[0].contains("08:00"))
+        XCTAssertTrue(lines[0].hasPrefix(String(localized: "每天")))
         XCTAssertTrue(lines[1].contains("300"))
         XCTAssertTrue(lines[2].contains("/tmp/w"))
         XCTAssertEqual(lines[3], String(localized: "加载时运行"))
+    }
+
+    func test_parsePlist_hourOnly_minuteNil_summaryCustom() throws {
+        let plist = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0"><dict>
+            <key>Label</key><string>com.test.houronly</string>
+            <key>Program</key><string>/bin/echo</string>
+            <key>StartCalendarInterval</key>
+            <dict><key>Hour</key><integer>9</integer></dict>
+        </dict></plist>
+        """
+        let url = tmpDir.appendingPathComponent("com.test.houronly.plist")
+        try plist.write(to: url, atomically: true, encoding: .utf8)
+        let item = svc.parsePlist(at: url, scope: .userAgent)
+        XCTAssertEqual(item?.calendarIntervals.first?.hour, 9)
+        XCTAssertNil(item?.calendarIntervals.first?.minute)
+        let lines = item?.triggerSummaryLines ?? []
+        XCTAssertEqual(lines.count, 1)
+        XCTAssertTrue(lines[0].contains(String(localized: "自定义日历")))
+        XCTAssertTrue(lines[0].contains("Hour=9"))
+        XCTAssertFalse(lines[0].contains("Minute"))
+    }
+
+    func test_triggerSummaryLines_weeklyMerged_neverWorkday() {
+        let dict: [String: Any] = [
+            "StartCalendarInterval": [
+                ["Weekday": 1, "Hour": 9, "Minute": 0],
+                ["Weekday": 2, "Hour": 9, "Minute": 0],
+                ["Weekday": 3, "Hour": 9, "Minute": 0],
+                ["Weekday": 4, "Hour": 9, "Minute": 0],
+                ["Weekday": 5, "Hour": 9, "Minute": 0],
+            ],
+        ]
+        let lines = LaunchItem.summaryLines(from: dict, runAtLoad: false)
+        XCTAssertEqual(lines.count, 1)
+        XCTAssertTrue(lines[0].contains("09:00"))
+        XCTAssertTrue(lines[0].contains("至"))
+        XCTAssertFalse(lines[0].contains("工作日"))
+    }
+
+    func test_triggerSummaryLines_passthroughHint() {
+        let dict: [String: Any] = [
+            "QueueDirectories": ["/tmp/q"],
+            "StartOnMount": true,
+        ]
+        let lines = LaunchItem.summaryLines(from: dict, runAtLoad: false)
+        XCTAssertEqual(lines.count, 1)
+        XCTAssertTrue(lines[0].contains("2"))
+        XCTAssertTrue(lines[0].contains("其它启动条件"))
     }
 }
 

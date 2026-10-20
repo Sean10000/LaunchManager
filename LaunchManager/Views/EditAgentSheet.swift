@@ -487,11 +487,12 @@ struct EditAgentSheet: View {
         let startInterval = dict["StartInterval"] as? Int
             ?? (dict["StartInterval"] as? NSNumber)?.intValue
         let watchPaths = dict["WatchPaths"] as? [String] ?? []
+        let runAtLoad = dict["RunAtLoad"] as? Bool ?? false
 
         let scope = existingItem?.scope ?? defaultScope
         let plistURL = existingItem?.plistURL ?? scope.directoryURL.appendingPathComponent("\(label).plist")
 
-        return LaunchItem(
+        var item = LaunchItem(
             label: label,
             plistURL: plistURL,
             scope: scope,
@@ -500,7 +501,7 @@ struct EditAgentSheet: View {
             calendarIntervals: calendarIntervals,
             startInterval: startInterval,
             watchPaths: watchPaths,
-            runAtLoad: dict["RunAtLoad"] as? Bool ?? false,
+            runAtLoad: runAtLoad,
             keepAlive: dict["KeepAlive"] as? Bool ?? false,
             standardOutPath: dict["StandardOutPath"] as? String,
             standardErrorPath: dict["StandardErrorPath"] as? String,
@@ -511,6 +512,8 @@ struct EditAgentSheet: View {
             pid: existingItem?.pid,
             lastExitCode: existingItem?.lastExitCode
         )
+        item.triggerSummaryLines = LaunchItem.summaryLines(from: dict, runAtLoad: runAtLoad)
+        return item
     }
 
     private func applyFormFields(from item: LaunchItem) {
@@ -689,25 +692,27 @@ private struct CalendarFormRow: Identifiable, Equatable {
     }
 
     init(from interval: LaunchItem.CalendarInterval) {
+        // UI default 0 when Minute absent; do not invent Minute on disk via parse path.
+        let minute = interval.minute ?? 0
         if let day = interval.day, interval.weekday == nil {
             self.init(
                 frequency: .monthly,
                 monthDay: day,
                 monthStep: 1,
                 hour: interval.hour ?? 8,
-                minute: interval.minute
+                minute: minute
             )
         } else if let weekday = interval.weekday {
             self.init(
                 frequency: .weekday(weekday),
                 hour: interval.hour ?? 8,
-                minute: interval.minute
+                minute: minute
             )
         } else {
             self.init(
                 frequency: .daily,
                 hour: interval.hour ?? 8,
-                minute: interval.minute
+                minute: minute
             )
         }
     }
@@ -780,9 +785,9 @@ private struct CalendarFormRow: Identifiable, Equatable {
 
         let day = monthly[0].day!
         let hour = monthly[0].hour ?? 0
-        let minute = monthly[0].minute
+        let minute = monthly[0].minute ?? 0
         guard monthly.allSatisfy({
-            $0.day == day && ($0.hour ?? 0) == hour && $0.minute == minute
+            $0.day == day && ($0.hour ?? 0) == hour && ($0.minute ?? 0) == minute
         }) else { return nil }
 
         if monthly.count == 1, monthly[0].month == nil {

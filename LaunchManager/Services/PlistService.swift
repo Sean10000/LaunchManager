@@ -100,13 +100,14 @@ struct PlistService {
         let startInterval = dict["StartInterval"] as? Int
             ?? (dict["StartInterval"] as? NSNumber)?.intValue
         let watchPaths = dict["WatchPaths"] as? [String] ?? []
+        let runAtLoad = dict["RunAtLoad"] as? Bool ?? false
 
-        return LaunchItem(
+        var item = LaunchItem(
             label: label, plistURL: url, scope: scope,
             program: program, programArguments: programArguments,
             calendarIntervals: calendarIntervals,
             startInterval: startInterval, watchPaths: watchPaths,
-            runAtLoad: dict["RunAtLoad"] as? Bool ?? false,
+            runAtLoad: runAtLoad,
             keepAlive: dict["KeepAlive"] as? Bool ?? false,
             standardOutPath: dict["StandardOutPath"] as? String,
             standardErrorPath: dict["StandardErrorPath"] as? String,
@@ -114,6 +115,8 @@ struct PlistService {
             environmentVariables: parseEnvironmentVariables(dict["EnvironmentVariables"]),
             isLoaded: false, isDisabledByOverride: false, pid: nil, lastExitCode: nil
         )
+        item.triggerSummaryLines = LaunchItem.summaryLines(from: dict, runAtLoad: runAtLoad)
+        return item
     }
 
     func parseEnvironmentVariables(_ value: Any?) -> [String: String] {
@@ -136,7 +139,7 @@ struct PlistService {
                 LaunchItem.CalendarInterval(
                     weekday: dict["Weekday"],
                     hour: dict["Hour"],
-                    minute: dict["Minute"] ?? 0,
+                    minute: dict["Minute"],
                     day: dict["Day"],
                     month: dict["Month"]
                 )
@@ -149,7 +152,7 @@ struct PlistService {
                     return LaunchItem.CalendarInterval(
                         weekday: d["Weekday"],
                         hour: d["Hour"],
-                        minute: d["Minute"] ?? 0,
+                        minute: d["Minute"],
                         day: d["Day"],
                         month: d["Month"]
                     )
@@ -169,14 +172,15 @@ struct PlistService {
         return LaunchItem.CalendarInterval(
             weekday: intVal(dict["Weekday"]),
             hour: intVal(dict["Hour"]),
-            minute: intVal(dict["Minute"]) ?? 0,
+            minute: intVal(dict["Minute"]),
             day: intVal(dict["Day"]),
             month: intVal(dict["Month"])
         )
     }
 
     private func calendarDictionary(from ci: LaunchItem.CalendarInterval) -> [String: Int] {
-        var d: [String: Int] = ["Minute": ci.minute]
+        var d: [String: Int] = [:]
+        if let m = ci.minute { d["Minute"] = m }
         if let w = ci.weekday { d["Weekday"] = w }
         if let h = ci.hour { d["Hour"] = h }
         if let day = ci.day { d["Day"] = day }
