@@ -2,9 +2,10 @@ import CryptoKit
 import Foundation
 
 struct TriggerDocumentSession {
-    let url: URL
-    private(set) var root: [String: Any]
-    private let openedRoot: [String: Any]
+    let url: URL?
+    var root: [String: Any]
+    /// Snapshot of root at open / sync time; used by `saveRoot` no-op detection.
+    let openedRoot: [String: Any]
     private let openedContentHash: Data
     private let openedStableKeys: [RuleStableKey]
 
@@ -14,17 +15,30 @@ struct TriggerDocumentSession {
 
     init(url: URL) throws {
         let data = try Data(contentsOf: url)
-        self.openedContentHash = Self.hash(data)
         guard let parsed = try PropertyListSerialization.propertyList(
             from: data, options: [], format: nil
         ) as? [String: Any] else {
             throw CocoaError(.fileReadCorruptFile)
         }
+        try self.init(root: parsed, url: url, contentHash: Self.hash(data))
+    }
+
+    /// In-memory session from a root dictionary (new agents after first build, or XML→form sync).
+    init(root: [String: Any], url: URL?) throws {
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: root, format: .binary, options: 0
+        )
+        try self.init(root: root, url: url, contentHash: Self.hash(data))
+    }
+
+    private init(root: [String: Any], url: URL?, contentHash: Data) throws {
         self.url = url
-        self.root = parsed
-        self.openedRoot = try Self.deepCopy(parsed)
-        self.native = TriggerCompiler.parseNative(from: parsed)
-        let projected = TriggerCompiler.project(native)
+        self.root = root
+        self.openedRoot = try Self.deepCopy(root)
+        self.openedContentHash = contentHash
+        let parsedNative = TriggerCompiler.parseNative(from: root)
+        self.native = parsedNative
+        let projected = TriggerCompiler.project(parsedNative)
         self.rules = projected
         self.openedStableKeys = projected.map(Self.stableKey)
         self.pathIdsInOrder = projected.flatMap { rule in
@@ -48,7 +62,9 @@ struct TriggerDocumentSession {
         !NSDictionary(dictionary: root).isEqual(to: openedRoot)
     }
 
+    /// Always `false` when there is no on-disk URL (in-memory / new agent).
     func fileChangedOnDisk() throws -> Bool {
+        guard let url else { return false }
         let data = try Data(contentsOf: url)
         return Self.hash(data) != openedContentHash
     }

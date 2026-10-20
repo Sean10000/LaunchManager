@@ -3593,6 +3593,216 @@
           }
         }
       }
+    },
+    "以下触发规则独立生效，任一规则触发时均可启动任务。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each trigger rule applies independently; any matching rule can start the job."
+          }
+        }
+      }
+    },
+    "添加规则": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Rule"
+          }
+        }
+      }
+    },
+    "每日": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily"
+          }
+        }
+      }
+    },
+    "每年": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yearly"
+          }
+        }
+      }
+    },
+    "时间间隔": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Interval"
+          }
+        }
+      }
+    },
+    "全部月份": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All months"
+          }
+        }
+      }
+    },
+    "每季度": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quarterly"
+          }
+        }
+      }
+    },
+    "每半年": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every half year"
+          }
+        }
+      }
+    },
+    "指定月份": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected months"
+          }
+        }
+      }
+    },
+    "月份": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Month"
+          }
+        }
+      }
+    },
+    "月份：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Months: %@"
+          }
+        }
+      }
+    },
+    "配置异常": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid configuration"
+          }
+        }
+      }
+    },
+    "自定义日历": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom calendar"
+          }
+        }
+      }
+    },
+    "请使用 XML 模式编辑此规则。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit this rule in XML mode."
+          }
+        }
+      }
+    },
+    "其它启动条件": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other launch conditions"
+          }
+        }
+      }
+    },
+    "删除整组": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete group"
+          }
+        }
+      }
+    },
+    "此规则对应多条原生日历条目，删除将移除整组。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This rule maps to multiple native calendar entries; deleting removes the whole group."
+          }
+        }
+      }
+    },
+    "文件已更改": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File changed"
+          }
+        }
+      }
+    },
+    "磁盘上的文件已被外部修改。重新加载将丢弃当前未保存的更改。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The file on disk was modified externally. Reloading discards unsaved changes."
+          }
+        }
+      }
+    },
+    "重新加载": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload"
+          }
+        }
+      }
+    },
+    "每 24 小时（86400 秒）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every 24 hours (86400 seconds)"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

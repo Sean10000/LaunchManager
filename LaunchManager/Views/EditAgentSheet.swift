@@ -12,13 +12,9 @@ struct EditAgentSheet: View {
     @State private var program: String
     @State private var argumentsText: String
     @State private var workingDirectory: String
-    @State private var useCalendar: Bool
-    @State private var calendarRows: [CalendarFormRow]
-    @State private var useInterval: Bool
-    @State private var intervalAmount: Int
-    @State private var intervalUnit: IntervalUnit
-    @State private var useWatchPath: Bool
-    @State private var watchPath: String
+    @State private var session: TriggerDocumentSession?
+    @State private var rules: [TriggerRule]
+    @State private var pathIdsInOrder: [UUID]
     @State private var runAtLoad: Bool
     @State private var keepAlive: Bool
     @State private var stdoutPath: String
@@ -28,6 +24,9 @@ struct EditAgentSheet: View {
     @State private var xmlError: String?
     @State private var formDisabledReason: String?
     @State private var errorMessage: String?
+    @State private var showAddRule = false
+    @State private var pendingDeleteRuleID: UUID?
+    @State private var showDiskChangedAlert = false
 
     private let plistService = PlistService()
 
@@ -50,16 +49,17 @@ struct EditAgentSheet: View {
         _program = State(initialValue: d?.program ?? i?.program ?? "")
         _argumentsText = State(initialValue: d?.programArguments.joined(separator: "\n") ?? i?.programArguments.joined(separator: "\n") ?? "")
         _workingDirectory = State(initialValue: d?.workingDirectory ?? i?.workingDirectory ?? "")
-        let sourceIntervals = i?.calendarIntervals ?? []
-        let calendarFormRows = CalendarFormRow.rows(from: sourceIntervals)
-        let split = IntervalUnit.split(seconds: i?.startInterval ?? 60)
-        _useCalendar = State(initialValue: !calendarFormRows.isEmpty)
-        _calendarRows = State(initialValue: calendarFormRows)
-        _useInterval = State(initialValue: i?.startInterval != nil)
-        _intervalAmount = State(initialValue: split.amount)
-        _intervalUnit = State(initialValue: split.unit)
-        _useWatchPath = State(initialValue: !(i?.watchPaths.isEmpty ?? true))
-        _watchPath = State(initialValue: i?.watchPaths.first ?? "")
+
+        if let item = existingItem, let opened = try? TriggerDocumentSession(url: item.plistURL) {
+            _session = State(initialValue: opened)
+            _rules = State(initialValue: opened.rules)
+            _pathIdsInOrder = State(initialValue: opened.pathIdsInOrder)
+        } else {
+            _session = State(initialValue: nil)
+            _rules = State(initialValue: [])
+            _pathIdsInOrder = State(initialValue: [])
+        }
+
         _runAtLoad = State(initialValue: d?.runAtLoad ?? i?.runAtLoad ?? false)
         _keepAlive = State(initialValue: d?.keepAlive ?? i?.keepAlive ?? false)
         _stdoutPath = State(initialValue: i?.standardOutPath ?? "")
@@ -122,6 +122,42 @@ struct EditAgentSheet: View {
         } message: {
             Text(errorMessage ?? "")
         }
+        .alert("文件已更改", isPresented: $showDiskChangedAlert) {
+            Button("重新加载") { reloadSessionFromDisk() }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("磁盘上的文件已被外部修改。重新加载将丢弃当前未保存的更改。")
+        }
+        .confirmationDialog("添加规则", isPresented: $showAddRule, titleVisibility: .visible) {
+            Button("每日") { addRule(.daily(hour: 8, minute: 0)) }
+            Button("每周") { addRule(.weekly(weekdays: [1], hour: 8, minute: 0)) }
+            Button("每月") { addRule(.monthly(day: 1, hour: 8, minute: 0, months: nil)) }
+            Button("每年") { addRule(.yearly(month: 1, day: 1, hour: 8, minute: 0)) }
+            Button("时间间隔") { addRule(.interval(seconds: 60)) }
+                .disabled(hasIntervalRule)
+            Button("监视路径") { addWatchPathRule() }
+            Button("取消", role: .cancel) {}
+        }
+        .confirmationDialog(
+            "删除整组",
+            isPresented: Binding(
+                get: { pendingDeleteRuleID != nil },
+                set: { if !$0 { pendingDeleteRuleID = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("删除整组", role: .destructive) {
+                if let id = pendingDeleteRuleID {
+                    removeRule(id: id)
+                }
+                pendingDeleteRuleID = nil
+            }
+            Button("取消", role: .cancel) {
+                pendingDeleteRuleID = nil
+            }
+        } message: {
+            Text("此规则对应多条原生日历条目，删除将移除整组。")
+        }
         .onAppear {
             if editorMode == .xml && xmlText.isEmpty {
                 loadXmlFromCurrentState()
@@ -133,6 +169,8 @@ struct EditAgentSheet: View {
             validateXmlText()
         }
     }
+
+    // MARK: - Form
 
     private var formContent: some View {
         Form {
@@ -181,136 +219,33 @@ struct EditAgentSheet: View {
             }
 
             Section("触发方式") {
-                Toggle("定时", isOn: $useCalendar)
-                    .onChange(of: useCalendar) { _, on in
-                        if on, calendarRows.isEmpty {
-                            calendarRows = [CalendarFormRow()]
-                        }
-                        if !on { calendarRows = [] }
-                    }
-                if useCalendar {
-                    ForEach($calendarRows) { $row in
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(alignment: .center, spacing: 12) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("频率").font(.caption).foregroundStyle(.secondary)
-                                    Picker("", selection: $row.frequency) {
-                                        Text("每天").tag(CalendarFrequency.daily)
-                                        ForEach(1...7, id: \.self) { d in
-                                            Text(["", "周一", "周二", "周三", "周四", "周五", "周六", "周日"][d])
-                                                .tag(CalendarFrequency.weekday(d))
-                                        }
-                                        Text("每月").tag(CalendarFrequency.monthly)
-                                    }
-                                    .labelsHidden()
-                                    .pickerStyle(.menu)
-                                    .fixedSize(horizontal: true, vertical: false)
-                                }
-                                if row.frequency == .monthly {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("日").font(.caption).foregroundStyle(.secondary)
-                                        TextField("", value: $row.monthDay, format: .number)
-                                            .textFieldStyle(.roundedBorder)
-                                            .frame(width: 52)
-                                            .multilineTextAlignment(.center)
-                                            .lineLimit(1)
-                                    }
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("每隔月数").font(.caption).foregroundStyle(.secondary)
-                                        TextField("", value: $row.monthStep, format: .number)
-                                            .textFieldStyle(.roundedBorder)
-                                            .frame(width: 52)
-                                            .multilineTextAlignment(.center)
-                                            .lineLimit(1)
-                                    }
-                                }
-                                HStack(alignment: .bottom, spacing: 6) {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("时")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                            .fixedSize(horizontal: true, vertical: false)
-                                        TextField("", value: $row.hour, format: .number)
-                                            .textFieldStyle(.roundedBorder)
-                                            .frame(width: 52)
-                                            .multilineTextAlignment(.center)
-                                            .lineLimit(1)
-                                    }
-                                    Text(":")
-                                        .foregroundStyle(.secondary)
-                                        .padding(.bottom, 6)
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("分")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                            .fixedSize(horizontal: true, vertical: false)
-                                        TextField("", value: $row.minute, format: .number)
-                                            .textFieldStyle(.roundedBorder)
-                                            .frame(width: 52)
-                                            .multilineTextAlignment(.center)
-                                            .lineLimit(1)
-                                    }
-                                }
-                                Spacer(minLength: 0)
-                                if calendarRows.count > 1 {
-                                    Button {
-                                        calendarRows.removeAll { $0.id == row.id }
-                                    } label: {
-                                        Image(systemName: "minus.circle.fill")
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    .buttonStyle(.borderless)
-                                }
-                            }
-                            if row.frequency == .monthly {
-                                Text(row.monthStep <= 1
-                                    ? String(localized: "按自然月：每月这一天触发")
-                                    : String(
-                                        format: String(localized: "按自然月：每 %lld 个月的这一天触发"),
-                                        locale: .current,
-                                        Int64(max(row.monthStep, 1))
-                                    ))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                    Button {
-                        calendarRows.append(CalendarFormRow())
-                    } label: {
-                        Label("添加时段", systemImage: "plus")
-                    }
+                Text("以下触发规则独立生效，任一规则触发时均可启动任务。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                ForEach(rules) { rule in
+                    ruleEditor(for: rule)
                 }
 
-                Toggle("间隔", isOn: $useInterval)
-                if useInterval {
-                    HStack(spacing: 8) {
-                        Text("每隔")
-                            .fixedSize(horizontal: true, vertical: false)
-                        TextField("数量", value: $intervalAmount, format: .number)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 72)
-                            .multilineTextAlignment(.trailing)
-                            .lineLimit(1)
-                        Picker("", selection: $intervalUnit) {
-                            ForEach(IntervalUnit.allCases) { unit in
-                                Text(unit.localizedName).tag(unit)
-                            }
-                        }
-                        .labelsHidden()
-                        .pickerStyle(.menu)
-                        .fixedSize(horizontal: true, vertical: false)
-                    }
-                    Text("按固定时长重复，与自然月无关")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                Button {
+                    showAddRule = true
+                } label: {
+                    Label("添加规则", systemImage: "plus")
                 }
+            }
 
-                Toggle("监视路径", isOn: $useWatchPath)
-                if useWatchPath {
-                    TextField("监视路径", text: $watchPath)
+            if !passthroughLaunchEntries.isEmpty {
+                Section("其它启动条件") {
+                    ForEach(passthroughLaunchEntries, id: \.key) { entry in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(entry.key)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(entry.summary)
+                                .font(.body.monospaced())
+                                .textSelection(.enabled)
+                        }
+                    }
                 }
             }
 
@@ -354,6 +289,310 @@ struct EditAgentSheet: View {
         .disabled(formDisabledReason != nil)
     }
 
+    @ViewBuilder
+    private func ruleEditor(for rule: TriggerRule) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(ruleKindTitle(rule.kind))
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Button {
+                    requestDelete(rule)
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+            }
+
+            switch rule.kind {
+            case .daily(let hour, let minute):
+                timeFields(
+                    hour: hour,
+                    minute: minute,
+                    onHour: { newHour in
+                        updateKind(rule.id, .daily(hour: newHour, minute: minute))
+                    },
+                    onMinute: { newMinute in
+                        updateKind(rule.id, .daily(hour: hour, minute: newMinute))
+                    }
+                )
+
+            case .weekly(let weekdays, let hour, let minute):
+                weekdayToggles(selected: Set(weekdays.map { $0 == 0 ? 7 : $0 })) { newDays in
+                    updateKind(rule.id, .weekly(weekdays: newDays.sorted(), hour: hour, minute: minute))
+                }
+                timeFields(
+                    hour: hour,
+                    minute: minute,
+                    onHour: { newHour in
+                        updateKind(rule.id, .weekly(weekdays: weekdays, hour: newHour, minute: minute))
+                    },
+                    onMinute: { newMinute in
+                        updateKind(rule.id, .weekly(weekdays: weekdays, hour: hour, minute: newMinute))
+                    }
+                )
+
+            case .monthly(let day, let hour, let minute, let months):
+                HStack(spacing: 12) {
+                    labeledIntField("日", value: day, width: 52) { newDay in
+                        updateKind(
+                            rule.id,
+                            .monthly(day: min(max(newDay, 1), 31), hour: hour, minute: minute, months: months)
+                        )
+                    }
+                    timeFields(
+                        hour: hour,
+                        minute: minute,
+                        onHour: { newHour in
+                            updateKind(rule.id, .monthly(day: day, hour: newHour, minute: minute, months: months))
+                        },
+                        onMinute: { newMinute in
+                            updateKind(rule.id, .monthly(day: day, hour: hour, minute: newMinute, months: months))
+                        }
+                    )
+                }
+                monthModePicker(months: months) { newMonths in
+                    updateKind(rule.id, .monthly(day: day, hour: hour, minute: minute, months: newMonths))
+                }
+
+            case .yearly(let month, let day, let hour, let minute):
+                HStack(spacing: 12) {
+                    labeledIntField("月", value: month, width: 52) { newMonth in
+                        updateKind(
+                            rule.id,
+                            .yearly(month: min(max(newMonth, 1), 12), day: day, hour: hour, minute: minute)
+                        )
+                    }
+                    labeledIntField("日", value: day, width: 52) { newDay in
+                        updateKind(
+                            rule.id,
+                            .yearly(month: month, day: min(max(newDay, 1), 31), hour: hour, minute: minute)
+                        )
+                    }
+                    timeFields(
+                        hour: hour,
+                        minute: minute,
+                        onHour: { newHour in
+                            updateKind(rule.id, .yearly(month: month, day: day, hour: newHour, minute: minute))
+                        },
+                        onMinute: { newMinute in
+                            updateKind(rule.id, .yearly(month: month, day: day, hour: hour, minute: newMinute))
+                        }
+                    )
+                }
+
+            case .interval(let seconds):
+                intervalEditor(ruleID: rule.id, seconds: seconds)
+
+            case .watchPath(let path):
+                TextField("监视路径", text: Binding(
+                    get: { path },
+                    set: { newPath in
+                        updateKind(rule.id, .watchPath(newPath))
+                    }
+                ))
+                .textFieldStyle(.roundedBorder)
+
+            case .customCalendar(let summary, let isMalformed):
+                if isMalformed {
+                    Text("配置异常")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.red)
+                } else {
+                    Text("自定义日历")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Text(summary.isEmpty ? "—" : summary)
+                    .font(.caption.monospaced())
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                Text("请使用 XML 模式编辑此规则。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func timeFields(
+        hour: Int,
+        minute: Int,
+        onHour: @escaping (Int) -> Void,
+        onMinute: @escaping (Int) -> Void
+    ) -> some View {
+        HStack(alignment: .bottom, spacing: 6) {
+            labeledIntField("时", value: hour, width: 52) { onHour(min(max($0, 0), 23)) }
+            Text(":").foregroundStyle(.secondary).padding(.bottom, 6)
+            labeledIntField("分", value: minute, width: 52) { onMinute(min(max($0, 0), 59)) }
+        }
+    }
+
+    private func labeledIntField(
+        _ title: LocalizedStringKey,
+        value: Int,
+        width: CGFloat,
+        onChange: @escaping (Int) -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            TextField(
+                "",
+                value: Binding(
+                    get: { value },
+                    set: onChange
+                ),
+                format: .number
+            )
+            .textFieldStyle(.roundedBorder)
+            .frame(width: width)
+            .multilineTextAlignment(.center)
+        }
+    }
+
+    /// launchd Weekday: 0/7=Sun, 1=Mon … 6=Sat. UI labels 周一=1 … 周日=7 (matches LaunchItem).
+    private func weekdayToggles(selected: Set<Int>, onChange: @escaping (Set<Int>) -> Void) -> some View {
+        let labels = [
+            (1, String(localized: "周一")),
+            (2, String(localized: "周二")),
+            (3, String(localized: "周三")),
+            (4, String(localized: "周四")),
+            (5, String(localized: "周五")),
+            (6, String(localized: "周六")),
+            (7, String(localized: "周日")),
+        ]
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("星期").font(.caption).foregroundStyle(.secondary)
+            HStack(spacing: 8) {
+                ForEach(labels, id: \.0) { value, title in
+                    Toggle(title, isOn: Binding(
+                        get: { selected.contains(value) },
+                        set: { isOn in
+                            var next = selected
+                            if isOn { next.insert(value) } else { next.remove(value) }
+                            if next.isEmpty { next = [value] }
+                            onChange(next)
+                        }
+                    ))
+                    .toggleStyle(.button)
+                }
+            }
+        }
+    }
+
+    private func monthModePicker(
+        months: Set<Int>?,
+        onChange: @escaping (Set<Int>?) -> Void
+    ) -> some View {
+        let mode = MonthSelectionMode(months: months)
+        return VStack(alignment: .leading, spacing: 8) {
+            Picker("月份", selection: Binding(
+                get: { mode },
+                set: { newMode in
+                    switch newMode {
+                    case .all:
+                        onChange(nil)
+                    case .quarter:
+                        onChange([1, 4, 7, 10])
+                    case .halfYear:
+                        onChange([1, 7])
+                    case .custom:
+                        if let months, !months.isEmpty, MonthSelectionMode(months: months) == .custom {
+                            onChange(months)
+                        } else {
+                            onChange([Calendar.current.component(.month, from: Date())])
+                        }
+                    }
+                }
+            )) {
+                Text("全部月份").tag(MonthSelectionMode.all)
+                Text("每季度").tag(MonthSelectionMode.quarter)
+                Text("每半年").tag(MonthSelectionMode.halfYear)
+                Text("指定月份").tag(MonthSelectionMode.custom)
+            }
+            .pickerStyle(.menu)
+
+            if mode == .custom {
+                let selected = months ?? []
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 6) {
+                    ForEach(1...12, id: \.self) { month in
+                        Toggle("\(month)", isOn: Binding(
+                            get: { selected.contains(month) },
+                            set: { isOn in
+                                var next = selected
+                                if isOn { next.insert(month) } else { next.remove(month) }
+                                onChange(next.isEmpty ? [month] : next)
+                            }
+                        ))
+                        .toggleStyle(.button)
+                    }
+                }
+            }
+
+            if let months, mode != .all {
+                Text(monthCaption(months: months))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func monthCaption(months: Set<Int>) -> String {
+        let list = months.sorted().map(String.init).joined(separator: ",")
+        return String(format: String(localized: "月份：%@"), locale: .current, list)
+    }
+
+    private func intervalEditor(ruleID: UUID, seconds: Int) -> some View {
+        let split = IntervalUnit.split(seconds: seconds)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Text("每隔")
+                    .fixedSize(horizontal: true, vertical: false)
+                TextField(
+                    "数量",
+                    value: Binding(
+                        get: { split.amount },
+                        set: { amount in
+                            let unit = split.unit
+                            updateKind(
+                                ruleID,
+                                .interval(seconds: max(1, amount) * unit.secondsMultiplier)
+                            )
+                        }
+                    ),
+                    format: .number
+                )
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 72)
+                .multilineTextAlignment(.trailing)
+                Picker("", selection: Binding(
+                    get: { split.unit },
+                    set: { unit in
+                        updateKind(
+                            ruleID,
+                            .interval(seconds: max(1, split.amount) * unit.secondsMultiplier)
+                        )
+                    }
+                )) {
+                    ForEach(IntervalUnit.allCases) { unit in
+                        Text(unit.localizedName).tag(unit)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .fixedSize(horizontal: true, vertical: false)
+            }
+            if split.unit == .days {
+                Text("每 24 小时（86400 秒）")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
     private var xmlContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             TextEditor(text: $xmlText)
@@ -389,6 +628,21 @@ struct EditAgentSheet: View {
         }
     }
 
+    private var hasIntervalRule: Bool {
+        rules.contains {
+            if case .interval = $0.kind { return true }
+            return false
+        }
+    }
+
+    private var passthroughLaunchEntries: [(key: String, summary: String)] {
+        let root = session?.root ?? [:]
+        return LaunchItem.passthroughLaunchKeys.sorted().compactMap { key in
+            guard let value = root[key] else { return nil }
+            return (key, Self.describePlistValue(value))
+        }
+    }
+
     private var templatesFooter: some View {
         VStack(spacing: 0) {
             Divider()
@@ -404,6 +658,78 @@ struct EditAgentSheet: View {
         }
     }
 
+    // MARK: - Rule mutations
+
+    private func ruleKindTitle(_ kind: TriggerRuleKind) -> String {
+        switch kind {
+        case .daily: return String(localized: "每日")
+        case .weekly: return String(localized: "每周")
+        case .monthly: return String(localized: "每月")
+        case .yearly: return String(localized: "每年")
+        case .interval: return String(localized: "时间间隔")
+        case .watchPath: return String(localized: "监视路径")
+        case .customCalendar(_, let isMalformed):
+            return isMalformed
+                ? String(localized: "配置异常")
+                : String(localized: "自定义日历")
+        }
+    }
+
+    private func updateKind(_ id: UUID, _ kind: TriggerRuleKind) {
+        guard let index = rules.firstIndex(where: { $0.id == id }) else { return }
+        rules[index].kind = kind
+        rules[index].isModified = true
+    }
+
+    private func addRule(_ kind: TriggerRuleKind) {
+        if case .interval = kind, hasIntervalRule { return }
+        rules.append(TriggerRule(
+            id: UUID(),
+            kind: kind,
+            sourceRefs: [],
+            isModified: true
+        ))
+    }
+
+    private func addWatchPathRule() {
+        let pathID = UUID()
+        rules.append(TriggerRule(
+            id: UUID(),
+            kind: .watchPath(""),
+            sourceRefs: [.watchPath(pathID)],
+            isModified: true
+        ))
+        pathIdsInOrder.append(pathID)
+    }
+
+    private func requestDelete(_ rule: TriggerRule) {
+        let multiRef: Bool = {
+            switch rule.kind {
+            case .weekly, .monthly:
+                return rule.sourceRefs.count > 1
+            default:
+                return false
+            }
+        }()
+        if multiRef {
+            pendingDeleteRuleID = rule.id
+        } else {
+            removeRule(id: rule.id)
+        }
+    }
+
+    private func removeRule(id: UUID) {
+        guard let rule = rules.first(where: { $0.id == id }) else { return }
+        for ref in rule.sourceRefs {
+            if case .watchPath(let pathID) = ref {
+                pathIdsInOrder.removeAll { $0 == pathID }
+            }
+        }
+        rules.removeAll { $0.id == id }
+    }
+
+    // MARK: - XML / form sync
+
     private func pickProgram() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
@@ -414,23 +740,18 @@ struct EditAgentSheet: View {
     }
 
     private func loadXmlFromCurrentState() {
-        if let existingItem {
-            xmlText = (try? plistService.readXml(from: existingItem.plistURL)) ?? formGeneratedXml()
-        } else {
-            xmlText = formGeneratedXml()
-        }
-        validateXmlText()
-    }
-
-    private func formGeneratedXml() -> String {
-        guard let data = try? PropertyListSerialization.data(
-            fromPropertyList: plistService.toDictionary(formLaunchItem()),
+        if let data = try? PropertyListSerialization.data(
+            fromPropertyList: currentRootDictionary(),
             format: .xml,
             options: 0
-        ), let string = String(data: data, encoding: .utf8) else {
-            return ""
+        ), let string = String(data: data, encoding: .utf8) {
+            xmlText = string
+        } else if let existingItem {
+            xmlText = (try? plistService.readXml(from: existingItem.plistURL)) ?? ""
+        } else {
+            xmlText = ""
         }
-        return string
+        validateXmlText()
     }
 
     private func syncFormFromXmlIfPossible() {
@@ -443,11 +764,45 @@ struct EditAgentSheet: View {
                 formDisabledReason = reason
                 return
             }
-            guard let parsed = parseLaunchItem(from: dict) else {
-                formDisabledReason = String(localized: "当前 plist 含表单无法完整表示的内容，请使用 XML 模式编辑。")
-                return
+            applyManagedFieldsFromDictionary(dict)
+            adoptRules(from: dict)
+        }
+    }
+
+    private func adoptRules(from dict: [String: Any]) {
+        let url = existingItem?.plistURL
+        if let adopted = try? TriggerDocumentSession(root: dict, url: url) {
+            session = adopted
+            rules = adopted.rules
+            pathIdsInOrder = adopted.pathIdsInOrder
+        } else {
+            let native = TriggerCompiler.parseNative(from: dict)
+            let projected = TriggerCompiler.project(native)
+            rules = projected
+            pathIdsInOrder = projected.flatMap { rule in
+                rule.sourceRefs.compactMap { ref -> UUID? in
+                    if case .watchPath(let id) = ref { return id }
+                    return nil
+                }
             }
-            applyFormFields(from: parsed)
+            session = nil
+        }
+    }
+
+    private func reloadSessionFromDisk() {
+        guard let existingItem else { return }
+        do {
+            let opened = try TriggerDocumentSession(url: existingItem.plistURL)
+            session = opened
+            rules = opened.rules
+            pathIdsInOrder = opened.pathIdsInOrder
+            applyManagedFieldsFromDictionary(opened.root)
+            formDisabledReason = plistService.formIncompatibilityReason(for: opened.root)
+            if editorMode == .xml {
+                loadXmlFromCurrentState()
+            }
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 
@@ -469,71 +824,95 @@ struct EditAgentSheet: View {
         }
     }
 
-    private func parseLaunchItem(from dict: [String: Any]) -> LaunchItem? {
-        guard let label = dict["Label"] as? String else { return nil }
+    private func applyManagedFieldsFromDictionary(_ dict: [String: Any]) {
+        if let l = dict["Label"] as? String { label = l }
 
-        var program = ""
-        var programArguments: [String] = []
         if let args = dict["ProgramArguments"] as? [String], !args.isEmpty {
             program = args[0]
-            programArguments = Array(args.dropFirst())
+            argumentsText = args.dropFirst().joined(separator: "\n")
         } else if let prog = dict["Program"] as? String {
             program = prog
-        } else {
-            return nil
+            argumentsText = ""
         }
 
-        let calendarIntervals = plistService.parseCalendarIntervals(from: dict["StartCalendarInterval"])
-        let startInterval = dict["StartInterval"] as? Int
-            ?? (dict["StartInterval"] as? NSNumber)?.intValue
-        let watchPaths = dict["WatchPaths"] as? [String] ?? []
-        let runAtLoad = dict["RunAtLoad"] as? Bool ?? false
-
-        let scope = existingItem?.scope ?? defaultScope
-        let plistURL = existingItem?.plistURL ?? scope.directoryURL.appendingPathComponent("\(label).plist")
-
-        var item = LaunchItem(
-            label: label,
-            plistURL: plistURL,
-            scope: scope,
-            program: program,
-            programArguments: programArguments,
-            calendarIntervals: calendarIntervals,
-            startInterval: startInterval,
-            watchPaths: watchPaths,
-            runAtLoad: runAtLoad,
-            keepAlive: dict["KeepAlive"] as? Bool ?? false,
-            standardOutPath: dict["StandardOutPath"] as? String,
-            standardErrorPath: dict["StandardErrorPath"] as? String,
-            workingDirectory: dict["WorkingDirectory"] as? String,
-            environmentVariables: plistService.parseEnvironmentVariables(dict["EnvironmentVariables"]),
-            isLoaded: existingItem?.isLoaded ?? false,
-            isDisabledByOverride: existingItem?.isDisabledByOverride ?? false,
-            pid: existingItem?.pid,
-            lastExitCode: existingItem?.lastExitCode
-        )
-        item.triggerSummaryLines = LaunchItem.summaryLines(from: dict, runAtLoad: runAtLoad)
-        return item
+        workingDirectory = dict["WorkingDirectory"] as? String ?? ""
+        runAtLoad = dict["RunAtLoad"] as? Bool ?? false
+        keepAlive = dict["KeepAlive"] as? Bool ?? false
+        stdoutPath = dict["StandardOutPath"] as? String ?? ""
+        stderrPath = dict["StandardErrorPath"] as? String ?? ""
+        envVarRows = Self.envRows(from: plistService.parseEnvironmentVariables(dict["EnvironmentVariables"]))
     }
 
-    private func applyFormFields(from item: LaunchItem) {
-        label = item.label
-        program = item.program
-        argumentsText = item.programArguments.joined(separator: "\n")
-        workingDirectory = item.workingDirectory ?? ""
-        calendarRows = CalendarFormRow.rows(from: item.calendarIntervals)
-        useCalendar = !calendarRows.isEmpty
-        useInterval = item.startInterval != nil
-        let split = IntervalUnit.split(seconds: item.startInterval ?? 60)
-        intervalAmount = split.amount
-        intervalUnit = split.unit
-        useWatchPath = !item.watchPaths.isEmpty
-        watchPath = item.watchPaths.first ?? ""
-        runAtLoad = item.runAtLoad
-        keepAlive = item.keepAlive
-        stdoutPath = item.standardOutPath ?? ""
-        stderrPath = item.standardErrorPath ?? ""
-        envVarRows = Self.envRows(from: item.environmentVariables)
+    private func applyManagedFields(to root: inout [String: Any]) {
+        root["Label"] = label
+        let args = argumentsText.components(separatedBy: "\n").filter { !$0.isEmpty }
+        if args.isEmpty {
+            root["Program"] = program
+            root.removeValue(forKey: "ProgramArguments")
+        } else {
+            root["ProgramArguments"] = [program] + args
+            root.removeValue(forKey: "Program")
+        }
+
+        if workingDirectory.isEmpty {
+            root.removeValue(forKey: "WorkingDirectory")
+        } else {
+            root["WorkingDirectory"] = workingDirectory
+        }
+
+        let env = environmentVariablesFromRows
+        if env.isEmpty {
+            root.removeValue(forKey: "EnvironmentVariables")
+        } else {
+            root["EnvironmentVariables"] = env
+        }
+
+        if stdoutPath.isEmpty {
+            root.removeValue(forKey: "StandardOutPath")
+        } else {
+            root["StandardOutPath"] = stdoutPath
+        }
+        if stderrPath.isEmpty {
+            root.removeValue(forKey: "StandardErrorPath")
+        } else {
+            root["StandardErrorPath"] = stderrPath
+        }
+
+        if runAtLoad {
+            root["RunAtLoad"] = true
+        } else {
+            root.removeValue(forKey: "RunAtLoad")
+        }
+        if keepAlive {
+            root["KeepAlive"] = true
+        } else {
+            root.removeValue(forKey: "KeepAlive")
+        }
+    }
+
+    private func buildRootFromFormFields() -> [String: Any] {
+        var root: [String: Any] = [:]
+        applyManagedFields(to: &root)
+        return root
+    }
+
+    private func currentRootDictionary() -> [String: Any] {
+        if var working = session {
+            applyManagedFields(to: &working.root)
+            working.rules = rules
+            working.pathIdsInOrder = pathIdsInOrder
+            working.applyTriggerRulesToRoot()
+            return working.root
+        }
+        var root = buildRootFromFormFields()
+        let emptyNative = TriggerCompiler.parseNative(from: [:])
+        root = TriggerCompiler.applyTriggers(
+            to: root,
+            native: emptyNative,
+            rules: rules,
+            pathIdsInOrder: pathIdsInOrder
+        )
+        return root
     }
 
     private func validateXmlText() {
@@ -543,41 +922,6 @@ struct EditAgentSheet: View {
         case .failure(let err):
             xmlError = err.localizedDescription
         }
-    }
-
-    private func formLaunchItem() -> LaunchItem {
-        let scope = existingItem?.scope ?? defaultScope
-        let args = argumentsText.components(separatedBy: "\n").filter { !$0.isEmpty }
-        let plistURL = existingItem?.plistURL ??
-            scope.directoryURL.appendingPathComponent("\(label).plist")
-
-        let calendars = useCalendar ? calendarRows.flatMap(\.asIntervals) : []
-        let start: Int? = useInterval
-            ? max(1, intervalAmount) * intervalUnit.secondsMultiplier
-            : nil
-
-        return LaunchItem(
-            label: label,
-            plistURL: plistURL,
-            scope: scope,
-            program: program,
-            programArguments: args,
-            calendarIntervals: calendars,
-            startInterval: start,
-            watchPaths: useWatchPath
-                ? (watchPath.trimmingCharacters(in: .whitespaces).isEmpty ? [] : [watchPath])
-                : [],
-            runAtLoad: runAtLoad,
-            keepAlive: keepAlive,
-            standardOutPath: stdoutPath.isEmpty ? nil : stdoutPath,
-            standardErrorPath: stderrPath.isEmpty ? nil : stderrPath,
-            workingDirectory: workingDirectory.isEmpty ? nil : workingDirectory,
-            environmentVariables: environmentVariablesFromRows,
-            isLoaded: existingItem?.isLoaded ?? false,
-            isDisabledByOverride: existingItem?.isDisabledByOverride ?? false,
-            pid: existingItem?.pid,
-            lastExitCode: existingItem?.lastExitCode
-        )
     }
 
     private func saveItem() {
@@ -601,13 +945,63 @@ struct EditAgentSheet: View {
         }
 
         do {
-            try store.save(formLaunchItem())
+            if var working = session {
+                if try working.fileChangedOnDisk() {
+                    showDiskChangedAlert = true
+                    return
+                }
+                applyManagedFields(to: &working.root)
+                working.rules = rules
+                working.pathIdsInOrder = pathIdsInOrder
+                working.applyTriggerRulesToRoot()
+                let url = existingItem?.plistURL
+                    ?? scope.directoryURL.appendingPathComponent("\(label).plist")
+                try store.saveRoot(
+                    working.root,
+                    to: url,
+                    scope: scope,
+                    openedRoot: working.openedRoot
+                )
+            } else {
+                // New agent: build root + apply triggers from empty native.
+                var root = buildRootFromFormFields()
+                let emptyNative = TriggerCompiler.parseNative(from: [:])
+                root = TriggerCompiler.applyTriggers(
+                    to: root,
+                    native: emptyNative,
+                    rules: rules,
+                    pathIdsInOrder: pathIdsInOrder
+                )
+                let url = scope.directoryURL.appendingPathComponent("\(label).plist")
+                try store.saveRoot(root, to: url, scope: scope, openedRoot: nil)
+            }
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
         }
     }
+
+    private static func describePlistValue(_ value: Any) -> String {
+        if let data = try? PropertyListSerialization.data(
+            fromPropertyList: value, format: .xml, options: 0
+        ),
+           let string = String(data: data, encoding: .utf8) {
+            let trimmed = string
+                .replacingOccurrences(of: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>", with: "")
+                .replacingOccurrences(
+                    of: "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">",
+                    with: ""
+                )
+                .replacingOccurrences(of: "<plist version=\"1.0\">", with: "")
+                .replacingOccurrences(of: "</plist>", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed
+        }
+        return String(describing: value)
+    }
 }
+
+// MARK: - Private helpers
 
 private enum EditorMode: String, CaseIterable {
     case form
@@ -650,10 +1044,26 @@ private enum IntervalUnit: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
-private enum CalendarFrequency: Hashable {
-    case daily
-    case weekday(Int)
-    case monthly
+/// Month selection for monthly rules. Values are launchd Month 1…12.
+private enum MonthSelectionMode: Hashable {
+    case all
+    case quarter
+    case halfYear
+    case custom
+
+    init(months: Set<Int>?) {
+        guard let months else {
+            self = .all
+            return
+        }
+        if months == Set([1, 4, 7, 10]) {
+            self = .quarter
+        } else if months == Set([1, 7]) {
+            self = .halfYear
+        } else {
+            self = .custom
+        }
+    }
 }
 
 private struct EnvVarRow: Identifiable {
@@ -664,144 +1074,5 @@ private struct EnvVarRow: Identifiable {
     init(key: String = "", value: String = "") {
         self.key = key
         self.value = value
-    }
-}
-
-private struct CalendarFormRow: Identifiable, Equatable {
-    let id: UUID
-    var frequency: CalendarFrequency
-    var monthDay: Int
-    var monthStep: Int
-    var hour: Int
-    var minute: Int
-
-    init(
-        id: UUID = UUID(),
-        frequency: CalendarFrequency = .daily,
-        monthDay: Int = 1,
-        monthStep: Int = 1,
-        hour: Int = 8,
-        minute: Int = 0
-    ) {
-        self.id = id
-        self.frequency = frequency
-        self.monthDay = monthDay
-        self.monthStep = monthStep
-        self.hour = hour
-        self.minute = minute
-    }
-
-    init(from interval: LaunchItem.CalendarInterval) {
-        // UI default 0 when Minute absent; do not invent Minute on disk via parse path.
-        let minute = interval.minute ?? 0
-        if let day = interval.day, interval.weekday == nil {
-            self.init(
-                frequency: .monthly,
-                monthDay: day,
-                monthStep: 1,
-                hour: interval.hour ?? 8,
-                minute: minute
-            )
-        } else if let weekday = interval.weekday {
-            self.init(
-                frequency: .weekday(weekday),
-                hour: interval.hour ?? 8,
-                minute: minute
-            )
-        } else {
-            self.init(
-                frequency: .daily,
-                hour: interval.hour ?? 8,
-                minute: minute
-            )
-        }
-    }
-
-    static func rows(from intervals: [LaunchItem.CalendarInterval]) -> [CalendarFormRow] {
-        if let monthly = detectMonthlyGroup(intervals) {
-            var rows = monthly.remainder.map { CalendarFormRow(from: $0) }
-            rows.insert(
-                CalendarFormRow(
-                    frequency: .monthly,
-                    monthDay: monthly.day,
-                    monthStep: monthly.every,
-                    hour: monthly.hour,
-                    minute: monthly.minute
-                ),
-                at: 0
-            )
-            return rows
-        }
-        return intervals.map { CalendarFormRow(from: $0) }
-    }
-
-    var asIntervals: [LaunchItem.CalendarInterval] {
-        switch frequency {
-        case .daily:
-            return [LaunchItem.CalendarInterval(hour: hour, minute: minute)]
-        case .weekday(let day):
-            return [LaunchItem.CalendarInterval(weekday: day, hour: hour, minute: minute)]
-        case .monthly:
-            return Self.monthlyIntervals(
-                every: monthStep,
-                day: monthDay,
-                hour: hour,
-                minute: minute
-            )
-        }
-    }
-
-    private static func monthlyIntervals(
-        every n: Int,
-        day: Int,
-        hour: Int,
-        minute: Int
-    ) -> [LaunchItem.CalendarInterval] {
-        let step = min(max(n, 1), 12)
-        let dom = min(max(day, 1), 31)
-        let h = min(max(hour, 0), 23)
-        let m = min(max(minute, 0), 59)
-        if step == 1 {
-            return [LaunchItem.CalendarInterval(hour: h, minute: m, day: dom)]
-        }
-        return stride(from: 1, through: 12, by: step).map { month in
-            LaunchItem.CalendarInterval(hour: h, minute: m, day: dom, month: month)
-        }
-    }
-
-    private static func detectMonthlyGroup(
-        _ intervals: [LaunchItem.CalendarInterval]
-    ) -> (every: Int, day: Int, hour: Int, minute: Int, remainder: [LaunchItem.CalendarInterval])? {
-        var monthly: [LaunchItem.CalendarInterval] = []
-        var remainder: [LaunchItem.CalendarInterval] = []
-        for ci in intervals {
-            if ci.day != nil, ci.weekday == nil {
-                monthly.append(ci)
-            } else {
-                remainder.append(ci)
-            }
-        }
-        guard !monthly.isEmpty else { return nil }
-
-        let day = monthly[0].day!
-        let hour = monthly[0].hour ?? 0
-        let minute = monthly[0].minute ?? 0
-        guard monthly.allSatisfy({
-            $0.day == day && ($0.hour ?? 0) == hour && ($0.minute ?? 0) == minute
-        }) else { return nil }
-
-        if monthly.count == 1, monthly[0].month == nil {
-            return (1, day, hour, minute, remainder)
-        }
-
-        let months = monthly.compactMap(\.month).sorted()
-        guard months.count == monthly.count, let first = months.first, first == 1, months.count >= 2 else {
-            return nil
-        }
-        let step = months[1] - months[0]
-        guard step >= 1 else { return nil }
-        let expected = Array(stride(from: 1, through: 12, by: step))
-        guard months == expected else { return nil }
-        return (step, day, hour, minute, remainder)
     }
 }

@@ -103,6 +103,22 @@ final class AgentStore: ObservableObject {
         refresh()
     }
 
+    func saveRoot(
+        _ root: [String: Any],
+        to url: URL,
+        scope: LaunchItem.Scope,
+        openedRoot: [String: Any]?
+    ) throws {
+        try plistService.saveRoot(
+            root,
+            to: url,
+            scope: scope,
+            privilege: privilegeService,
+            openedRoot: openedRoot
+        )
+        refresh()
+    }
+
     func delete(_ item: LaunchItem) throws {
         try plistService.delete(item, launchctl: launchctlService, privilege: privilegeService)
         refresh()
