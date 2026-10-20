@@ -4,7 +4,7 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
 
 **Website:** [launchmanager.dev](https://www.launchmanager.dev) · **Docs:** [Help](https://www.launchmanager.dev/help) · **Templates:** [launchmanager.dev/templates](https://www.launchmanager.dev/templates)
 
-![Version](https://img.shields.io/badge/version-1.6.4-blue) ![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green) ![Built with Claude](https://img.shields.io/badge/Built%20with-Claude-blueviolet?logo=anthropic)
+![Version](https://img.shields.io/badge/version-1.6.4-blue) ![macOS](https://img.shields.io/badge/macOS-14%2B-blue) ![Swift](https://img.shields.io/badge/Swift-5.10-orange) ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Star History
 
@@ -22,7 +22,7 @@ A macOS app for managing launchd LaunchAgents and LaunchDaemons — view, create
 
 - **Browse** all LaunchAgents and LaunchDaemons across User, System Agent, and System Daemon scopes in one unified list with collapsible scope groups
 - **Search** across all scopes from a single search field
-- **Create & edit** plist jobs with a **Form** or **XML** editor — extra plist keys are preserved in XML mode
+- **Create & edit** plist jobs with a **Form** or **XML** editor — combine calendar, interval, and WatchPaths triggers; extra plist keys are preserved
 - **Import plist** — bring external `.plist` files into user/global Agent or LaunchDaemon directories
 - **Clone job** — duplicate an existing agent with a new Label
 - **Paste XML** — create a new job from clipboard XML
@@ -154,10 +154,10 @@ lsof -i :5666
 
 ```
 LaunchManager/
-├── Models/          # LaunchItem, InvalidPlist, LaunchAgentDraft, Service, ListeningProcess
-├── Services/        # PlistService, LaunchctlService, UpdateChecker, ProcessDiscovery, Docker/
-├── Store/           # AgentStore, ServiceStore, ServiceNameStore
-└── Views/           # SwiftUI views (AgentList, ServicesList, EditAgentSheet, …)
+├── Models/          # LaunchItem, drafts, services, trigger rule types
+├── Services/        # PlistService, TriggerCompiler, LaunchctlService, ProcessDiscovery, …
+├── Store/           # AgentStore, ServiceStore, …
+└── Views/           # SwiftUI (AgentList, ServicesList, EditAgentSheet, …)
 ```
 
 ## License
@@ -169,7 +169,3 @@ MIT — see [LICENSE](LICENSE).
 If LaunchManager saved you some time, feel free to buy me a coffee ☕ Americano is better.
 
 <img src="assets/wechat-reward.jpg" width="200" alt="WeChat Reward QR Code" />
-
-## Acknowledgements
-
-Built with [Claude](https://claude.ai) (Anthropic) — AI pair programmer for design, implementation, and code review.

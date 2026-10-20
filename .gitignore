@@ -1,6 +1,7 @@
 build/
 DerivedData/
 DeveloperSettings.xcconfig
+default.profraw
 
 # Xcode user state
 *.xcodeproj/xcuserdata/
@@ -9,5 +10,13 @@ DeveloperSettings.xcconfig
 # macOS
 .DS_Store
 
-# Brainstorm sessions
+# Local agent / IDE tooling (not part of the product)
 .superpowers/
+.claude/
+.agents/
+.cursor/
+agent/
+skills-lock.json
+
+# Design specs, plans, and mockups (kept locally, not published)
+docs/
