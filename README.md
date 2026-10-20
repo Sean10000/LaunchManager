@@ -1,5 +1,7 @@
 # LaunchManager
 
+**English** | [中文](README.zh-CN.md)
+
 **AI creates the jobs. You stay in control.**
 
 A native macOS app for visually managing launchd tasks, background services, and the automation you build with AI.
