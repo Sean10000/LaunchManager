@@ -169,43 +169,28 @@ final class PlistServiceTests: XCTestCase {
         try plist.write(to: url, atomically: true, encoding: .utf8)
         let dict = try svc.readDictionary(from: url)
         XCTAssertEqual(svc.extraKeys(in: dict), ["MachServices"])
-        XCTAssertNotNil(svc.formIncompatibilityReason(for: dict))
+        XCTAssertNil(svc.formIncompatibilityReason(for: dict))
     }
 
-    func test_save_rejectsFormSaveWhenExtraKeysPresent() throws {
-        let plist = """
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0"><dict>
-            <key>Label</key><string>com.test.extra</string>
-            <key>Program</key><string>/bin/echo</string>
-            <key>EnvironmentVariables</key>
-            <dict><key>FOO</key><string>bar</string></dict>
-            <key>MachServices</key><dict/>
-        </dict></plist>
-        """
-        let url = tmpDir.appendingPathComponent("com.test.extra.plist")
-        try plist.write(to: url, atomically: true, encoding: .utf8)
-        let item = LaunchItem(
-            label: "com.test.extra",
-            plistURL: url,
-            scope: .userAgent,
-            program: "/bin/echo",
-            programArguments: [],
-            calendarIntervals: [],
-            startInterval: nil,
-            watchPaths: [],
-            runAtLoad: false,
-            keepAlive: false,
-            standardOutPath: nil,
-            standardErrorPath: nil,
-            workingDirectory: nil,
-            environmentVariables: ["FOO": "bar"],
-            isLoaded: false,
-            pid: nil,
-            lastExitCode: nil
-        )
-        XCTAssertThrowsError(try svc.save(item, privilege: PrivilegeService()))
+    func test_formIncompatibility_queueDirectoriesCompatible() throws {
+        let dict: [String: Any] = [
+            "Label": "com.test.qd",
+            "Program": "/bin/echo",
+            "QueueDirectories": ["/tmp/queue"],
+        ]
+        XCTAssertEqual(svc.extraKeys(in: dict), ["QueueDirectories"])
+        XCTAssertNil(svc.formIncompatibilityReason(for: dict))
+    }
+
+    func test_formIncompatibility_keepAliveNonBool() {
+        let dict: [String: Any] = [
+            "Label": "com.test.ka",
+            "Program": "/bin/echo",
+            "KeepAlive": ["SuccessfulExit": false],
+        ]
+        let reason = svc.formIncompatibilityReason(for: dict)
+        XCTAssertNotNil(reason)
+        XCTAssertTrue(reason?.contains("KeepAlive") == true)
     }
 
     func test_roundtrip_environmentVariables() throws {
@@ -570,7 +555,7 @@ final class PlistServiceTests: XCTestCase {
         XCTAssertNil(svc.formIncompatibilityReason(for: dict))
     }
 
-    func test_formIncompatibility_multipleWatchPaths() throws {
+    func test_formIncompatibility_multipleWatchPathsCompatible() throws {
         let plist = """
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -584,9 +569,46 @@ final class PlistServiceTests: XCTestCase {
         let url = tmpDir.appendingPathComponent("com.test.multipath.plist")
         try plist.write(to: url, atomically: true, encoding: .utf8)
         let dict = try svc.readDictionary(from: url)
-        let reason = svc.formIncompatibilityReason(for: dict)
-        XCTAssertNotNil(reason)
-        XCTAssertTrue(reason?.contains("WatchPaths") == true || reason?.contains("路径") == true)
+        XCTAssertNil(svc.formIncompatibilityReason(for: dict))
+    }
+
+    func test_saveRoot_noopWhenEqual() throws {
+        let url = tmpDir.appendingPathComponent("com.test.saveroot.plist")
+        let root: [String: Any] = [
+            "Label": "com.test.saveroot",
+            "Program": "/bin/echo",
+            "WatchPaths": ["/tmp/a", "/tmp/b"],
+            "QueueDirectories": ["/tmp/q"],
+        ]
+        try svc.saveRoot(root, to: url, scope: .userAgent, privilege: PrivilegeService(), openedRoot: nil)
+        let attrsBefore = try FileManager.default.attributesOfItem(atPath: url.path)
+        let mtimeBefore = attrsBefore[.modificationDate] as? Date
+        let sizeBefore = attrsBefore[.size] as? NSNumber
+
+        try svc.saveRoot(root, to: url, scope: .userAgent, privilege: PrivilegeService(), openedRoot: root)
+
+        let attrsAfter = try FileManager.default.attributesOfItem(atPath: url.path)
+        XCTAssertEqual(attrsAfter[.modificationDate] as? Date, mtimeBefore)
+        XCTAssertEqual(attrsAfter[.size] as? NSNumber, sizeBefore)
+    }
+
+    func test_saveRoot_writesWhenChanged() throws {
+        let url = tmpDir.appendingPathComponent("com.test.saveroot2.plist")
+        let opened: [String: Any] = [
+            "Label": "com.test.saveroot2",
+            "Program": "/bin/echo",
+            "QueueDirectories": ["/tmp/q"],
+        ]
+        try svc.saveRoot(opened, to: url, scope: .userAgent, privilege: PrivilegeService(), openedRoot: nil)
+
+        var changed = opened
+        changed["WatchPaths"] = ["/tmp/a", "/tmp/b"]
+        try svc.saveRoot(changed, to: url, scope: .userAgent, privilege: PrivilegeService(), openedRoot: opened)
+
+        let written = try svc.readDictionary(from: url)
+        XCTAssertEqual(written["WatchPaths"] as? [String], ["/tmp/a", "/tmp/b"])
+        XCTAssertEqual(written["QueueDirectories"] as? [String], ["/tmp/q"])
+        XCTAssertEqual(written["Label"] as? String, "com.test.saveroot2")
     }
 
     func test_triggerSummaryLines_order() {

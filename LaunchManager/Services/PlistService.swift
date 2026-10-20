@@ -17,7 +17,7 @@ extension PlistValidationError: LocalizedError {
 }
 
 struct PlistService {
-    /// Keys the form editor reads and writes. Any other key on disk requires XML mode.
+    /// Keys the form editor reads and writes. Extra keys are passthrough (preserved via root session).
     static let formManagedKeys: Set<String> = [
         "Label", "Program", "ProgramArguments",
         "StartCalendarInterval", "StartInterval", "WatchPaths",
@@ -46,15 +46,8 @@ struct PlistService {
     }
 
     func formIncompatibilityReason(for dict: [String: Any]) -> String? {
-        let extra = extraKeys(in: dict)
-        if !extra.isEmpty {
-            return String(localized: "此 plist 包含表单不支持的键：\(extra.joined(separator: ", "))。请使用 XML 模式编辑。")
-        }
-        if let keepAlive = dict["KeepAlive"], keepAlive is Bool == false {
+        if let keepAlive = dict["KeepAlive"], !(keepAlive is Bool) {
             return String(localized: "KeepAlive 使用了表单不支持的格式，请使用 XML 模式编辑。")
-        }
-        if let wp = dict["WatchPaths"] as? [Any], wp.count > 1 {
-            return String(localized: "WatchPaths 包含多条路径，请使用 XML 模式编辑。")
         }
         return nil
     }
@@ -223,15 +216,42 @@ struct PlistService {
         }
         let data = try PropertyListSerialization.data(
             fromPropertyList: toDictionary(item), format: .xml, options: 0)
-        if item.scope.requiresPrivilege {
+        try writePlistData(data, to: item.plistURL, scope: item.scope, privilege: privilege)
+    }
+
+    /// Writes a full root dictionary snapshot. When `openedRoot` is provided and logically equal
+    /// to `root`, skips writing (avoids no-op XML churn).
+    func saveRoot(
+        _ root: [String: Any],
+        to url: URL,
+        scope: LaunchItem.Scope,
+        privilege: PrivilegeService,
+        openedRoot: [String: Any]?
+    ) throws {
+        if let openedRoot,
+           NSDictionary(dictionary: root).isEqual(to: openedRoot) {
+            return
+        }
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: root, format: .xml, options: 0)
+        try writePlistData(data, to: url, scope: scope, privilege: privilege)
+    }
+
+    private func writePlistData(
+        _ data: Data,
+        to url: URL,
+        scope: LaunchItem.Scope,
+        privilege: PrivilegeService
+    ) throws {
+        if scope.requiresPrivilege {
             let tmp = FileManager.default.temporaryDirectory
-                .appendingPathComponent(item.plistURL.lastPathComponent)
+                .appendingPathComponent(url.lastPathComponent)
             try data.write(to: tmp)
-            let dest = shellQuote(item.plistURL.path)
+            let dest = shellQuote(url.path)
             let src = shellQuote(tmp.path)
             try privilege.run("mv \(src) \(dest) && chown root:wheel \(dest) && chmod 644 \(dest)")
         } else {
-            try data.write(to: item.plistURL)
+            try data.write(to: url)
         }
     }
 
