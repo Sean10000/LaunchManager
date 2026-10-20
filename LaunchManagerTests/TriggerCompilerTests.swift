@@ -115,6 +115,32 @@ final class TriggerCompilerTests: XCTestCase {
         }
     }
 
+    func test_project_duplicateWeekdays_dedupesKindKeepsSourceRefs() {
+        let intervals: [[String: Any]] = [
+            ["Weekday": 1, "Hour": 9, "Minute": 0],
+            ["Weekday": 1, "Hour": 9, "Minute": 0],
+        ]
+        let native = TriggerCompiler.parseNative(from: [
+            "StartCalendarInterval": intervals
+        ])
+        let rules = TriggerCompiler.project(native)
+        XCTAssertEqual(rules.count, 1)
+        guard case .weekly(let weekdays, let hour, let minute) = rules[0].kind else {
+            return XCTFail("expected weekly")
+        }
+        XCTAssertEqual(weekdays, [1])
+        XCTAssertEqual(hour, 9)
+        XCTAssertEqual(minute, 0)
+        XCTAssertEqual(rules[0].sourceRefs.count, 2)
+        XCTAssertEqual(
+            rules[0].sourceRefs,
+            [
+                .calendarEntry(native.calendarEntries[0].sessionId),
+                .calendarEntry(native.calendarEntries[1].sessionId),
+            ]
+        )
+    }
+
     func test_project_mergesMonths_keepsSourceRefs() {
         let intervals: [[String: Any]] = [
             ["Month": 1, "Day": 15, "Hour": 9, "Minute": 0],

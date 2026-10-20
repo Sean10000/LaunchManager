@@ -109,24 +109,35 @@ enum TriggerCompiler {
         }
 
         let keys = presentKeys(entry)
-        if keys == Set(["Hour", "Minute"]) {
-            return .daily(hour: entry.hour!, minute: entry.minute!)
+        if keys == Set(["Hour", "Minute"]),
+           let hour = entry.hour,
+           let minute = entry.minute
+        {
+            return .daily(hour: hour, minute: minute)
         }
-        if keys == Set(["Weekday", "Hour", "Minute"]) {
-            return .weekly(weekdays: [entry.weekday!], hour: entry.hour!, minute: entry.minute!)
+        if keys == Set(["Weekday", "Hour", "Minute"]),
+           let weekday = entry.weekday,
+           let hour = entry.hour,
+           let minute = entry.minute
+        {
+            return .weekly(weekdays: [weekday], hour: hour, minute: minute)
         }
-        if keys == Set(["Day", "Hour", "Minute"]) {
-            return .monthly(day: entry.day!, hour: entry.hour!, minute: entry.minute!, months: nil)
+        if keys == Set(["Day", "Hour", "Minute"]),
+           let day = entry.day,
+           let hour = entry.hour,
+           let minute = entry.minute
+        {
+            return .monthly(day: day, hour: hour, minute: minute, months: nil)
         }
-        if keys == Set(["Month", "Day", "Hour", "Minute"]) {
-            return .yearly(
-                month: entry.month!,
-                day: entry.day!,
-                hour: entry.hour!,
-                minute: entry.minute!
-            )
+        if keys == Set(["Month", "Day", "Hour", "Minute"]),
+           let month = entry.month,
+           let day = entry.day,
+           let hour = entry.hour,
+           let minute = entry.minute
+        {
+            return .yearly(month: month, day: day, hour: hour, minute: minute)
         }
-        // Day+Weekday together (or any other valid non-preset set) → custom, never a preset
+        // Day+Weekday, missing optionals despite key set, or any other non-preset → custom
         return .customCalendar(summary: summary(for: entry), isMalformed: false)
     }
 
@@ -164,9 +175,11 @@ enum TriggerCompiler {
                     consumed.insert(other.sessionId)
                 }
 
+                // Keep all sourceRefs (fidelity); unique+sorted weekdays for the kind only
+                let uniqueWeekdays = Array(Set(weekdays)).sorted()
                 rules.append(TriggerRule(
                     id: UUID(),
-                    kind: .weekly(weekdays: weekdays, hour: hour, minute: minute),
+                    kind: .weekly(weekdays: uniqueWeekdays, hour: hour, minute: minute),
                     sourceRefs: refs,
                     isModified: false
                 ))
