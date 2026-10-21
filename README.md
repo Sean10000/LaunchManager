@@ -105,45 +105,6 @@ lsof -iTCP:5666 -sTCP:LISTEN -nP
 lsof -i :5666
 ```
 
-## Comparison with Paid Alternatives
-
-| Feature | LaunchManager (Free) | LaunchControl | Lingon Pro 10 | LaunchD Task Scheduler |
-|---|---|---|---|---|
-| **Price** | Free & Open Source | ~$33 | $23.99 | $5.00 |
-| **Distribution** | GitHub Direct | Direct / Homebrew | App Store / Direct | App Store |
-| **Browse Agents & Daemons** | ✅ | ✅ | ✅ | ✅ |
-| **Create & Edit jobs (GUI)** | ✅ | ✅ | ✅ | ✅ |
-| **Load / Unload / Start / Stop** | ✅ | ✅ | ✅ | ✅ |
-| **Log viewer** | ✅ File + System log | ✅ Advanced | ✅ | ✅ |
-| **System Agent / Daemon support** | ✅ | ✅ | ✅ (Pro) | Limited |
-| **Privilege escalation** | ✅ | ✅ | ✅ | — |
-| **Invalid plist detection** | ✅ Inline with delete | ❌ | ❌ | ❌ |
-| **Local TCP / Docker services view** | ✅ | ❌ | ❌ | ❌ |
-| **App must stay running** | ❌ Not required | ❌ Not required | ⚠️ Required | ❌ Not required |
-| **AI assistant** | ❌ | ✅ (7 LLM providers) | ❌ | ❌ |
-| **XML / Expert editor** | ✅ Form + XML tabs | ✅ Advanced | ❌ | ❌ |
-| **Open Source** | ✅ MIT | ❌ | ❌ | ❌ |
-| **macOS requirement** | 14 Sonoma+ | 11 Big Sur+ | 14 Sonoma+ | — |
-
-> LaunchManager is ideal if you want a **free, native, open-source** tool for everyday launchd management and local dev service discovery.
-> For power users needing an in-app AI assistant or advanced XML tooling (syntax highlighting, diff), [LaunchControl](https://www.soma-zone.com/LaunchControl/) remains the most feature-complete paid option.
-
-## Releasing
-
-1. Add bullets under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) as you develop.
-2. Run `./scripts/release.sh patch` (or `minor`, `major`, or an explicit `X.Y.Z`).
-3. GitHub Actions builds the universal DMG, creates the GitHub Release, and updates the Homebrew tap.
-
-Local test build only (no publish):
-
-```bash
-./scripts/build-dmg.sh   # → build/LaunchManager.dmg
-```
-
-Version numbers live in [Version.xcconfig](Version.xcconfig) only — do not edit `project.pbxproj` by hand.
-
-**CI secret:** set `HOMEBREW_TAP_TOKEN` in repo Settings → Secrets (PAT with push access to `Sean10000/homebrew-tap`).
-
 ## Project Structure
 
 ```

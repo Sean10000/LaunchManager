@@ -97,36 +97,6 @@ open LaunchManager.xcodeproj
 - 只在虚拟机 / NAS / 其它机器上监听、未转发到本机的服务
 - UDP 监听
 
-## 与付费方案对比
-
-| 功能 | LaunchManager（免费） | LaunchControl | Lingon Pro 10 | LaunchD Task Scheduler |
-|---|---|---|---|---|
-| **价格** | 免费开源 | ~$33 | $23.99 | $5.00 |
-| **浏览 Agents / Daemons** | ✅ | ✅ | ✅ | ✅ |
-| **图形化创建与编辑** | ✅ | ✅ | ✅ | ✅ |
-| **加载 / 卸载 / 启停** | ✅ | ✅ | ✅ | ✅ |
-| **日志** | ✅ 文件 + 系统日志 | ✅ 进阶 | ✅ | ✅ |
-| **系统级 Agent / Daemon** | ✅ | ✅ | ✅（Pro） | 有限 |
-| **本机 TCP / Docker 视图** | ✅ | ❌ | ❌ | ❌ |
-| **必须常开 App** | ❌ | ❌ | ⚠️ 需要 | ❌ |
-| **应用内 AI 助手** | ❌ | ✅ | ❌ | ❌ |
-| **开源** | ✅ MIT | ❌ | ❌ | ❌ |
-
-> 若你要的是**免费、原生、开源**的日常 launchd 管理与本地服务发现，LaunchManager 很合适。
-> 若需要应用内 AI 助手或更重的 XML 工具（高亮、diff），可考虑 [LaunchControl](https://www.soma-zone.com/LaunchControl/)。
-
-## 发布
-
-1. 在 [CHANGELOG.md](CHANGELOG.md) 的 `## [Unreleased]` 下补充说明
-2. 运行 `./scripts/release.sh patch`（或 `minor` / `major` / 指定版本号）
-3. GitHub Actions 会构建通用 DMG、创建 Release，并更新 Homebrew tap
-
-本地仅打包（不发布）：
-
-```bash
-./scripts/build-dmg.sh   # → build/LaunchManager.dmg
-```
-
 ## Star History
 
 <a href="https://www.star-history.com/?repos=Sean10000%2FLaunchManager&type=date&legend=top-left">
