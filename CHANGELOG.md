@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 <!-- Add changes here as you develop. Run ./scripts/release.sh patch to publish. -->
 
+## [1.8.1] - 2026-10-23
+
+
 ### Fixed
 - **Agents runtime status** — while the Agents list is visible in the foreground, lightly poll `launchctl list` every 4s so Start/Stop updates when a job exits without clicking refresh; polling stops in the background.
 
