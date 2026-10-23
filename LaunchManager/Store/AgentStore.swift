@@ -10,6 +10,9 @@ final class AgentStore: ObservableObject {
     private let launchctlService: LaunchctlService
     private let privilegeService: PrivilegeService
     private var directoryWatcher: DirectoryWatcher?
+    private var statusGeneration: UInt64 = 0
+    private var statusPollingTask: Task<Void, Never>?
+    private var isStatusRefreshing = false
 
     init(plistService: PlistService = PlistService(),
          launchctlService: LaunchctlService = LaunchctlService(),
@@ -34,7 +37,50 @@ final class AgentStore: ObservableObject {
         directoryWatcher = nil
     }
 
+    /// Idempotent: no-op if already polling. First start runs an immediate light status refresh, then every 4s.
+    func startStatusPolling() {
+        guard statusPollingTask == nil else { return }
+        statusPollingTask = Task { [weak self] in
+            await self?.refreshRuntimeStatus()
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 4_000_000_000)
+                guard !Task.isCancelled else { break }
+                await self?.refreshRuntimeStatus()
+            }
+        }
+    }
+
+    func stopStatusPolling() {
+        bumpStatusGeneration()
+        statusPollingTask?.cancel()
+        statusPollingTask = nil
+    }
+
+    /// Light refresh: `launchctl list` only — updates pid / exit / loaded. Does not rescan plists.
+    func refreshRuntimeStatus() async {
+        guard !isStatusRefreshing else { return }
+        isStatusRefreshing = true
+        defer { isStatusRefreshing = false }
+
+        let generation = statusGeneration
+        let service = launchctlService
+
+        let result: Result<[String: (pid: Int?, exitCode: Int?)], Error> = await Task.detached {
+            Result { try service.listAll() }
+        }.value
+
+        guard !Task.isCancelled, generation == statusGeneration else { return }
+
+        switch result {
+        case .failure:
+            return
+        case .success(let statuses):
+            applyRuntimeStatuses(statuses)
+        }
+    }
+
     func refresh() {
+        bumpStatusGeneration()
         let (scanned, invalid) = plistService.scanAll()
         let statuses = (try? launchctlService.listAll()) ?? [:]
         let disabledLabels = fetchDisabledLabels()
@@ -52,6 +98,7 @@ final class AgentStore: ObservableObject {
     }
 
     func bootstrap(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
+        bumpStatusGeneration()
         runPending(item.label, .loading, operationName: String(localized: "载入"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.bootstrap(item.plistURL, scope: item.scope)
@@ -61,6 +108,7 @@ final class AgentStore: ObservableObject {
     }
 
     func bootout(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
+        bumpStatusGeneration()
         runPending(item.label, .unloading, operationName: String(localized: "移除"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.bootout(item.plistURL, scope: item.scope)
@@ -70,6 +118,7 @@ final class AgentStore: ObservableObject {
     }
 
     func start(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
+        bumpStatusGeneration()
         runPending(item.label, .starting, operationName: String(localized: "启动"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.start(item.label, scope: item.scope)
@@ -81,6 +130,7 @@ final class AgentStore: ObservableObject {
     }
 
     func stop(_ item: LaunchItem, onError: @escaping (String) -> Void = { _ in }) {
+        bumpStatusGeneration()
         runPending(item.label, .stopping, operationName: String(localized: "停止"), onError: onError) {
             try await self.runLaunchctl(scope: item.scope) {
                 try self.launchctlService.stop(item.label, scope: item.scope)
@@ -171,6 +221,30 @@ final class AgentStore: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func bumpStatusGeneration() {
+        statusGeneration &+= 1
+    }
+
+    /// Same label matching as `refresh()` (`listAll` keyed by label only).
+    private func applyRuntimeStatuses(_ statuses: [String: (pid: Int?, exitCode: Int?)]) {
+        let updated = items.map { item -> LaunchItem in
+            var copy = item
+            if let s = statuses[item.label] {
+                copy.isLoaded = true
+                copy.pid = s.pid
+                copy.lastExitCode = s.exitCode
+            } else {
+                copy.isLoaded = false
+                copy.pid = nil
+                copy.lastExitCode = nil
+            }
+            return copy
+        }
+        if updated != items {
+            items = updated
+        }
+    }
 
     private func fetchDisabledLabels() -> Set<String> {
         var labels = Set<String>()

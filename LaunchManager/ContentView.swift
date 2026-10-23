@@ -87,6 +87,7 @@ struct ContentView: View {
             syncModuleScanning(active: phase == .active)
         }
         .onChange(of: selection) { _, newSelection in
+            syncAgentStatusPolling(active: scenePhase == .active)
             guard let newSelection else { return }
             refreshModuleIfNeeded(newSelection)
         }
@@ -260,6 +261,7 @@ struct ContentView: View {
         } else {
             store.stopWatching()
         }
+        syncAgentStatusPolling(active: active)
 
         if settings.crontab {
             crontabStore.refresh()
@@ -269,6 +271,15 @@ struct ContentView: View {
             serviceStore.startPolling(isActive: true)
         } else {
             serviceStore.stopPolling()
+        }
+    }
+
+    /// Agents list visible + app active → light status polling; otherwise stop.
+    private func syncAgentStatusPolling(active: Bool) {
+        if moduleSettings.settings.agents, isAgentsView, active {
+            store.startStatusPolling()
+        } else {
+            store.stopStatusPolling()
         }
     }
 

@@ -805,6 +805,144 @@ final class AgentStorePendingTests: XCTestCase {
     }
 }
 
+// MARK: - AgentStore Runtime Status Polling Tests
+
+private final class ControllableListShell: ShellRunner, @unchecked Sendable {
+    enum Mode {
+        case succeed(output: String)
+        case fail
+        case delayThen(output: String, seconds: TimeInterval)
+    }
+
+    private let lock = NSLock()
+    private var mode: Mode
+    private(set) var listCount = 0
+
+    init(mode: Mode) {
+        self.mode = mode
+    }
+
+    func setMode(_ mode: Mode) {
+        lock.lock()
+        self.mode = mode
+        lock.unlock()
+    }
+
+    func run(_ path: String, arguments: [String]) throws -> String {
+        guard path == "/bin/launchctl", arguments.first == "list" else { return "" }
+        lock.lock()
+        listCount += 1
+        let mode = self.mode
+        lock.unlock()
+
+        switch mode {
+        case .succeed(let output):
+            return output
+        case .fail:
+            throw ShellError.nonZeroExit(code: 1, output: "list failed")
+        case .delayThen(let output, let seconds):
+            Thread.sleep(forTimeInterval: seconds)
+            return output
+        }
+    }
+}
+
+@MainActor
+final class AgentStoreRuntimeStatusTests: XCTestCase {
+    private func makeItem(
+        label: String = "com.test.runtime",
+        isLoaded: Bool = true,
+        pid: Int? = 4242,
+        lastExitCode: Int? = 0
+    ) -> LaunchItem {
+        LaunchItem(
+            label: label,
+            plistURL: URL(fileURLWithPath: "/tmp/\(label).plist"),
+            scope: .userAgent,
+            program: "/bin/echo",
+            programArguments: [],
+            calendarIntervals: [],
+            startInterval: nil,
+            watchPaths: [],
+            runAtLoad: true,
+            keepAlive: false,
+            standardOutPath: nil,
+            standardErrorPath: nil,
+            workingDirectory: nil,
+            isLoaded: isLoaded,
+            pid: pid,
+            lastExitCode: lastExitCode
+        )
+    }
+
+    func test_startStatusPolling_twice_isIdempotent() async throws {
+        let shell = ControllableListShell(mode: .succeed(output: "PID\tStatus\tLabel\n"))
+        let store = AgentStore(launchctlService: LaunchctlService(shell: shell))
+        store.items = [makeItem()]
+
+        store.startStatusPolling()
+        store.startStatusPolling()
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+        XCTAssertEqual(shell.listCount, 1)
+
+        store.stopStatusPolling()
+    }
+
+    func test_refreshRuntimeStatus_failure_preservesState() async throws {
+        let shell = ControllableListShell(mode: .fail)
+        let store = AgentStore(launchctlService: LaunchctlService(shell: shell))
+        let item = makeItem(pid: 99, lastExitCode: 7)
+        store.items = [item]
+
+        await store.refreshRuntimeStatus()
+
+        XCTAssertEqual(store.items.first?.pid, 99)
+        XCTAssertEqual(store.items.first?.lastExitCode, 7)
+        XCTAssertEqual(store.items.first?.isLoaded, true)
+    }
+
+    func test_refreshRuntimeStatus_successMissingLabel_marksUnloaded() async throws {
+        let shell = ControllableListShell(mode: .succeed(output: "PID\tStatus\tLabel\n"))
+        let store = AgentStore(launchctlService: LaunchctlService(shell: shell))
+        store.items = [makeItem(pid: 99, lastExitCode: 0)]
+
+        await store.refreshRuntimeStatus()
+
+        XCTAssertNil(store.items.first?.pid)
+        XCTAssertNil(store.items.first?.lastExitCode)
+        XCTAssertEqual(store.items.first?.isLoaded, false)
+    }
+
+    func test_refreshRuntimeStatus_staleResultDiscardedAfterStopPolling() async throws {
+        let emptyList = "PID\tStatus\tLabel\n"
+        let shell = ControllableListShell(mode: .delayThen(output: emptyList, seconds: 0.25))
+        let store = AgentStore(launchctlService: LaunchctlService(shell: shell))
+        store.items = [makeItem(pid: 99, lastExitCode: 0)]
+
+        let refreshTask = Task { await store.refreshRuntimeStatus() }
+        try await Task.sleep(nanoseconds: 50_000_000)
+        store.stopStatusPolling()
+        await refreshTask.value
+
+        XCTAssertEqual(store.items.first?.pid, 99)
+        XCTAssertEqual(store.items.first?.isLoaded, true)
+    }
+
+    func test_refreshRuntimeStatus_updatesPidWhenPresent() async throws {
+        let output = "PID\tStatus\tLabel\n123\t0\tcom.test.runtime\n"
+        let shell = ControllableListShell(mode: .succeed(output: output))
+        let store = AgentStore(launchctlService: LaunchctlService(shell: shell))
+        store.items = [makeItem(isLoaded: false, pid: nil, lastExitCode: nil)]
+
+        await store.refreshRuntimeStatus()
+
+        XCTAssertEqual(store.items.first?.pid, 123)
+        XCTAssertEqual(store.items.first?.lastExitCode, 0)
+        XCTAssertEqual(store.items.first?.isLoaded, true)
+    }
+}
+
 // MARK: - AgentStore Plist Tests
 
 @MainActor
